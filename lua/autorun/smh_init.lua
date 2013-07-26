@@ -192,9 +192,6 @@ function ENT:smhRecFrame(f)
 			T.Vector = self:GetManipulateBonePosition(i);
 			T.Angle = self:GetManipulateBoneAngles(i);
 			T.Scale = self:GetManipulateBoneScale(i);
-			print(T.Vector.x.." "..T.Vector.y.." "..T.Vector.z.."\n"
-			..T.Angle.p.." "..T.Angle.y.." "..T.Angle.r.."\n"
-			..T.Scale.x.." "..T.Scale.y.." "..T.Scale.z.."\n");
 			FT["mbone"..i] = T;
 		end
 	end
@@ -275,9 +272,6 @@ function ENT:smhSetFrame(f)
 	for i=0,self:GetBoneCount()-1 do
 		if self:TranslateBoneToPhysBoneNew(i) == -1 then
 			local T = FT["mbone"..i];
-			print(T.Vector.x.." "..T.Vector.y.." "..T.Vector.z.."\n"
-			..T.Angle.p.." "..T.Angle.y.." "..T.Angle.r.."\n"
-			..T.Scale.x.." "..T.Scale.y.." "..T.Scale.z.."\n");
 			self:ManipulateBonePosition(i,T.Vector);
 			self:ManipulateBoneAngles(i,T.Angle);
 			self:ManipulateBoneScale(i,T.Scale);

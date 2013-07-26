@@ -4,10 +4,10 @@
 TOOL.Name = "SMH Selector"
 TOOL.Category = "Stop Motion Helper"
 TOOL.Command = nil
-TOOL.ConfigName = ""
+TOOL.ConfigName = ""
+
 
 function TOOL:LeftClick(tr)
-	print(tr.Entity);
 	return SMH.svSelectEnt(tr.Entity)
 end
 
