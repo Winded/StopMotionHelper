@@ -1,6 +1,8 @@
 
 if !game.SinglePlayer() then return end
 
+include("shared.lua");
+
 local ShowEnts = false
 
 SMH.AddNetFunc("svAddFrame")
@@ -57,11 +59,11 @@ function SMH.AddFrame()
 	SMH.svAddFrame(SMH.CurFrame)
 end
 function SMH.clAddFrame(f)
-	/*
+	--[[
 	When a frame is added on clientside, it is added to the end of the panel list.
 	Why? Because it doesn't matter in what order you put frames clientside,
 	all frame setup is done serverside.
-	*/
+	--]]
 	SMH.CreateKeyframe()
 	SMH.svSetFrame(f+1)
 end
@@ -329,6 +331,6 @@ function SMH.RenderHalo()
 end
 hook.Add("PostDrawEffects","smhRenderHalo",SMH.RenderHalo);
 
-include("smh_menu.lua");
+include("client/menu.lua");
 
 Msg("SMH client initialized.\n")

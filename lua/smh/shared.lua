@@ -1,9 +1,9 @@
 
-if !game.SinglePlayer() then return end //Mutliplayer ees not good!
+if !game.SinglePlayer() then return end
 
-//Even though SMH (and the other tools) are meant for singleplayer,
-//you should know that serverside and clientside differences still matter.
-//Why? Its just the way source engine works. And it makes things more simple than more complicated.
+-- Even though SMH (and the other tools) are meant for singleplayer,
+-- you should know that serverside and clientside differences still matter.
+-- Why? Its just the way source engine works. And it makes things more simple than more complicated.
 
 if !SMH then
 	SMH = {}
@@ -15,7 +15,7 @@ SMH.CurFrame = 1
 
 SMH.ThreadUpdate = false
 
-//Initializing all convars, although all of them aren't needed right away
+-- Initializing all convars, although all of them aren't needed right away
 CreateConVar("smh_picsadd",9,{FCVAR_REPLICATED})
 CreateConVar("smh_cycletick",0.2,{FCVAR_REPLICATED, FCVAR_ARCHIVE})
 CreateConVar("smh_moverounded",0,{FCVAR_REPLICATED})
@@ -31,7 +31,7 @@ CreateConVar("smh_wf_g",1.0,{FCVAR_REPLICATED})
 CreateConVar("smh_wf_b",0.0,{FCVAR_REPLICATED})
 CreateConVar("smh_wf_enable",1,{FCVAR_REPLICATED})
 
-//Fix bone manipulations.
+-- Fix bone manipulations.
 hook.Add("PlayerSpawnedRagdoll","smhRagdollFix",
 function(pl,mdl,rag)
 	for i=0,rag:GetBoneCount()-1 do
@@ -49,18 +49,18 @@ function(pl,mdl,prop)
 	end
 end)
 
-//SMH entity functions
+-- SMH entity functions
 local ENT = FindMetaTable("Entity")
 local FingersAll = 5 * 3 * 2
 
-//This is for easier phys bone parent receiving, so you dont have to do many steps always
+-- This is for easier phys bone parent receiving, so you dont have to do many steps always
 function ENT:GetPhysBoneParent(bone)
 	local b = self:TranslatePhysBoneToBone(bone)
 	local parent = self:GetBoneParent(b)
 	return self:TranslateBoneToPhysBoneNew(parent)
 end
 
-//These are used to manage the entity's ghost
+-- These are used to manage the entity's ghost
 function ENT:smhAddGhost()
 	if self.smhGhost then
 		self.smhGhost:Remove()
@@ -421,12 +421,12 @@ local function smhRemoveEntHook(self)
 end
 hook.Add("EntityRemoved","smhRemoveEntHook",smhRemoveEntHook)
 
-//Saving entity frame data, AKA writing a file with GLON encoded string from entity's frame table
+-- Saving entity frame data, AKA writing a file with GLON encoded string from entity's frame table
 function ENT:smhSave(fn)
 	file.Write("smh_saves/"..fn..".txt",glon.encode(self.smhFrames))
 end
 
-//Loading encoded frame data file
+-- Loading encoded frame data file
 function ENT:smhLoad(fn)
 	local File = file.Read("smh_saves/"..fn..".txt")
 	if !File then return end

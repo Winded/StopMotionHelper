@@ -1,7 +1,7 @@
 
 if !SMH or !SMH.PanelFrames then return end
 
-//What would anyone do without DermaDesigner? Credits to the maker of it.
+-- What would anyone do without DermaDesigner? Credits to the maker of it.
 
 local MenuFrame
 local PFrames
@@ -34,7 +34,7 @@ local MenuFrameS = {w = 145, h = 230}
 
 hook.Add("Initialize","smhClientLoad",function()
 
-//Menu setup
+-- Menu setup
 
 MenuFrame = vgui.Create('DFrame')
 MenuFrame:SetSize(MenuFrameS.w, MenuFrameS.h)
@@ -69,7 +69,7 @@ end
 
 SMH.PFrames = PFrames;
 
-//Adding the first frame to the list
+-- Adding the first frame to the list
 SMH.PanelFrames[1] = vgui.Create("DButton")
 SMH.PanelFrames[1]:SetHeight(10)
 SMH.PanelFrames[1]:SetText("-")
@@ -205,7 +205,7 @@ CBGhost.OnChange = function(self,val)
 end
 CBGhost:SizeToContents()
 
-//Help menu
+-- Help menu
 HelpMenu = vgui.Create('DFrame')
 HelpMenu:SetSize(650, 650)
 HelpMenu:Center()
@@ -223,7 +223,7 @@ HelpPage:SetSize(640, 625);
 HelpPage:SetBGColor(Color(255,255,255,255));
 HelpPage:SetHTML(file.Read("lua/smh_help.lua","GAME"));
 
-//Color menu
+-- Color menu
 -- ColorMenu = vgui.Create('DFrame')
 -- ColorMenu:SetSize(169, 169)
 -- ColorMenu:Center()
@@ -281,7 +281,7 @@ HelpMenu:SetVisible(false)
 
 end)
 
-local MenuMoving = false //Only for moving out
+local MenuMoving = false -- Only for moving out
 local function MoveMenuIn()
 	MenuFrame:SetVisible(true)
 	RestoreCursorPosition()
