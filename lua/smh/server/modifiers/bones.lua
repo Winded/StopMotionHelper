@@ -30,7 +30,7 @@ function MOD:Load(entity, frame, data)
 
 	for b = 0, count - 1 do
 
-		local d = data[i];
+		local d = data[b];
 		entity:ManipulateBonePosition(b, d.Pos);
 		entity:ManipulateBoneAngles(b, d.Ang);
 		entity:ManipulateBoneScale(b, d.Scale);

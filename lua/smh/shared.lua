@@ -104,50 +104,50 @@ function ENT:smhDisableGhost()
 	end
 end
 function ENT:smhSetGhostFrame(f)
-	if !GetConVar("smh_ghost_enable"):GetBool() then
-		self:smhDisableGhost()
-		return
-	end
-	if !IsValid(self.smhGhost) then return end
-	local FT = self.smhFrames[f-1]
-	if !FT then
-		self:smhDisableGhost()
-		return
-	end
-	if table.Count(FT) <= 0 then
-		self:smhDisableGhost()
-		return
-	end
-	for i=0,self:GetPhysicsObjectCount()-1 do
-		local bone = self.smhGhost:GetPhysicsObjectNum(i)
-		local b = self.smhGhost:TranslatePhysBoneToBone(i)
-		bone:SetPos(FT["bone"..i].Pos)
-		bone:SetAngles(FT["bone"..i].Ang)
-		self.smhGhost:SetNWInt("InflateSize"..b,FT["bone"..i].Inf)
-		bone:EnableMotion(false)
-		bone:Wake()
-	end
-	for i=0,self.smhGhost:GetBoneCount()-1 do
-		if self.smhGhost:TranslateBoneToPhysBoneNew(i) == -1 then
-			local T = FT["mbone"..i];
-			self.smhGhost:ManipulateBonePosition(i,T.Vector);
-			self.smhGhost:ManipulateBoneAngles(i,T.Angle);
-			self.smhGhost:ManipulateBoneScale(i,T.Scale);
-		end
-	end
-	self.smhGhost:SetFlexScale(FT["flexscale"])
-	for i=0,self:GetFlexNum()-1 do
-		self.smhGhost:SetFlexWeight(i,FT["flex"..i])
-	end
-	self.smhGhost:SetEyeTarget(FT["eyes"])
-	for k,v in pairs(FT["posep"]) do
-		self.smhGhost:SetPoseParameter(k,v)
-		self.smhGhost:GetPhysicsObject():Wake()
-	end
-	for i=1,32 do
-		self.smhGhost:SetBodygroup(i,self:GetBodygroup(i))
-	end
-	self.smhGhost:SetSkin(self:GetSkin())
+--	if !GetConVar("smh_ghost_enable"):GetBool() then
+--		self:smhDisableGhost()
+--		return
+--	end
+--	if !IsValid(self.smhGhost) then return end
+--	local FT = self.smhFrames[f-1]
+--	if !FT then
+--		self:smhDisableGhost()
+--		return
+--	end
+--	if table.Count(FT) <= 0 then
+--		self:smhDisableGhost()
+--		return
+--	end
+--	for i=0,self:GetPhysicsObjectCount()-1 do
+--		local bone = self.smhGhost:GetPhysicsObjectNum(i)
+--		local b = self.smhGhost:TranslatePhysBoneToBone(i)
+--		bone:SetPos(FT["bone"..i].Pos)
+--		bone:SetAngles(FT["bone"..i].Ang)
+--		self.smhGhost:SetNWInt("InflateSize"..b,FT["bone"..i].Inf)
+--		bone:EnableMotion(false)
+--		bone:Wake()
+--	end
+--	for i=0,self.smhGhost:GetBoneCount()-1 do
+--		if self.smhGhost:TranslateBoneToPhysBoneNew(i) == -1 then
+--			local T = FT["mbone"..i];
+--			self.smhGhost:ManipulateBonePosition(i,T.Vector);
+--			self.smhGhost:ManipulateBoneAngles(i,T.Angle);
+--			self.smhGhost:ManipulateBoneScale(i,T.Scale);
+--		end
+--	end
+--	self.smhGhost:SetFlexScale(FT["flexscale"])
+--	for i=0,self:GetFlexNum()-1 do
+--		self.smhGhost:SetFlexWeight(i,FT["flex"..i])
+--	end
+--	self.smhGhost:SetEyeTarget(FT["eyes"])
+--	for k,v in pairs(FT["posep"]) do
+--		self.smhGhost:SetPoseParameter(k,v)
+--		self.smhGhost:GetPhysicsObject():Wake()
+--	end
+--	for i=1,32 do
+--		self.smhGhost:SetBodygroup(i,self:GetBodygroup(i))
+--	end
+--	self.smhGhost:SetSkin(self:GetSkin())
 end
 
 //Adding a frame for the entity
@@ -164,64 +164,76 @@ function ENT:smhRemFrame(f)
 end
 
 //Recording
-function ENT:smhRecFrame(f)
-	local FT = {}
-	//Bones (position,angle and inflate size)
-	for i=0,self:GetPhysicsObjectCount()-1 do
-		local Ref = self:GetPhysicsObjectNum(i)
-		local b = self:TranslatePhysBoneToBone(i)
-		local T = {};
-		T.Pos = Ref:GetPos()
-		T.Ang = Ref:GetAngles()
-		if i != 0 then
-			local mb = self:GetPhysicsObjectNum(self:GetPhysBoneParent(i))
-			if mb then
-				local pos,ang = WorldToLocal(Ref:GetPos(),Ref:GetAngles(),mb:GetPos(),mb:GetAngles())
-				T.OffPos = pos
-				T.OffAng = ang
-			end
-		end
-		T.Freezed = !Ref:IsMoveable()
-		T.Inf = self:GetManipulateBoneScale(b);
-		FT["bone"..i] = T;
+function ENT:smhRecFrame(frame)
+
+	-- NEW CODE
+	local FT = {};
+
+	for name, mod in pairs(SMH.Modifiers) do
+		FT[name] = mod:Save(self, frame);
 	end
-	//Bone manipulations. For non-physical bones.
-	for i=0,self:GetBoneCount()-1 do
-		if self:TranslateBoneToPhysBoneNew(i) == -1 then
-			local T = {};
-			T.Vector = self:GetManipulateBonePosition(i);
-			T.Angle = self:GetManipulateBoneAngles(i);
-			T.Scale = self:GetManipulateBoneScale(i);
-			FT["mbone"..i] = T;
-		end
-	end
-	//Flex scale and flexes
-	FT["flexscale"] = self:GetFlexScale()
-	for i=0,self:GetFlexNum()-1 do
-		FT["flex"..i] = self:GetFlexWeight(i)
-	end
-	//Eyes
-	FT["eyes"] = self:GetEyeTarget()
-	//Color
-	FT["color"] = self:GetColor()
-	//Pose parameters
-	FT["posep"] = {}
-	for k,v in pairs(self:GetPoseParams()) do
-		FT["posep"][v] = self:GetPoseParameter(v)
-	end
-	FT["posep"]["aim_pitch"] = self:GetPoseParameter("aim_pitch")
-	FT["posep"]["aim_yaw"] = self:GetPoseParameter("aim_yaw")
-	//E. A. S. Attachments
-	if self.easWelds then
-		for k,v in pairs(self.easWelds) do
-			FT["eas"..k] = {}
-			FT["eas"..k].Pos = v:GetNWVector("EAS_Pos")
-			FT["eas"..k].Ang = v:GetNWAngle("EAS_Ang")
-			FT["eas"..k].Color = v:GetColor()
-			FT["eas"..k].Scale = v:GetNWVector("EAS_Scale",Vector(1,1,1))
-		end
-	end
-	self.smhFrames[f] = FT
+
+	self.smhFrames[frame] = FT;
+
+	return;
+
+--	local FT = {}
+--	//Bones (position,angle and inflate size)
+--	for i=0,self:GetPhysicsObjectCount()-1 do
+--		local Ref = self:GetPhysicsObjectNum(i)
+--		local b = self:TranslatePhysBoneToBone(i)
+--		local T = {};
+--		T.Pos = Ref:GetPos()
+--		T.Ang = Ref:GetAngles()
+--		if i != 0 then
+--			local mb = self:GetPhysicsObjectNum(self:GetPhysBoneParent(i))
+--			if mb then
+--				local pos,ang = WorldToLocal(Ref:GetPos(),Ref:GetAngles(),mb:GetPos(),mb:GetAngles())
+--				T.OffPos = pos
+--				T.OffAng = ang
+--			end
+--		end
+--		T.Freezed = !Ref:IsMoveable()
+--		T.Inf = self:GetManipulateBoneScale(b);
+--		FT["bone"..i] = T;
+--	end
+--	//Bone manipulations. For non-physical bones.
+--	for i=0,self:GetBoneCount()-1 do
+--		if self:TranslateBoneToPhysBoneNew(i) == -1 then
+--			local T = {};
+--			T.Vector = self:GetManipulateBonePosition(i);
+--			T.Angle = self:GetManipulateBoneAngles(i);
+--			T.Scale = self:GetManipulateBoneScale(i);
+--			FT["mbone"..i] = T;
+--		end
+--	end
+--	//Flex scale and flexes
+--	FT["flexscale"] = self:GetFlexScale()
+--	for i=0,self:GetFlexNum()-1 do
+--		FT["flex"..i] = self:GetFlexWeight(i)
+--	end
+--	//Eyes
+--	FT["eyes"] = self:GetEyeTarget()
+--	//Color
+--	FT["color"] = self:GetColor()
+--	//Pose parameters
+--	FT["posep"] = {}
+--	for k,v in pairs(self:GetPoseParams()) do
+--		FT["posep"][v] = self:GetPoseParameter(v)
+--	end
+--	FT["posep"]["aim_pitch"] = self:GetPoseParameter("aim_pitch")
+--	FT["posep"]["aim_yaw"] = self:GetPoseParameter("aim_yaw")
+--	//E. A. S. Attachments
+--	if self.easWelds then
+--		for k,v in pairs(self.easWelds) do
+--			FT["eas"..k] = {}
+--			FT["eas"..k].Pos = v:GetNWVector("EAS_Pos")
+--			FT["eas"..k].Ang = v:GetNWAngle("EAS_Ang")
+--			FT["eas"..k].Color = v:GetColor()
+--			FT["eas"..k].Scale = v:GetNWVector("EAS_Scale",Vector(1,1,1))
+--		end
+--	end
+--	self.smhFrames[f] = FT
 end
 
 //Clearing
@@ -246,57 +258,69 @@ function ENT:smhMoveFrameDown(f)
 end
 
 //Setting to a certain frame
-function ENT:smhSetFrame(f)
-	//If the frame doesnt exist or its size is 0 entries (Empty frame), we return from the function
-	if !self.smhFrames[f] then return end
-	local FT = self.smhFrames[f]
-	if table.Count(FT) <= 0 then return end
-	//Phys bone indexing starts from 0, so the actual final phys bone is physobject count - 1
-	for i=0,self:GetPhysicsObjectCount()-1 do
-		local T = FT["bone"..i];
-		local Ref = self:GetPhysicsObjectNum(i)
-		local b = self:TranslatePhysBoneToBone(i)
-		local parent = self:GetPhysicsObjectNum(self:GetPhysBoneParent(i))
-		Ref:EnableMotion(true)
-		Ref:Sleep()
-		Ref:SetPos(T.Pos)
-		Ref:SetAngles(T.Ang)
-		self:ManipulateBoneScale(b,T.Inf);
-	end
-	for i=0,self:GetPhysicsObjectCount()-1 do
-		if FT["bone"..i].Freezed or GetConVar("smh_freezeall"):GetInt() == 1 then
-			self:GetPhysicsObjectNum(i):EnableMotion(false)
-		end
-		self:GetPhysicsObjectNum(i):Wake()
-	end
-	for i=0,self:GetBoneCount()-1 do
-		if self:TranslateBoneToPhysBoneNew(i) == -1 then
-			local T = FT["mbone"..i];
-			self:ManipulateBonePosition(i,T.Vector);
-			self:ManipulateBoneAngles(i,T.Angle);
-			self:ManipulateBoneScale(i,T.Scale);
+function ENT:smhSetFrame(frame)
+
+	if not self.smhFrames[frame] then return; end
+	local FT = self.smhFrames[frame];
+
+	for name, mod in pairs(SMH.Modifiers) do
+		if FT[name] then
+			mod:Load(self, frame, FT[name]);
 		end
 	end
-	self:SetFlexScale(FT["flexscale"])
-	for i=0,self:GetFlexNum()-1 do
-		self:SetFlexWeight(i,FT["flex"..i])
-	end
-	self:SetEyeTarget(FT["eyes"])
-	self:SetColor(FT["color"])
-	for k,v in pairs(FT["posep"]) do
-		self:SetPoseParameter(k,v)
-		self:GetPhysicsObject():Wake()
-	end
-	if self.easWelds then
-		for k,v in pairs(self.easWelds) do
-			if FT["eas"..k] then
-				v:SetNWVector("EAS_Pos",FT["eas"..k].Pos)
-				v:SetNWAngle("EAS_Ang",FT["eas"..k].Ang)
-				v:SetColor(FT["eas"..k].Color)
-				v:SetNWVector("EAS_Scale",FT["eas"..k].Scale)
-			end
-		end
-	end
+
+	return;
+
+--	//If the frame doesnt exist or its size is 0 entries (Empty frame), we return from the function
+--	if !self.smhFrames[f] then return end
+--	local FT = self.smhFrames[f]
+--	if table.Count(FT) <= 0 then return end
+--	//Phys bone indexing starts from 0, so the actual final phys bone is physobject count - 1
+--	for i=0,self:GetPhysicsObjectCount()-1 do
+--		local T = FT["bone"..i];
+--		local Ref = self:GetPhysicsObjectNum(i)
+--		local b = self:TranslatePhysBoneToBone(i)
+--		local parent = self:GetPhysicsObjectNum(self:GetPhysBoneParent(i))
+--		Ref:EnableMotion(true)
+--		Ref:Sleep()
+--		Ref:SetPos(T.Pos)
+--		Ref:SetAngles(T.Ang)
+--		self:ManipulateBoneScale(b,T.Inf);
+--	end
+--	for i=0,self:GetPhysicsObjectCount()-1 do
+--		if FT["bone"..i].Freezed or GetConVar("smh_freezeall"):GetInt() == 1 then
+--			self:GetPhysicsObjectNum(i):EnableMotion(false)
+--		end
+--		self:GetPhysicsObjectNum(i):Wake()
+--	end
+--	for i=0,self:GetBoneCount()-1 do
+--		if self:TranslateBoneToPhysBoneNew(i) == -1 then
+--			local T = FT["mbone"..i];
+--			self:ManipulateBonePosition(i,T.Vector);
+--			self:ManipulateBoneAngles(i,T.Angle);
+--			self:ManipulateBoneScale(i,T.Scale);
+--		end
+--	end
+--	self:SetFlexScale(FT["flexscale"])
+--	for i=0,self:GetFlexNum()-1 do
+--		self:SetFlexWeight(i,FT["flex"..i])
+--	end
+--	self:SetEyeTarget(FT["eyes"])
+--	self:SetColor(FT["color"])
+--	for k,v in pairs(FT["posep"]) do
+--		self:SetPoseParameter(k,v)
+--		self:GetPhysicsObject():Wake()
+--	end
+--	if self.easWelds then
+--		for k,v in pairs(self.easWelds) do
+--			if FT["eas"..k] then
+--				v:SetNWVector("EAS_Pos",FT["eas"..k].Pos)
+--				v:SetNWAngle("EAS_Ang",FT["eas"..k].Ang)
+--				v:SetColor(FT["eas"..k].Color)
+--				v:SetNWVector("EAS_Scale",FT["eas"..k].Scale)
+--			end
+--		end
+--	end
 end
 
 //Setting a picture between frame and next frame

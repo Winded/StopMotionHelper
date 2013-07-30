@@ -39,7 +39,7 @@ function MOD:Load(entity, frame, data)
 		local d = data[i];
 		pb:SetPos(d.Pos);
 		pb:SetAngles(d.Ang);
-		pb:EnableMotion(!d.Moveable);
+		pb:EnableMotion(d.Moveable);
 
 	end
 
