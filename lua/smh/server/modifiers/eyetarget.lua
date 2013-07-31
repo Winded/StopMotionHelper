@@ -10,7 +10,7 @@ function MOD:HasEyes(entity)
 
 end
 
-function MOD:Save(entity, frame)
+function MOD:Save(entity)
 
 	if not self:HasEyes(entity) then return nil; end
 
@@ -22,10 +22,20 @@ function MOD:Save(entity, frame)
 
 end
 
-function MOD:Load(entity, frame, data)
+function MOD:Load(entity, data)
 
-	if not self:HasEyes(entity) then return nil; end --Shouldn't happen, but meh
+	if not self:HasEyes(entity) then return; end --Shouldn't happen, but meh
 
 	entity:SetEyeTarget(data.EyeTarget);
+
+end
+
+function MOD:LoadBetween(entity, data1, data2, percentage)
+
+	if not self:HasEyes(entity) then return; end --Shouldn't happen, but meh
+
+	local et = SMH.LerpLinearVector(data1.EyeTarget, data2.EyeTarget, percentage);
+
+	entity:SetEyeTarget(et);
 
 end

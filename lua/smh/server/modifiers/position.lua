@@ -1,7 +1,7 @@
 
 MOD.Name = "Position and Rotation";
 
-function MOD:Save(entity, frame)
+function MOD:Save(entity)
 
 	local data = {};
 	data.Pos = entity:GetPos();
@@ -10,9 +10,19 @@ function MOD:Save(entity, frame)
 
 end
 
-function MOD:Load(entity, frame, data)
+function MOD:Load(entity, data)
 
 	entity:SetPos(data.Pos);
 	entity:SetAngles(data.Ang);
+
+end
+
+function MOD:LoadBetween(entity, data1, data2, percentage)
+
+	local Pos = SMH.LerpLinearVector(data1.Pos, data2.Pos, percentage);
+	local Ang = SMH.LerpLinearAngle(data1.Ang, data2.Ang, percentage);
+
+	entity:SetPos(Pos);
+	entity:SetAngles(Ang);
 
 end

@@ -6,8 +6,6 @@ function SMH.LoadModifiers()
 	local path = "smh/server/modifiers/";
 	local files, dirs = file.Find(path .. "*.lua", "LUA");
 
-	print(#files);
-
 	for _, f in pairs(files) do
 
 		_G["MOD"] = {};

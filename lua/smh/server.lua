@@ -2,6 +2,7 @@
 if !game.SinglePlayer() then return end
 
 include("shared.lua");
+include("server/easing.lua");
 include("server/eyetarget.lua");
 include("server/modifiers.lua");
 
