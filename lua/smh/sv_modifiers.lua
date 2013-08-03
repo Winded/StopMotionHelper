@@ -3,7 +3,7 @@ function SMH.LoadModifiers()
 
 	SMH.Modifiers = {};
 
-	local path = "smh/server/modifiers/";
+	local path = "smh/modifiers/";
 	local files, dirs = file.Find(path .. "*.lua", "LUA");
 
 	for _, f in pairs(files) do

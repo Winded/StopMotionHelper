@@ -2,18 +2,18 @@
 if !game.SinglePlayer() then return end
 
 include("shared.lua");
-include("server/easing.lua");
-include("server/eyetarget.lua");
-include("server/modifiers.lua");
+include("sv_easing.lua");
+include("sv_eyetarget.lua");
+include("sv_modifiers.lua");
 
 AddCSLuaFile("client.lua");
 AddCSLuaFile("shared.lua");
-AddCSLuaFile("client/menu.lua");
+AddCSLuaFile("cl_menu.lua");
 
 local FingersAll = 5 * 3 * 2
 
-SMH.frames = {} //You can get the frame count with #SMH.frames
-SMH.CurPic = 0 //We only need CurPic value in the server
+SMH.frames = {} -- You can get the frame count with #SMH.frames
+SMH.CurPic = 0 -- We only need CurPic value in the server
 
 SMH.AddNetFunc("clAddFrame")
 SMH.AddNetFunc("clRemFrame")
@@ -23,31 +23,14 @@ SMH.AddNetFunc("clSetFrame")
 SMH.AddNetFunc("clLoad")
 SMH.AddNetFunc("clLoadAddEnt")
 
-//--
-//Taken from faceposer.lua
-local function IsUselessFaceFlex( strName )
+util.AddNetworkString("smhAddFrame");
+util.AddNetworkString("smhRemFrame");
+util.AddNetworkString("smhClearFrame");
+util.AddNetworkString("smhSetFrame");
+util.AddNetworkString("smhSetPic");
 
-	if ( strName == "gesture_rightleft" ) then return true end
-	if ( strName == "gesture_updown" ) then return true end
-	if ( strName == "head_forwardback" ) then return true end
-	if ( strName == "chest_rightleft" ) then return true end
-	if ( strName == "body_rightleft" ) then return true end
-	if ( strName == "eyes_rightleft" ) then return true end
-	if ( strName == "eyes_updown" ) then return true end
-	if ( strName == "head_tilt" ) then return true end
-	if ( strName == "head_updown" ) then return true end
-	if ( strName == "head_rightleft" ) then return true end
-	
-	return false
-
-end
-//--
-
-local function RagHasEyes(ent)
-	local Eyes = ent:LookupAttachment("eyes")
-	if Eyes == 0 then return false end
-	return true
-end
+util.AddNetworkString("smhSelectEntity");
+util.AddNetworkString("smhDeselectEntity");
 
 util.AddNetworkString("smhClientLoad");
 
@@ -370,9 +353,6 @@ function smhNPrevPic(pl,cmd,args)
 	if timer.Exists("smh_NPPic") then
 		timer.Remove("smh_NPPic")
 	end
-end
-
-local function doJpeg(playa)
 end
 
 function smhMakeJPEG(pl,cmd,args)

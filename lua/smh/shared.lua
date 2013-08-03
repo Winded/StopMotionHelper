@@ -1,5 +1,5 @@
 
-if !game.SinglePlayer() then return end
+if not game.SinglePlayer() then return; end
 
 -- Even though SMH (and the other tools) are meant for singleplayer,
 -- you should know that serverside and clientside differences still matter.
