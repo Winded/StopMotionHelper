@@ -166,7 +166,6 @@ end
 -- Recording
 function ENT:smhRecFrame(frame)
 
-	-- NEW CODE
 	local FT = {};
 
 	for name, mod in pairs(SMH.Modifiers) do
@@ -177,68 +176,13 @@ function ENT:smhRecFrame(frame)
 
 	return;
 
---	local FT = {}
---	//Bones (position,angle and inflate size)
---	for i=0,self:GetPhysicsObjectCount()-1 do
---		local Ref = self:GetPhysicsObjectNum(i)
---		local b = self:TranslatePhysBoneToBone(i)
---		local T = {};
---		T.Pos = Ref:GetPos()
---		T.Ang = Ref:GetAngles()
---		if i != 0 then
---			local mb = self:GetPhysicsObjectNum(self:GetPhysBoneParent(i))
---			if mb then
---				local pos,ang = WorldToLocal(Ref:GetPos(),Ref:GetAngles(),mb:GetPos(),mb:GetAngles())
---				T.OffPos = pos
---				T.OffAng = ang
---			end
---		end
---		T.Freezed = !Ref:IsMoveable()
---		T.Inf = self:GetManipulateBoneScale(b);
---		FT["bone"..i] = T;
---	end
---	//Bone manipulations. For non-physical bones.
---	for i=0,self:GetBoneCount()-1 do
---		if self:TranslateBoneToPhysBoneNew(i) == -1 then
---			local T = {};
---			T.Vector = self:GetManipulateBonePosition(i);
---			T.Angle = self:GetManipulateBoneAngles(i);
---			T.Scale = self:GetManipulateBoneScale(i);
---			FT["mbone"..i] = T;
---		end
---	end
---	//Flex scale and flexes
---	FT["flexscale"] = self:GetFlexScale()
---	for i=0,self:GetFlexNum()-1 do
---		FT["flex"..i] = self:GetFlexWeight(i)
---	end
---	//Eyes
---	FT["eyes"] = self:GetEyeTarget()
---	//Color
---	FT["color"] = self:GetColor()
---	//Pose parameters
---	FT["posep"] = {}
---	for k,v in pairs(self:GetPoseParams()) do
---		FT["posep"][v] = self:GetPoseParameter(v)
---	end
---	FT["posep"]["aim_pitch"] = self:GetPoseParameter("aim_pitch")
---	FT["posep"]["aim_yaw"] = self:GetPoseParameter("aim_yaw")
---	//E. A. S. Attachments
---	if self.easWelds then
---		for k,v in pairs(self.easWelds) do
---			FT["eas"..k] = {}
---			FT["eas"..k].Pos = v:GetNWVector("EAS_Pos")
---			FT["eas"..k].Ang = v:GetNWAngle("EAS_Ang")
---			FT["eas"..k].Color = v:GetColor()
---			FT["eas"..k].Scale = v:GetNWVector("EAS_Scale",Vector(1,1,1))
---		end
---	end
---	self.smhFrames[f] = FT
 end
 
 -- Clearing
 function ENT:smhClearFrame(f)
+
 	table.Empty(self.smhFrames[f])
+	
 end
 
 -- Clearing all. This is used by the selector when pressing Reload
