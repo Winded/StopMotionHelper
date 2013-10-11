@@ -60,7 +60,7 @@ function FH:RecordFrame(at)
 
 	local frame = self:GetFrame(at);
 	if not frame then
-		error("Frame " .. frame .. " does not exist.");
+		error("Frame " .. at .. " does not exist.");
 		return;
 	end
 
@@ -77,7 +77,7 @@ function FH:ClearFrame(at)
 
 	local frame = self:GetFrame(at);
 	if not frame then
-		error("Frame " .. frame .. " does not exist.");
+		error("Frame " .. at .. " does not exist.");
 		return;
 	end
 
@@ -85,11 +85,24 @@ function FH:ClearFrame(at)
 
 end
 
-function FH:SetFrame(frame)
+function FH:MoveFrame(from, to)
+
+	local frame = self:GetFrame(from);
+	if not frame then
+		error("Frame " .. from .. " does not exist.");
+		return;
+	end
+
+	table.remove(self.frames, from);
+	table.insert(self.frames, to, frame);
+
+end
+
+function FH:SetFrame(to)
 
 	local frame = self:GetFrame(at);
 	if not frame then
-		error("Frame " .. frame .. " does not exist.");
+		error("Frame " .. to .. " does not exist.");
 		return;
 	end
 

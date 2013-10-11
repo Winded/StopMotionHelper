@@ -1,11 +1,7 @@
 
 if not game.SinglePlayer() then return; end
 
--- Even though SMH (and the other tools) are meant for singleplayer,
--- you should know that serverside and clientside differences still matter.
--- Why? Its just the way source engine works. And it makes things more simple than more complicated.
-
-if !SMH then
+if not SMH then
 	SMH = {}
 end
 
@@ -408,19 +404,3 @@ local function smhRemoveEntHook(self)
 	end
 end
 hook.Add("EntityRemoved","smhRemoveEntHook",smhRemoveEntHook)
-
--- Saving entity frame data, AKA writing a file with GLON encoded string from entity's frame table
-function ENT:smhSave(fn)
-	file.Write("smh_saves/"..fn..".txt",glon.encode(self.smhFrames))
-end
-
--- Loading encoded frame data file
-function ENT:smhLoad(fn)
-	local File = file.Read("smh_saves/"..fn..".txt")
-	if !File then return end
-	local Frames = glon.decode(File)
-	if !self.smhFrames then
-		self.smhFrames = {}
-	end
-	self.smhFrames = Frames
-end

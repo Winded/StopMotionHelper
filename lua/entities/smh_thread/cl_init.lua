@@ -1,8 +1,5 @@
+include("shared.lua");
 
-ENT.Type = "anim"
+function ENT:Draw() return; end
 
-function ENT:Draw()
-end
-
-function ENT:DrawTranslucent()
-end
+function ENT:DrawTranslucent() return; end
