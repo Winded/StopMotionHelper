@@ -1,7 +1,0 @@
-"AddonInfo"
-{
-	"name" "Stop Motion Helper"
-	"author_name" "Winded"
-	"info" "This is a rather simple tool that can be used to make stop motion making easier, although some people use it for straight animation filming.
-Bind command +smh_menu to a key, and press the Help button that exists in the menu. This will give you a detailed tutorial for using the tool."
-}
