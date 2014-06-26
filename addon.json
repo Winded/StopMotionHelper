@@ -2,8 +2,9 @@
 	"title": "Stop Motion Helper",
 	"type": "tool",
 	"tags": [],
-	"ignore"
+	"ignore":
 	[
-		".git/*"
+		".git/*",
+		"README.md"
 	]
 }
