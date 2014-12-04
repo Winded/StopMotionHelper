@@ -28,12 +28,7 @@ function MOD:Load(entity, data)
 	entity:SetFlexScale(data.Scale);
 
 	for i, f in pairs(data.Weights) do
-
-		local w = entity:GetFlexWeight(i);
-		if w ~= f then
-			entity:SetFlexWeight(i, f);
-		end
-
+		entity:SetFlexWeight(i, f);
 	end
 
 end
