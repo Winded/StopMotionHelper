@@ -22,7 +22,6 @@ function PANEL:OnMousePressed(mousecode)
 	local tr = util.TraceLine(playerTrace);
 	if IsValid(tr.Entity) then
 		SMH.SelectEntity(tr.Entity);
-		SMH.Menu.RebuildFrameItems();
 	end
 
 end

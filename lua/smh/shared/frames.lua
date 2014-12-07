@@ -1,6 +1,7 @@
 
 if SERVER then
 	util.AddNetworkString("SMHSave");
+	util.AddNetworkString("SMHRecord");
 	util.AddNetworkString("SMHDelete");
 end
 
@@ -28,15 +29,6 @@ if SERVER then
 		end
 
 	end);
-	
-	function SMH.RecordToFrame(frame)
-
-		frame.Data = {};
-		for name, mod in pairs(SMH.Modifiers) do
-			frame.Data[name] = mod:Save(frame.Entity);
-		end
-
-	end
 
 	-- If the position has no frame, gets the frame before the position and the frame after the position.
 	-- otherwise returns only the frame at the position.
@@ -50,13 +42,14 @@ if SERVER then
 		for _, frame in pairs(frames) do
 
 			local diff = frame.Position - framepos;
-			if diff < 0 and math.abs(diff) < closestPrevFramePos then
-				closestPrevFramePos = math.abs(diff);
+			local aDiff = math.abs(diff);
+			if diff < 0 and aDiff < closestPrevFramePos then
+				closestPrevFramePos = aDiff;
 				closestPrevFrame = frame;
-			elseif diff > 0 and math.abs(diff) < closestNextFramePos then
+			elseif diff > 0 and aDiff < closestNextFramePos then
 				closestNextFramePos = math.abs(diff);
 				closestNextFrame = frame;
-			else
+			elseif diff == 0 then
 				return frame, nil;
 			end
 
@@ -113,18 +106,47 @@ function FRAME.New(player, entity, position)
 end
 
 -- Sends the frame table to the other side (server on client, client on server).
-function FRAME:Save()
+-- Argument copyOf should be set to another frame if the server should copy the data from that frame.
+function FRAME:Save(copyOf)
 
 	net.Start("SMHSave");
 
+	-- Don't send data; its only recorded and kept on server, no need to transfer
+	local data = self.Data;
 	net.WriteTable(self);
+	self.Data = data;
 
 	if SERVER then
 		net.Send(self.Player);
-	else
-		net.SendToServer();
+		return;
 	end
 
+	if copyOf then
+		net.WriteInt(copyOf.ID, 32);
+	else
+		net.WriteInt(0, 32);
+	end
+	net.SendToServer();
+
+end
+
+-- If on server, record current entity state to the frame.
+-- If on client, send a request for server to record the frame.
+function FRAME:Record()
+	if SERVER then
+
+		self.Data = {};
+		for name, mod in pairs(SMH.Modifiers) do
+			self.Data[name] = mod:Save(self.Entity);
+		end
+
+	else
+
+		net.Start("SMHRecord");
+		net.WriteInt(self.ID, 32);
+		net.SendToServer();
+
+	end
 end
 
 -- Send a message to the other side that this frame is to be deleted
@@ -132,7 +154,7 @@ function FRAME:Delete()
 
 	net.Start("SMHDelete");
 
-	net.WriteString(self.ID);
+	net.WriteInt(self.ID, 32);
 
 	if SERVER then
 		net.Send(self.Player);
@@ -142,9 +164,21 @@ function FRAME:Delete()
 
 end
 
+-- Update frame with given data
+function FRAME:Update(data)
+	if self.ID ~= data.ID then
+		error("SMH frame update - ID mismatch");
+		return;
+	end
+	self.Entity = data.Entity;
+	self.Player = data.Player;
+	self.Position = data.Position;
+end
+
 net.Receive("SMHSave", function(len, pl)
 
 	local frame = setmetatable(net.ReadTable(), FRAME);
+	local copyOf = net.ReadInt(32);
 
 	if SERVER and (not IsValid(frame.Player) or frame.Player ~= pl) then
 		ErrorNoHalt("SMHSave - players do not match!");
@@ -156,29 +190,58 @@ net.Receive("SMHSave", function(len, pl)
 	end
 
 	local f = table.First(SMH.Frames, function(item) return item.ID == frame.ID; end);
-
-	if not f then
-
-		if SERVER then
-			SMH.RecordToFrame(frame);
-			frame:Save();
-		end
-
-		table.insert(SMH.Frames, frame);
-
+	if f then
+		f:Update(frame);
+		frame = f;
 	else
-
-		table.RemoveByValue(SMH.Frames, f);
 		table.insert(SMH.Frames, frame);
-
+		if SERVER and copyOf == 0 then
+			frame:Record();
+		end
 	end
+
+	if copyOf ~= 0 then
+		local copyFrame = table.First(SMH.Frames, function(item) return item.ID == copyOf; end);
+		if not copyFrame then
+			ErrorNoHalt("SMHSave - Invalid copyOf ID!");
+			return;
+		end
+		frame.Data = table.Copy(copyFrame.Data);
+	end
+
+end);
+
+net.Receive("SMHRecord", function(len, pl)
+
+	if not SERVER then
+		return;
+	end
+
+	local frameID = net.ReadInt(32);
+	local frame = table.First(SMH.Frames, function(item) return item.ID == frameID; end);
+	if not frame then
+		ErrorNoHalt("SMHRecord - Invalid frame ID");
+		return;
+	end
+
+	-- Security check
+	if frame.Player ~= pl then
+		ErrorNoHalt("SMHRecord - players do not match!");
+		return;
+	end
+
+	frame:Record();
 
 end);
 
 net.Receive("SMHDelete", function(len, pl)
 
-	local frameID = net.ReadString();
+	local frameID = net.ReadInt(32);
 	local frame = table.First(SMH.Frames, function(item) return item.ID == frameID; end);
+	if not frame then
+		ErrorNoHalt("SMHDelete - Invalid frame ID");
+		return;
+	end
 
 	-- Security check
 	if SERVER and frame.Player ~= pl then

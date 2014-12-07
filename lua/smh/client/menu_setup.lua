@@ -1,7 +1,9 @@
 
-include("smh/client/world_clicker.lua");
-include("smh/client/frame_panel.lua");
-include("smh/client/smh_menu.lua");
+include("world_clicker.lua");
+include("frame_item.lua");
+include("pointer.lua");
+include("frame_panel.lua");
+include("smh_menu.lua");
 
 hook.Add("Initialize", "SMHMenuInit", function()
 
@@ -33,19 +35,22 @@ SMH.HelpMenu:SetVisible(false);
 end)
 
 function SMH.OpenHelp()
-    SMH.HelpMenu:SetVisible(true);
+	SMH.HelpMenu:SetVisible(true);
 end
 
 function ShowMenu()
-    SMH.WorldClicker:SetVisible(true);
-    RestoreCursorPosition();
-    SMH.HighlightEntity = true;
+	SMH.WorldClicker:SetVisible(true);
+	RestoreCursorPosition();
+	SMH.HighlightEntity = true;
 end
 
 function HideMenu()
-    RememberCursorPosition();
-    SMH.WorldClicker:SetVisible(false);
-    SMH.HighlightEntity = false;
+	if SMH.Menu:Focused() then
+		return;
+	end
+	RememberCursorPosition();
+	SMH.WorldClicker:SetVisible(false);
+	SMH.HighlightEntity = false;
 end
 
 concommand.Add("+smh_menu", ShowMenu);
