@@ -3,8 +3,6 @@ if not SMH then
 	SMH = {};
 end
 
-include("smh/utils/table_query.lua");
-
 include("smh/shared/frames.lua");
 
 -- Fix bone manipulations.
