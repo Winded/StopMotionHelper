@@ -14,7 +14,7 @@ end
 
 function PANEL:OnMousePressed(mousecode)
 
-	if mousecode != MOUSE_RIGHT then
+	if mousecode ~= MOUSE_RIGHT then
 		return;
 	end
 

@@ -101,9 +101,10 @@ function PANEL:RecordFrame()
 		frame = SMH.Frame.New(LocalPlayer(), SMH.Entity, pos);
 		table.insert(SMH.Frames, frame);
 		self:CreateFrameItem(frame);
+		frame:Save();
+	else
+		frame:Record();
 	end
-
-	frame:Save();
 
 end
 
