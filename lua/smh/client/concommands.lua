@@ -1,50 +1,30 @@
 
 local function Record()
-	SMH.Menu:RecordFrame();
+	SMH.Data:_Call("Record");
 end
 
 local function NextPosition()
-	local pointer = SMH.Menu.Pointer;
-	local pos = pointer.Position + 1;
-	if pos > SMH.PlaybackLength then
+	local pos = SMH.Data.Position + 1;
+	if pos > SMH.Data.PlaybackLength then
 		pos = 0;
 	end
-	pointer:SetPosition(pos);
+	SMH.Data.Position = pos;
 end
 
 local function PrevPosition()
-	local pointer = SMH.Menu.Pointer;
-	local pos = pointer.Position - 1;
+	local pos = SMH.Data.Position - 1;
 	if pos < 0 then
-		pos = SMH.PlaybackLength;
+		pos = SMH.Data.PlaybackLength;
 	end
-	pointer:SetPosition(pos);
+	SMH.Data.Position = pos;
 end
 
 local function Play()
-
-	local data = {};
-	data.Play = true;
-	data.Entities = SMH.TouchedEntities;
-	data.StartPosition = SMH.Menu.CurrentPosition;
-	data.PlaybackRate = SMH.PlaybackRate;
-	data.PlaybackLength = SMH.PlaybackLength;
-
-	net.Start("SMHPlayback");
-	net.WriteTable(data);
-	net.SendToServer();
-
+	SMH.Data:_Call("Play");
 end
 
 local function Stop()
-
-	local data = {};
-	data.Play = false;
-
-	net.Start("SMHPlayback");
-	net.WriteTable(data);
-	net.SendToServer();
-
+	SMH.Data:_Call("Stop");
 end
 
 concommand.Add("smh_record", Record);

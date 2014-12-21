@@ -24,29 +24,27 @@ hook.Add("Think", "SMHPlaybackTick", function()
 	end
 end);
 
-net.Receive("SMHPlayback", function(len, pl)
+function SMH.StartPlayback(player)
 
-	local data = net.ReadTable();
 	local pb = table.First(CurrentPlaybacks, function(item) return item.Player == pl; end);
-
-	if data.Play then
-		
-		if not pb then
-			pb = {};
-			pb.Player = pl;
-		end
-
-		pb.Entities = data.Entities;
-		pb.Position = data.StartPosition;
-		pb.PlaybackRate = data.PlaybackRate;
-		pb.PlaybackLength = data.PlaybackLength;
-
-		table.insert(CurrentPlaybacks, pb);
-
-	else
-		if pb then
-			table.RemoveByValue(CurrentPlaybacks, pb);
-		end
+	if pb then
+		table.RemoveByValue(CurrentPlaybacks, pb);
 	end
 
-end);
+	pb = {};
+	pb.Player = player;
+	pb.Entities = SMH.GetEntities(player);
+	pb.Position = player.SMHData.Position;
+	pb.PlaybackRate = player.SMHData.PlaybackRate;
+	pb.PlaybackLength = player.SMHData.PlaybackLength;
+
+	table.insert(CurrentPlaybacks, pb);
+
+end
+
+function SMH.StopPlayback(player)
+	local pb = table.First(CurrentPlaybacks, function(item) return item.Player == pl; end);
+	if pb then
+		table.RemoveByValue(CurrentPlaybacks, pb);
+	end
+end

@@ -2,12 +2,11 @@
 -- SMH Entry point.
 ---
 
-function Include(f)
-      RunString(file.Read(f, "LUA"));
-end
+include("bivalues/bivalues.lua");
 
 if SERVER then
-      include("smh/server.lua");
+	AddCSLuaFile("smh.lua");
+	include("smh/server.lua");
 else
-      include("smh/client.lua");
+	include("smh/client.lua");
 end

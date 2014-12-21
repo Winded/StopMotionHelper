@@ -1,0 +1,3 @@
+[submodule "lua/bivalues"]
+	path = lua/bivalues
+	url = https://Winded@github.com/Winded/BiValues.git

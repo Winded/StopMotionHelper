@@ -21,9 +21,21 @@ function PANEL:OnMousePressed(mousecode)
 	local playerTrace = util.GetPlayerTrace(LocalPlayer());
 	local tr = util.TraceLine(playerTrace);
 	if IsValid(tr.Entity) then
-		SMH.SelectEntity(tr.Entity);
+		self:OnSelect(tr.Entity);
 	end
 
 end
 
+function PANEL:OnSelect(entity) end
+
 vgui.Register("SMHWorldClicker", PANEL, "DPanel");
+
+local BIND = setmetatable({}, BiValues.ValueBind);
+function BIND:Init()
+	self.Settings.Callback = self.Settings.Callback or "OnSelect";
+	BiValues.ValueBind.Init(self);
+end
+function BIND:SetValue(value)
+	-- do nothing
+end
+BiValues.RegisterBindType("WorldClicker", BIND);
