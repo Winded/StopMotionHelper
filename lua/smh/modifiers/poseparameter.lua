@@ -1,7 +1,7 @@
 
 MOD.Name = "Pose parameters";
 
-function MOD:Save(entity)
+function MOD:Save(player, entity)
 
 	local data = {};
 
@@ -15,7 +15,7 @@ function MOD:Save(entity)
 
 end
 
-function MOD:Load(entity, data)
+function MOD:Load(player, entity, data)
 
 	for name, value in pairs(data) do
 		entity:SetPoseParameter(name, value);
@@ -23,7 +23,7 @@ function MOD:Load(entity, data)
 
 end
 
-function MOD:LoadBetween(entity, data1, data2, percentage)
+function MOD:LoadBetween(player, entity, data1, data2, percentage)
 	for name, value1 in pairs(data1) do
 
 		local value2 = data2[name];

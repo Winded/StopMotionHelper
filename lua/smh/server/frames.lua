@@ -8,9 +8,11 @@
 	Player - the player that owns this frame
 	Entity - the entity that owns this frame
 	Position - The position of the frame in the timeline
+	EaseIn - Amount from 0 to 1 for easing INTO the frame
+	EaseOut - Amount from 0 to 1 for easing OUT OF the frame
 	EntityData - The data retrieved from SMH modifiers
 
-	ActiveFrame objects should only contain the frame's ID and Position, as the client won't need anything else.
+	ActiveFrame objects should only contain the frame's ID, Position and easing values, as the client won't need anything else.
 ]]--
 
 SMH.Frames = {};
@@ -36,6 +38,8 @@ function FRAME.New(player, entity, position, copyOf)
 	f.Entity = entity;
 	f.Position = position;
 
+	f.EaseIn = 0;
+	f.EaseOut = 0;
 	f.EntityData = nil;
 
 	table.insert(SMH.Frames, f);
@@ -53,7 +57,7 @@ end
 function FRAME:Record()
 	self.EntityData = {};
 	for name, mod in pairs(SMH.Modifiers) do
-		self.EntityData[name] = mod:Save(self.Entity);
+		self.EntityData[name] = mod:Save(self.Player, self.Entity);
 	end
 end
 

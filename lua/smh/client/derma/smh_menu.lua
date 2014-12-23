@@ -14,9 +14,9 @@ function PANEL:Init()
 	self.LengthListener = SMH.Data:_Listen("PlaybackLength", function() self:LengthChanged(); end);
 	self.FramesListener = SMH.Data:_Listen("ActiveFrames", function() self:RefreshFrames(); end);
 
+	self.FrameItems = {};
+
 	self.FramePanel = vgui.Create("SMHFramePanel", self);
-	self.FramePanel:SetPos(5, 25);
-	self.FramePanel:SetSize(self:GetWide() - 5, 40);
 	self.FramePanel:Bind(SMH.Data, "PlaybackLength", "FramePanel");
 
 	self.Pointer = vgui.Create("SMHPointer", self.FramePanel);
@@ -26,14 +26,11 @@ function PANEL:Init()
 	self.Pointer:Bind(SMH.Data, "Position", "PointerPosition");
 
 	self.RecordButton = vgui.Create("DButton", self);
-	self.RecordButton:SetPos(self:GetWide() - 25, 2);
-	self.RecordButton:SetSize(20, 20);
 	self.RecordButton:SetText("R");
 	self.RecordButton:SetTooltip("Record frame");
 	self.RecordButton:Bind(SMH.Data, "Record", "Button");
 
 	self.PositionLabel = vgui.Create("DLabel", self);
-	self.PositionLabel:SetPos(150, 5);
 	self.PositionLabel:SetText("Position: 0 / 100");
 	self.PositionLabel:SizeToContents();
 	self.PositionLabel.Listen = function(container, key, value)
@@ -43,29 +40,85 @@ function PANEL:Init()
 	self.PositionLabel.PositionListener = SMH.Data:_Listen("Position", self.PositionLabel.Listen);
 	self.PositionLabel.LengthListener = SMH.Data:_Listen("PlaybackLength", self.PositionLabel.Listen);
 
-	local prLabel = vgui.Create("DLabel", self);
-	prLabel:SetPos(283, 5);
-	prLabel:SetText("Framerate");
-	prLabel:SizeToContents();
 	self.PlaybackRateControl = vgui.Create("DNumberWang", self);
-	self.PlaybackRateControl:SetPos(340, 2);
-	self.PlaybackRateControl:SetSize(50, 20);
 	self.PlaybackRateControl:SetMinMax(1, 999);
 	self.PlaybackRateControl:SetDecimals(0);
 	self.PlaybackRateControl:Bind(SMH.Data, "PlaybackRate", "Number");
+	self.PlaybackRateControl.Label = vgui.Create("DLabel", self);
+	self.PlaybackRateControl.Label:SetText("Framerate");
+	self.PlaybackRateControl.Label:SizeToContents();
 
-	local plLabel = vgui.Create("DLabel", self);
-	plLabel:SetPos(395, 5);
-	plLabel:SetText("Frame count");
-	plLabel:SizeToContents();
 	self.PlaybackLengthControl = vgui.Create("DNumberWang", self);
-	self.PlaybackLengthControl:SetPos(460, 2);
-	self.PlaybackLengthControl:SetSize(50, 20);
 	self.PlaybackLengthControl:SetMinMax(1, 999);
 	self.PlaybackLengthControl:SetDecimals(0);
 	self.PlaybackLengthControl:Bind(SMH.Data, "PlaybackLength", "Number");
+	self.PlaybackLengthControl.Label = vgui.Create("DLabel", self);
+	self.PlaybackLengthControl.Label:SetText("Frame count");
+	self.PlaybackLengthControl.Label:SizeToContents();
 
-	self.FrameItems = {};
+	self.Easing = vgui.Create("Panel", self);
+
+	self.EaseInControl = vgui.Create("DNumberWang", self.Easing);
+	self.EaseInControl:SetNumberStep(0.1);
+	self.EaseInControl:SetMinMax(0, 1);
+	self.EaseInControl:SetDecimals(1);
+	self.EaseInControl:Bind(SMH.Data, "EaseIn", "Number");
+	self.EaseInControl.Label = vgui.Create("DLabel", self.Easing);
+	self.EaseInControl.Label:SetText("Ease in");
+	self.EaseInControl.Label:SizeToContents();
+
+	self.EaseOutControl = vgui.Create("DNumberWang", self.Easing);
+	self.EaseOutControl:SetNumberStep(0.1);
+	self.EaseOutControl:SetMinMax(0, 1);
+	self.EaseOutControl:SetDecimals(1);
+	self.EaseOutControl:Bind(SMH.Data, "EaseOut", "Number");
+	self.EaseOutControl.Label = vgui.Create("DLabel", self.Easing);
+	self.EaseOutControl.Label:SetText("Ease out");
+	self.EaseOutControl.Label:SizeToContents();
+
+	self.Easing:Bind(SMH.Data, "ShowEaseOptions", "Visibility");
+
+end
+
+function PANEL:PerformLayout()
+
+	self:SetTitle("Stop Motion Helper");
+	self:SetSize(ScrW(), 70);
+	self:SetPos(0, ScrH() - self:GetTall());
+
+	self.FramePanel:SetPos(5, 25);
+	self.FramePanel:SetSize(self:GetWide() - 5, 40);
+
+	self.Pointer.VerticalPosition = self.FramePanel:GetTall() / 4;
+	self.Pointer:RefreshPosition();
+
+	self.RecordButton:SetPos(self:GetWide() - 25, 2);
+	self.RecordButton:SetSize(20, 20);
+
+	self.PositionLabel:SetPos(150, 5);
+
+	self.PlaybackRateControl:SetPos(340, 2);
+	self.PlaybackRateControl:SetSize(50, 20);
+	local sizeX, sizeY = self.PlaybackRateControl.Label:GetSize();
+	self.PlaybackRateControl.Label:SetRelativePos(self.PlaybackRateControl, -(sizeX) - 5, 3);
+
+	self.PlaybackLengthControl:SetPos(460, 2);
+	self.PlaybackLengthControl:SetSize(50, 20);
+	sizeX, sizeY = self.PlaybackLengthControl.Label:GetSize();
+	self.PlaybackLengthControl.Label:SetRelativePos(self.PlaybackLengthControl, -(sizeX) - 5, 3);
+
+	self.Easing:SetPos(540, 0);
+	self.Easing:SetSize(250, 30);
+
+	self.EaseInControl:SetPos(60, 2);
+	self.EaseInControl:SetSize(50, 20);
+	sizeX, sizeY = self.EaseInControl.Label:GetSize();
+	self.EaseInControl.Label:SetRelativePos(self.EaseInControl, -(sizeX) - 5, 3);
+
+	self.EaseOutControl:SetPos(160, 2);
+	self.EaseOutControl:SetSize(50, 20);
+	sizeX, sizeY = self.EaseOutControl.Label:GetSize();
+	self.EaseOutControl.Label:SetRelativePos(self.EaseOutControl, -(sizeX) - 5, 3);
 
 end
 
@@ -74,6 +127,7 @@ function PANEL:Focused()
 end
 
 function PANEL:LengthChanged()
+	self.Pointer:RefreshPosition();
 	for _, item in pairs(self.FrameItems) do
 		item:RefreshPosition();
 	end

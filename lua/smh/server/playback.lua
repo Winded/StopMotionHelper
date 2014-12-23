@@ -43,7 +43,7 @@ function SMH.StartPlayback(player)
 end
 
 function SMH.StopPlayback(player)
-	local pb = table.First(CurrentPlaybacks, function(item) return item.Player == pl; end);
+	local pb = table.First(CurrentPlaybacks, function(item) return item.Player == player; end);
 	if pb then
 		table.RemoveByValue(CurrentPlaybacks, pb);
 	end

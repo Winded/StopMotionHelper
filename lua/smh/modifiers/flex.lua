@@ -1,7 +1,7 @@
 
 MOD.Name = "Facial flexes";
 
-function MOD:Save(entity)
+function MOD:Save(player, entity)
 
 	local count = entity:GetFlexNum();
 	if count <= 0 then return nil; end
@@ -20,7 +20,7 @@ function MOD:Save(entity)
 
 end
 
-function MOD:Load(entity, data)
+function MOD:Load(player, entity, data)
 
 	local count = entity:GetFlexNum();
 	if count <= 0 then return; end --Shouldn't happen, but meh
@@ -33,12 +33,13 @@ function MOD:Load(entity, data)
 
 end
 
-function MOD:LoadBetween(entity, data1, data2, percentage)
+function MOD:LoadBetween(player, entity, data1, data2, percentage)
 
 	local count = entity:GetFlexNum();
 	if count <= 0 then return; end --Shouldn't happen, but meh
 
 	local scale = SMH.LerpLinear(data1.Scale, data2.Scale, percentage);
+	entity:SetFlexScale(scale);
 
 	for i = 0, count - 1 do
 

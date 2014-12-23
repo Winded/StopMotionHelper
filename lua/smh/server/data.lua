@@ -15,7 +15,9 @@ local function RefreshActiveFrames(container)
 	for _, frame in pairs(frames) do
 		local f = {
 			ID = frame.ID,
-			Position = frame.Position
+			Position = frame.Position,
+			EaseIn = frame.EaseIn,
+			EaseOut = frame.EaseOut
 		};
 		table.insert(container.ActiveFrames, f);
 	end
@@ -66,13 +68,22 @@ local function FrameEdited(container, key, editedFrame)
 
 	if editedFrame.NewPosition then
 
-		local existingFrame = table.First(SMH.Frames, function(item) return item.Player == player and item.Entity == entity and item.Position == editedFrame.NewPosition; end);
+		local existingFrame = table.First(SMH.Frames, function(item) 
+			return item.ID ~= editedFrame.ID and item.Player == player and item.Entity == entity and item.Position == editedFrame.NewPosition; 
+		end);
 		if existingFrame then
 			existingFrame:Remove();
 		end
 
 		frame.Position = editedFrame.NewPosition;
 
+	end
+
+	if editedFrame.NewEaseIn then
+		frame.EaseIn = editedFrame.NewEaseIn;
+	end
+	if editedFrame.NewEaseOut then
+		frame.EaseOut = editedFrame.NewEaseOut;
 	end
 
 	if editedFrame.Remove then
@@ -123,36 +134,28 @@ function SMH.SetupData(player)
 	defaults.ActiveFrames = {};
 	defaults.EditedFrame = nil;
 
-	if SERVER then
+	defaults.EaseIn = 0;
+	defaults.EaseOut = 0;
+	defaults.ShowEaseOptions = false;
 
-		defaults.Record = RecordFrame;
+	defaults.Record = RecordFrame;
 
-		defaults.Play = function(container, key)
-			SMH.StartPlayback(container._Player);
-		end
-		defaults.Stop = function(container, key)
-			SMH.StopPlayback(container._Player);
-		end
-
+	defaults.Play = function(container, key)
+		SMH.StartPlayback(container._Player);
+	end
+	defaults.Stop = function(container, key)
+		SMH.StopPlayback(container._Player);
 	end
 
 	local data = BiValues.New(player, "SMHData", {UseSync = true, AutoApply = true}, defaults);
-
-	if SERVER then
 		
-		data:_Listen("Entity", function(container, key, value)
-			RefreshActiveFrames(container);
-		end);
-		data:_Listen("Position", PositionChanged);
-		data:_Listen("EditedFrame", FrameEdited);
-		data:_Listen("CopiedFrame", FrameCopied);
+	data:_Listen("Entity", function(container, key, value)
+		RefreshActiveFrames(container);
+	end);
+	data:_Listen("Position", PositionChanged);
+	data:_Listen("EditedFrame", FrameEdited);
+	data:_Listen("CopiedFrame", FrameCopied);
 
-	end
-
-	if SERVER then
-		player.SMHData = data;
-	else
-		SMH.Data = data;
-	end
+	player.SMHData = data;
 
 end

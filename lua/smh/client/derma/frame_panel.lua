@@ -22,7 +22,6 @@ function PANEL:SetLength(value)
 	if value < 1 then
 		value = 1;
 	end
-	print(value);
 	self.Length = value;
 end
 

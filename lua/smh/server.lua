@@ -1,15 +1,18 @@
 
 include("shared.lua");
+
+include("server/data.lua");
 include("server/easing.lua");
 include("server/eyetarget.lua");
+include("server/frames.lua");
 include("server/modifiers.lua");
 include("server/playback.lua");
 include("server/positioning.lua");
 
 AddCSLuaFile("shared.lua");
-AddCSLuaFile("shared/frames.lua");
 
 AddCSLuaFile("client.lua");
+AddCSLuaFile("client/data.lua");
 AddCSLuaFile("client/concommands.lua");
 AddCSLuaFile("client/entity_highlight.lua");
 AddCSLuaFile("client/entity_selection.lua");

@@ -1,7 +1,7 @@
 
 MOD.Name = "Physical Bones";
 
-function MOD:Save(entity)
+function MOD:Save(player, entity)
 
 	local count = entity:GetPhysicsObjectCount();
 	if count <= 0 then return nil; end
@@ -26,10 +26,9 @@ function MOD:Save(entity)
 
 end
 
-function MOD:Load(entity, data)
+function MOD:Load(player, entity, data)
 
 	local count = entity:GetPhysicsObjectCount();
-	if count <= 0 then return; end --Shouldn't happen, but meh
 
 	for i = 0, count - 1 do
 
@@ -38,17 +37,22 @@ function MOD:Load(entity, data)
 		local d = data[i];
 		pb:SetPos(d.Pos);
 		pb:SetAngles(d.Ang);
-		pb:EnableMotion(d.Moveable);
+
+		if entity.SMHData.FreezeAll then
+			pb:EnableMotion(false);
+		else
+			pb:EnableMotion(d.Moveable);
+		end
+
 		pb:Wake();
 
 	end
 
 end
 
-function MOD:LoadBetween(entity, data1, data2, percentage)
+function MOD:LoadBetween(player, entity, data1, data2, percentage)
 
 	local count = entity:GetPhysicsObjectCount();
-	if count <= 0 then return; end --Shouldn't happen, but meh
 
 	for i = 0, count - 1 do
 

@@ -50,6 +50,7 @@ function SMH.GetPositionFrames(frames, framepos)
 	end
 
 	local perc = (framepos - closestPrevFrame.Position) / (closestNextFrame.Position - closestPrevFrame.Position);
+	perc = math.EaseInOut(perc, closestPrevFrame.EaseOut, closestNextFrame.EaseIn);
 	return closestPrevFrame, closestNextFrame, perc;
 
 end
@@ -65,13 +66,13 @@ function SMH.PositionEntity(player, entity, framepos)
 
 	if not frame2 then
 		for name, mod in pairs(SMH.Modifiers) do
-			mod:Load(entity, frame1.EntityData[name]);
+			mod:Load(player, entity, frame1.EntityData[name]);
 		end
 		return;
 	end
 
 	for name, mod in pairs(SMH.Modifiers) do
-		mod:LoadBetween(entity, frame1.EntityData[name], frame2.EntityData[name], perc);
+		mod:LoadBetween(player, entity, frame1.EntityData[name], frame2.EntityData[name], perc);
 	end
 
 end

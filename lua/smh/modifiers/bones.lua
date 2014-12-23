@@ -1,10 +1,9 @@
 
 MOD.Name = "Bones";
 
-function MOD:Save(entity)
+function MOD:Save(player, entity)
 
 	local count = entity:GetBoneCount();
-	if count <= 0 then return nil; end
 
 	local data = {};
 
@@ -23,10 +22,9 @@ function MOD:Save(entity)
 
 end
 
-function MOD:Load(entity, data)
+function MOD:Load(player, entity, data)
 
 	local count = entity:GetBoneCount();
-	if count <= 0 then return; end --Shouldn't happen, but meh
 
 	for b = 0, count - 1 do
 
@@ -39,10 +37,9 @@ function MOD:Load(entity, data)
 
 end
 
-function MOD:LoadBetween(entity, data1, data2, percentage)
+function MOD:LoadBetween(player, entity, data1, data2, percentage)
 
 	local count = entity:GetBoneCount();
-	if count <= 0 then return; end --Shouldn't happen, but meh
 
 	for b = 0, count - 1 do
 

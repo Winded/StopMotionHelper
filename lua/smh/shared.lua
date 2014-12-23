@@ -3,9 +3,6 @@ if not SMH then
 	SMH = {};
 end
 
-include("shared/data.lua");
-include("shared/frames.lua");
-
 -- Fix bone manipulations.
 hook.Add("PlayerSpawnedRagdoll", "SMHRagdollFix", function(pl, model, ragdoll)
 	for i = 0, ragdoll:GetBoneCount() - 1 do
