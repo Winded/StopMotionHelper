@@ -25,11 +25,6 @@ function PANEL:Init()
 	self.Pointer:SetPosition(0);
 	self.Pointer:Bind(SMH.Data, "Position", "PointerPosition");
 
-	self.RecordButton = vgui.Create("DButton", self);
-	self.RecordButton:SetText("R");
-	self.RecordButton:SetTooltip("Record frame");
-	self.RecordButton:Bind(SMH.Data, "Record", "Button");
-
 	self.PositionLabel = vgui.Create("DLabel", self);
 	self.PositionLabel:SetText("Position: 0 / 100");
 	self.PositionLabel:SizeToContents();
@@ -78,9 +73,27 @@ function PANEL:Init()
 
 	self.Easing:Bind(SMH.Data, "ShowEaseOptions", "Visibility");
 
+	self.RecordButton = vgui.Create("DButton", self);
+	self.RecordButton:SetText("Record");
+	self.RecordButton:Bind(SMH.Data, "Record", "Button");
+
+	self.SaveButton = vgui.Create("DButton", self);
+	self.SaveButton:SetText("Save");
+	self.SaveButton:Bind(SMH.Data, "ShowSaveMenu", "Button");
+
+	self.LoadButton = vgui.Create("DButton", self);
+	self.LoadButton:SetText("Load");
+	self.LoadButton:Bind(SMH.Data, "ShowLoadMenu", "Button");
+
+	self.SettingsButton = vgui.Create("DButton", self);
+	self.SettingsButton:SetText("Settings");
+	self.SettingsButton:Bind(SMH.Data, "ShowSettingsMenu", "Button");
+
 end
 
 function PANEL:PerformLayout()
+
+	self.BaseClass.PerformLayout(self);
 
 	self:SetTitle("Stop Motion Helper");
 	self:SetSize(ScrW(), 70);
@@ -91,9 +104,6 @@ function PANEL:PerformLayout()
 
 	self.Pointer.VerticalPosition = self.FramePanel:GetTall() / 4;
 	self.Pointer:RefreshPosition();
-
-	self.RecordButton:SetPos(self:GetWide() - 25, 2);
-	self.RecordButton:SetSize(20, 20);
 
 	self.PositionLabel:SetPos(150, 5);
 
@@ -119,6 +129,18 @@ function PANEL:PerformLayout()
 	self.EaseOutControl:SetSize(50, 20);
 	sizeX, sizeY = self.EaseOutControl.Label:GetSize();
 	self.EaseOutControl.Label:SetRelativePos(self.EaseOutControl, -(sizeX) - 5, 3);
+
+	self.RecordButton:SetPos(self:GetWide() - 60 * 4 - 5 * 4, 2);
+	self.RecordButton:SetSize(60, 20);
+
+	self.SaveButton:SetPos(self:GetWide() - 60 * 3 - 5 * 3, 2);
+	self.SaveButton:SetSize(60, 20);
+
+	self.LoadButton:SetPos(self:GetWide() - 60 * 2 - 5 * 2, 2);
+	self.LoadButton:SetSize(60, 20);
+
+	self.SettingsButton:SetPos(self:GetWide() - 60 * 1 - 5 * 1, 2);
+	self.SettingsButton:SetSize(60, 20);
 
 end
 

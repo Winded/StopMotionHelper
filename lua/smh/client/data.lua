@@ -50,19 +50,30 @@ local function EaseOutChanged(container, key, value)
 
 end
 
+local function ShowSettingsMenu(container, key)
+	if not container.ShowSettings then
+		container.ShowSettings = true;
+	end
+end
+
+local function ShowHelpMenu(container, key)
+	if not container.ShowHelp then
+		container.ShowHelp = true;
+	end
+end
+
+local function ShowSaveMenu(container, key)
+	if not container.ShowSave then
+		container.ShowSave = true;
+	end
+end
+
 function SMH.SetupData()
 
-	local defaults = {};
-	defaults.Entity = nil;
-	defaults.Position = 0;
-	defaults.PlaybackRate = 30;
-	defaults.PlaybackLength = 100;
-	defaults.ActiveFrames = {};
-	defaults.EditedFrame = nil;
-
-	defaults.EaseIn = 0;
-	defaults.EaseOut = 0;
-	defaults.ShowEaseOptions = false;
+	local defaults = table.Copy(SMH.DefaultData);
+	defaults.ShowSettingsMenu = ShowSettingsMenu;
+	defaults.ShowHelpMenu = ShowHelpMenu;
+	defaults.ShowSaveMenu = ShowSaveMenu;
 
 	local data = BiValues.New(LocalPlayer(), "SMHData", {UseSync = true, AutoApply = true}, defaults);
 

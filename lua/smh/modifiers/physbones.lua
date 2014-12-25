@@ -38,7 +38,7 @@ function MOD:Load(player, entity, data)
 		pb:SetPos(d.Pos);
 		pb:SetAngles(d.Ang);
 
-		if entity.SMHData.FreezeAll then
+		if player.SMHData.FreezeAll then
 			pb:EnableMotion(false);
 		else
 			pb:EnableMotion(d.Moveable);

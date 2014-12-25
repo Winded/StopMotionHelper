@@ -1,6 +1,8 @@
 
 include("derma/frame_panel.lua");
 include("derma/frame_pointer.lua");
+include("derma/save.lua");
+include("derma/settings.lua");
 include("derma/smh_menu.lua");
 include("derma/world_clicker.lua");
 
@@ -13,7 +15,18 @@ function SMH.SetupMenu()
 
 	SMH.Menu = vgui.Create("SMHMenu", SMH.WorldClicker);
 
-	SMH.HelpMenu = vgui.Create('DFrame');
+	SMH.SettingsMenu = vgui.Create("SMHSettings", SMH.WorldClicker);
+	SMH.SettingsMenu:SetPos(ScrW() - SMH.SettingsMenu:GetWide(), ScrH() - SMH.Menu:GetTall() - SMH.SettingsMenu:GetTall());
+	SMH.SettingsMenu:MakePopup();
+	SMH.SettingsMenu:SetVisible(false);
+	SMH.SettingsMenu:Bind(SMH.Data, "ShowSettings", "Visibility");
+
+	SMH.SaveMenu = vgui.Create("SMHSave");
+	SMH.SaveMenu:MakePopup();
+	SMH.SaveMenu:SetVisible(false);
+	SMH.SaveMenu:Bind(SMH.Data, "ShowSaveMenu", "Visibility");
+
+	SMH.HelpMenu = vgui.Create("DFrame");
 	SMH.HelpMenu:SetSize(650, 650);
 	SMH.HelpMenu:Center();
 	SMH.HelpMenu:SetTitle('Help');
@@ -22,12 +35,12 @@ function SMH.SetupMenu()
 	SMH.HelpMenu:SetDeleteOnClose(false);
 	SMH.HelpMenu:SetBackgroundBlur(true);
 	SMH.HelpMenu:MakePopup();
+	SMH.HelpMenu:Bind(SMH.Data, "ShowHelp", "Visibility");
 
-	SMH.HelpMenu.Body = vgui.Create("DHTML", SMH.HelpMenu);
+	SMH.HelpMenu.Body = vgui.Create("HTML", SMH.HelpMenu);
 	SMH.HelpMenu.Body:SetPos(5, 25);
 	SMH.HelpMenu.Body:SetSize(640, 620);
-	SMH.HelpMenu.Body:SetBGColor(Color(255,255,255,255));
-	SMH.HelpMenu.Body:SetHTML(file.Read("lua/smh_help.lua","GAME"));
+	SMH.HelpMenu.Body:OpenURL("http://winded.org/gmod/smh_help.html");
 
 	SMH.HelpMenu:SetVisible(false);
 

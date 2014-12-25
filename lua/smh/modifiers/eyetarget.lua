@@ -1,7 +1,7 @@
 
 MOD.Name = "Eye target";
 
-function MOD:HasEyes(player, entity)
+function MOD:HasEyes(entity)
 
 	local Eyes = entity:LookupAttachment("eyes");
 

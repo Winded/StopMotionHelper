@@ -126,17 +126,7 @@ end
 
 function SMH.SetupData(player)
 
-	local defaults = {};
-	defaults.Entity = nil;
-	defaults.Position = 0;
-	defaults.PlaybackRate = 30;
-	defaults.PlaybackLength = 100;
-	defaults.ActiveFrames = {};
-	defaults.EditedFrame = nil;
-
-	defaults.EaseIn = 0;
-	defaults.EaseOut = 0;
-	defaults.ShowEaseOptions = false;
+	local defaults = table.Copy(SMH.DefaultData);
 
 	defaults.Record = RecordFrame;
 
