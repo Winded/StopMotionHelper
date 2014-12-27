@@ -1,0 +1,6 @@
+"AddonInfo"
+{
+	"name" "Stop Motion Helper"
+	"author_name" "author"
+	"info" ""
+}
