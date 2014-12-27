@@ -28,7 +28,7 @@ function FRAME.GetByPosition(player, entity, position)
 	return table.First(SMH.Frames, function(item) return item.Player == player and item.Entity == entity and item.Position == position; end);
 end
 
-function FRAME.New(player, entity, position, copyOf)
+function FRAME.New(player, entity, position, easeIn, easeOut)
 
 	local f = setmetatable({}, FRAME);
 
@@ -38,8 +38,8 @@ function FRAME.New(player, entity, position, copyOf)
 	f.Entity = entity;
 	f.Position = position;
 
-	f.EaseIn = 0;
-	f.EaseOut = 0;
+	f.EaseIn = easeIn or 0;
+	f.EaseOut = easeOut or 0;
 	f.EntityData = nil;
 
 	table.insert(SMH.Frames, f);
@@ -49,7 +49,7 @@ end
 
 -- Create a copy of the given frame
 function FRAME.Copy(frame)
-	local newFrame = FRAME.New(frame.Player, frame.Entity, frame.Position, frame.ID);
+	local newFrame = FRAME.New(frame.Player, frame.Entity, frame.Position, frame.EaseIn, frame.EaseOut);
 	newFrame.EntityData = table.Copy(frame.EntityData);
 	return newFrame;
 end

@@ -124,6 +124,66 @@ local function FrameCopied(container, key, copiedFrame)
 
 end
 
+local function Load(container, key)
+
+	local player = container._Player;
+	local entity = container.Entity;
+	local data = container.LoadData;
+
+	if not IsValid(entity) or table.Count(data) == 0 then
+		return;
+	end
+
+	local frames = table.Where(SMH.Frames, function(item) return item.Player == player and item.Entity == entity; end);
+	for _, frame in pairs(frames) do
+		frame:Remove();
+	end
+
+	for _, sFrame in pairs(data.Frames) do
+		local frame = SMH.Frame.New(player, entity, sFrame.Position, sFrame.EaseIn, sFrame.EaseOut);
+		frame.EntityData = table.Copy(sFrame.EntityData);
+	end
+
+	RefreshActiveFrames(container);
+	container.LoadFileName = "";
+
+end
+
+local function Save(container, key)
+
+	local player = container._Player;
+
+	local data = {};
+	data.Map = game.GetMap();
+	data.Entities = {};
+
+	local ents = SMH.GetEntities(player);
+	for _, entity in pairs(ents) do
+		
+		local eData = {};
+		local mdl = string.Split(entity:GetModel(), "/");
+		eData.Model = mdl[#mdl];
+		eData.Frames = {};
+
+		local frames = table.Where(SMH.Frames, function(item) return item.Player == player and item.Entity == entity; end);
+		for _, frame in pairs(frames) do
+			local fData = {};
+			fData.Position = frame.Position;
+			fData.EaseIn = frame.EaseIn;
+			fData.EaseOut = frame.EaseOut;
+			fData.EntityData = frame.EntityData;
+			table.insert(eData.Frames, fData);
+		end
+
+		table.insert(data.Entities, eData);
+
+	end
+
+	local json = util.TableToJSON(data);
+	container.SaveData = json;
+
+end
+
 function SMH.SetupData(player)
 
 	local defaults = table.Copy(SMH.DefaultData);
@@ -136,6 +196,9 @@ function SMH.SetupData(player)
 	defaults.Stop = function(container, key)
 		SMH.StopPlayback(container._Player);
 	end
+
+	defaults.Load = Load;
+	defaults.Save = Save;
 
 	local data = BiValues.New(player, "SMHData", {UseSync = true, AutoApply = true}, defaults);
 		

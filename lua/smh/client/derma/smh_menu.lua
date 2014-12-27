@@ -144,10 +144,6 @@ function PANEL:PerformLayout()
 
 end
 
-function PANEL:Focused()
-	return self.PlaybackRateControl:HasFocus() or self.PlaybackLengthControl:HasFocus();
-end
-
 function PANEL:LengthChanged()
 	self.Pointer:RefreshPosition();
 	for _, item in pairs(self.FrameItems) do

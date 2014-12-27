@@ -2,6 +2,7 @@
 include("derma/frame_panel.lua");
 include("derma/frame_pointer.lua");
 include("derma/save.lua");
+include("derma/load.lua");
 include("derma/settings.lua");
 include("derma/smh_menu.lua");
 include("derma/world_clicker.lua");
@@ -16,15 +17,19 @@ function SMH.SetupMenu()
 	SMH.Menu = vgui.Create("SMHMenu", SMH.WorldClicker);
 
 	SMH.SettingsMenu = vgui.Create("SMHSettings", SMH.WorldClicker);
-	SMH.SettingsMenu:SetPos(ScrW() - SMH.SettingsMenu:GetWide(), ScrH() - SMH.Menu:GetTall() - SMH.SettingsMenu:GetTall());
-	SMH.SettingsMenu:MakePopup();
+	SMH.SettingsMenu:SetPos(ScrW() - SMH.SettingsMenu:GetWide(), ScrH() - 100 - SMH.SettingsMenu:GetTall());
 	SMH.SettingsMenu:SetVisible(false);
 	SMH.SettingsMenu:Bind(SMH.Data, "ShowSettings", "Visibility");
 
 	SMH.SaveMenu = vgui.Create("SMHSave");
 	SMH.SaveMenu:MakePopup();
 	SMH.SaveMenu:SetVisible(false);
-	SMH.SaveMenu:Bind(SMH.Data, "ShowSaveMenu", "Visibility");
+	SMH.SaveMenu:Bind(SMH.Data, "ShowSave", "Visibility");
+
+	SMH.LoadMenu = vgui.Create("SMHLoad");
+	SMH.LoadMenu:MakePopup();
+	SMH.LoadMenu:SetVisible(false);
+	SMH.LoadMenu:Bind(SMH.Data, "ShowLoad", "Visibility");
 
 	SMH.HelpMenu = vgui.Create("DFrame");
 	SMH.HelpMenu:SetSize(650, 650);
@@ -57,9 +62,6 @@ function SMH.ShowMenu()
 end
 
 function SMH.HideMenu()
-	if SMH.Menu:Focused() then
-		return;
-	end
 	RememberCursorPosition();
 	SMH.WorldClicker:SetVisible(false);
 	SMH.HighlightEntity = false;

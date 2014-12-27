@@ -19,6 +19,9 @@ AddCSLuaFile("client/entity_selection.lua");
 AddCSLuaFile("client/menu_setup.lua");
 AddCSLuaFile("client/derma/frame_panel.lua");
 AddCSLuaFile("client/derma/frame_pointer.lua");
+AddCSLuaFile("client/derma/load.lua");
+AddCSLuaFile("client/derma/save.lua");
+AddCSLuaFile("client/derma/settings.lua");
 AddCSLuaFile("client/derma/smh_menu.lua");
 AddCSLuaFile("client/derma/world_clicker.lua");
 

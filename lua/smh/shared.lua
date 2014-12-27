@@ -22,6 +22,8 @@ SMH.DefaultData = {
 	
 	ShowSettings = false,
 	ShowHelp = false,
+	ShowSave = false,
+	ShowLoad = false,
 
 };
 
