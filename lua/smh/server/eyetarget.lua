@@ -14,8 +14,8 @@ end
 
 function meta:GetEyeTarget()
 
-	if !self.EyeVec then
-		self.EyeVec = Vector(100,0,0);
+	if not self.EyeVec then
+		self.EyeVec = Vector(180, 0, 0);
 	end
 
 	return self.EyeVec;

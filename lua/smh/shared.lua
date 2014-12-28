@@ -21,9 +21,15 @@ SMH.DefaultData = {
 	ShowEaseOptions = false,
 	
 	ShowSettings = false,
+
+	FreezeAll = false,
+	IgnorePhysBones = false,
+
 	ShowHelp = false,
 	ShowSave = false,
 	ShowLoad = false,
+
+	OnionSkin = false,
 
 };
 

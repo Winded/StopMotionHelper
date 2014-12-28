@@ -184,6 +184,39 @@ local function Save(container, key)
 
 end
 
+local function ToggleOnionSkin(container, key, value)
+
+	local player = container._Player;
+	local enabled = value;
+
+	if not enabled then
+		container.OnionSkinData = {};
+		return;
+	end
+
+	local data = {};
+
+	local ents = SMH.GetEntities(player);
+	for _, entity in pairs(ents) do
+		
+		local eData = {};
+		eData.Model = entity:GetModel();
+		eData.Frames = {};
+
+		local frames = table.Where(SMH.Frames, function(item) return item.Player == player and item.Entity == entity; end);
+		for i = 0, container.PlaybackLength do
+			local bones = SMH.GetFrameBonePositions(entity, frames, i);
+			eData.Frames[i] = bones;
+		end
+
+		table.insert(data, eData);
+
+	end
+
+	container.OnionSkinData = data;
+
+end
+
 function SMH.SetupData(player)
 
 	local defaults = table.Copy(SMH.DefaultData);
@@ -208,6 +241,8 @@ function SMH.SetupData(player)
 	data:_Listen("Position", PositionChanged);
 	data:_Listen("EditedFrame", FrameEdited);
 	data:_Listen("CopiedFrame", FrameCopied);
+
+	data:_Listen("OnionSkin", ToggleOnionSkin);
 
 	player.SMHData = data;
 

@@ -55,6 +55,35 @@ function SMH.GetPositionFrames(frames, framepos)
 
 end
 
+-- Return a table of bone positions from the frames for the given frame position. Used for onion skinning.
+function SMH.GetFrameBonePositions(entity, frames, framepos)
+	
+	local frame1, frame2, perc = SMH.GetPositionFrames(frames, framepos);
+
+	if not frame2 then
+		frame2 = frame1;
+		perc = 0;
+	end
+
+	local bones = {};
+
+	for id, data in pairs(frame1.EntityData["physbones"]) do
+		local data2 = frame2.EntityData["physbones"][id];
+		local boneId = entity:TranslatePhysBoneToBone(id);
+		local bone = {};
+		bone.Pos = SMH.LerpLinearVector(data.Pos, data2.Pos, perc);
+		bone.Ang = SMH.LerpLinearAngle(data.Ang, data2.Ang, perc);
+		bones[boneId] = bone;
+	end
+
+	for id, data in pairs(frame1.EntityData["bones"]) do
+		-- TODO
+	end
+
+	return bones;
+
+end
+
 function SMH.PositionEntity(player, entity, framepos)
 
 	local frames = table.Where(SMH.Frames, function(item) return item.Player == player and item.Entity == entity; end);

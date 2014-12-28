@@ -28,6 +28,10 @@ end
 
 function MOD:Load(player, entity, data)
 
+	if player.SMHData.IgnorePhysBones then
+		return;
+	end
+
 	local count = entity:GetPhysicsObjectCount();
 
 	for i = 0, count - 1 do
@@ -51,6 +55,10 @@ function MOD:Load(player, entity, data)
 end
 
 function MOD:LoadBetween(player, entity, data1, data2, percentage)
+
+	if player.SMHData.IgnorePhysBones then
+		return;
+	end
 
 	local count = entity:GetPhysicsObjectCount();
 

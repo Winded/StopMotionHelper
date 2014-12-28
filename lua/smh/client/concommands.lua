@@ -27,8 +27,13 @@ local function Stop()
 	SMH.Data:_Call("Stop");
 end
 
+local function Onion()
+	SMH.Data.OnionSkin = not SMH.Data.OnionSkin;
+end
+
 concommand.Add("smh_record", Record);
 concommand.Add("smh_next", NextPosition);
 concommand.Add("smh_previous", PrevPosition);
 concommand.Add("+smh_playback", Play);
 concommand.Add("-smh_playback", Stop);
+concommand.Add("smh_onionskin", Onion);
