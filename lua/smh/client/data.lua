@@ -1,5 +1,5 @@
 
-local SaveDir = "smh/";
+SMH.SaveDir = "smh/";
 
 local function RefreshEaseOptions(container, key, value)
 
@@ -82,7 +82,7 @@ local function RefreshSaveList(container, key, value)
 		return;
 	end
 
-	local files, dirs = file.Find(SaveDir .. "*.txt", "DATA");
+	local files, dirs = file.Find(SMH.SaveDir .. "*.txt", "DATA");
 
 	local saves = {};
 	for _, file in pairs(files) do
@@ -100,7 +100,7 @@ local function LoadFileChanged(container, key, value)
 		return;
 	end
 
-	local path = SaveDir .. value .. ".txt";
+	local path = SMH.SaveDir .. value .. ".txt";
 	if not file.Exists(path, "DATA") then
 		container.LoadFileEntities = {};
 		return;
@@ -131,7 +131,7 @@ local function LoadEntityChanged(container, key, value)
 		return;
 	end
 
-	local path = SaveDir .. "/" .. loadFile .. ".txt";
+	local path = SMH.SaveDir .. "/" .. loadFile .. ".txt";
 	if not file.Exists(path, "DATA") then
 		container.LoadData = {};
 		return;
@@ -162,11 +162,11 @@ local function SaveDataChanged(container, key, value)
 		return;
 	end
 
-	if not file.Exists(SaveDir, "DATA") or not file.IsDir(SaveDir, "DATA") then
-		file.CreateDir(SaveDir);
+	if not file.Exists(SMH.SaveDir, "DATA") or not file.IsDir(SMH.SaveDir, "DATA") then
+		file.CreateDir(SMH.SaveDir);
 	end
 
-	local path = SaveDir .. "/" .. fileName .. ".txt";
+	local path = SMH.SaveDir .. "/" .. fileName .. ".txt";
 	file.Write(path, value);
 
 	container[key] = nil;
@@ -187,6 +187,14 @@ end
 local function OnionDataChanged(container, key, value)
 	if container.OnionSkin and table.Count(value) > 0 then
 		SMH.EnableOnionSkin();
+	end
+end
+
+local function ToggleRender(container, key, value)
+	if value then
+		SMH.StartRender();
+	else
+		SMH.StopRender();
 	end
 end
 
@@ -214,6 +222,8 @@ function SMH.SetupData()
 
 	data:_Listen("OnionSkin", ToggleOnionSkin);
 	data:_Listen("OnionSkinData", OnionDataChanged);
+
+	data:_Listen("Rendering", ToggleRender);
 
 	SMH.Data = data;
 

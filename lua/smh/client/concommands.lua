@@ -31,9 +31,29 @@ local function Onion()
 	SMH.Data.OnionSkin = not SMH.Data.OnionSkin;
 end
 
+local function QuickSave()
+
+	local qs1 = SMH.SaveDir .. "/quicksave.txt";
+	local qs2 = SMH.SaveDir .. "/quicksave_backup.txt";
+
+	if file.Exists(qs1, "DATA") then
+		file.Write(qs2, file.Read(qs1));
+	end
+
+	SMH.Data.SaveFileName = "quicksave";
+	SMH.Data:_Call("Save");
+
+end
+
+local function MakeJPEG()
+	SMH.Data.Rendering = not SMH.Data.Rendering;
+end
+
 concommand.Add("smh_record", Record);
 concommand.Add("smh_next", NextPosition);
 concommand.Add("smh_previous", PrevPosition);
 concommand.Add("+smh_playback", Play);
 concommand.Add("-smh_playback", Stop);
 concommand.Add("smh_onionskin", Onion);
+concommand.Add("smh_quicksave", QuickSave);
+concommand.Add("smh_makejpeg", MakeJPEG);

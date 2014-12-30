@@ -5,6 +5,7 @@ include("client/concommands.lua");
 include("client/data.lua");
 include("client/entity_highlight.lua");
 include("client/entity_selection.lua");
+include("client/makejpeg.lua");
 include("client/onionskin.lua");
 
 include("client/menu_setup.lua");

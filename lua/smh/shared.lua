@@ -31,6 +31,8 @@ SMH.DefaultData = {
 
 	OnionSkin = false,
 
+	Rendering = false,
+
 };
 
 -- Fix bone manipulations.
