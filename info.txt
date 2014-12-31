@@ -1,6 +1,0 @@
-"AddonInfo"
-{
-	"name" "Stop Motion Helper"
-	"author_name" "Winded"
-	"info" "A tool to make stop motion animation easier and more manageable. Can also be used for recording animation."
-}

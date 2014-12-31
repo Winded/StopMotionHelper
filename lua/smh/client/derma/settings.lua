@@ -20,20 +20,20 @@ function PANEL:Init()
 	self.HelpButton:SetText("Help");
 	self.HelpButton:Bind(SMH.Data, "ShowHelpMenu", "Button");
 
+	self:SetSize(160, 95);
+
 end
 
 function PANEL:PerformLayout()
 
 	self.BaseClass.PerformLayout(self);
 
-	self:SetSize(130, 105);
-
 	self.FreezeAll:SetPos(5, 25);
 
 	self.IgnorePhysBones:SetPos(5, 45);
 
 	self.HelpButton:SetPos(5, 65);
-	self.HelpButton:SetSize(100, 20);
+	self.HelpButton:SetSize(150, 20);
 
 end
 

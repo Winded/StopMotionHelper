@@ -4,7 +4,6 @@ local PANEL = {};
 function PANEL:Init()
 
 	self:SetWorldClicker(true);
-	self:SetDrawBackground(false);
 	self.m_bStretchToFit = true;
 
 	self:SetPos(0, 0);
@@ -28,7 +27,7 @@ end
 
 function PANEL:OnSelect(entity) end
 
-vgui.Register("SMHWorldClicker", PANEL, "DPanel");
+vgui.Register("SMHWorldClicker", PANEL, "EditablePanel");
 
 local BIND = setmetatable({}, BiValues.ValueBind);
 function BIND:Init()

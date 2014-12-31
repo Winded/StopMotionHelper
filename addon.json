@@ -1,0 +1,12 @@
+{
+	"title"		:	"Stop Motion Helper", 
+	"type"		:	"tool", 
+	"tags"		:	[], 
+	"ignore"	:
+	[
+		"*.html",
+		"*.css",
+		"*.git*",
+		"README.md"
+	]
+}
