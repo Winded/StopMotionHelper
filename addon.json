@@ -1,12 +1,13 @@
 {
-	"title"		:	"Stop Motion Helper", 
-	"type"		:	"tool", 
-	"tags"		:	[], 
-	"ignore"	:
-	[
-		"*.html",
-		"*.css",
-		"*.git*",
-		"README.md"
-	]
+    "ignore": [
+        "*.html",
+        "*.css",
+        "*.git*",
+        "*README.md*"
+    ],
+    "tags": [
+        "movie"
+    ],
+    "title": "Stop Motion Helper",
+    "type": "tool"
 }
