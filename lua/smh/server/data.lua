@@ -128,10 +128,16 @@ local function Load(container, key)
 
 	local player = container._Player;
 	local entity = container.Entity;
-	local data = container.LoadData;
+	local index = container.LoadDataIndex;
 
-	if not IsValid(entity) or table.Count(data) == 0 then
+	if not IsValid(entity) or table.Count(index) == 0 then
 		return;
+	end
+
+	local loadFrames = {};
+	for _, idx in pairs(index) do
+		local frame = container["LoadDataFrame_" .. idx];
+		table.insert(loadFrames, frame);
 	end
 
 	local frames = table.Where(SMH.Frames, function(item) return item.Player == player and item.Entity == entity; end);
@@ -139,7 +145,7 @@ local function Load(container, key)
 		frame:Remove();
 	end
 
-	for _, sFrame in pairs(data.Frames) do
+	for _, sFrame in pairs(loadFrames) do
 		local frame = SMH.Frame.New(player, entity, sFrame.Position, sFrame.EaseIn, sFrame.EaseOut);
 		frame.EntityData = table.Copy(sFrame.EntityData);
 	end
@@ -157,13 +163,16 @@ local function Save(container, key)
 	data.Map = game.GetMap();
 	data.Entities = {};
 
+	-- We don't store all frames into one table in the container because they can be huge, which causes problems with net sync
+
+	local i = 1;
 	local ents = SMH.GetEntities(player);
 	for _, entity in pairs(ents) do
 		
 		local eData = {};
 		local mdl = string.Split(entity:GetModel(), "/");
 		eData.Model = mdl[#mdl];
-		eData.Frames = {};
+		eData.FrameIndex = {};
 
 		local frames = table.Where(SMH.Frames, function(item) return item.Player == player and item.Entity == entity; end);
 		for _, frame in pairs(frames) do
@@ -172,7 +181,9 @@ local function Save(container, key)
 			fData.EaseIn = frame.EaseIn;
 			fData.EaseOut = frame.EaseOut;
 			fData.EntityData = frame.EntityData;
-			table.insert(eData.Frames, fData);
+			container["SaveDataFrame_" .. i] = fData;
+			table.insert(eData.FrameIndex, i);
+			i = i + 1;
 		end
 
 		table.insert(data.Entities, eData);

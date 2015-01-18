@@ -127,30 +127,38 @@ local function LoadEntityChanged(container, key, value)
 	local loadFile = container.LoadFileName;
 
 	if not value or value == "" then
-		container.LoadData = {};
+		container.LoadDataIndex = {};
 		return;
 	end
 
 	local path = SMH.SaveDir .. "/" .. loadFile .. ".txt";
 	if not file.Exists(path, "DATA") then
-		container.LoadData = {};
+		container.LoadDataIndex = {};
 		return;
 	end
 
 	local json = file.Read(path);
 	local data = util.JSONToTable(json);
 	if not data then
-		container.LoadData = {};
+		container.LoadDataIndex = {};
 		return;
 	end
 
 	local eData = table.First(data.Entities, function(item) return item.Model == value; end);
 	if not eData then
-		container.LoadData = {};
+		container.LoadDataIndex = {};
 		return;
 	end
 
-	container.LoadData = eData;
+	-- We don't store all frames into one table in the container because they can be huge, which causes problems with net sync
+
+	local index = {};
+	for idx, frame in pairs(eData.Frames) do
+		container["LoadDataFrame_" .. idx] = frame;
+		table.insert(index, idx);
+	end
+
+	container.LoadDataIndex = index;
 
 end
 
@@ -166,8 +174,18 @@ local function SaveDataChanged(container, key, value)
 		file.CreateDir(SMH.SaveDir);
 	end
 
+	local data = table.Copy(value);
+	for _, eData in pairs(data.Entities) do
+		eData.Frames = {};
+		for _, i in pairs(eData.FrameIndex) do
+			local frame = container["SaveDataFrame_" .. i];
+			table.insert(eData.Frames, frame);
+		end
+		eData.FrameIndex = nil;
+	end
+
 	local path = SMH.SaveDir .. "/" .. fileName .. ".txt";
-	local json = util.TableToJSON(value);
+	local json = util.TableToJSON(data);
 	file.Write(path, json);
 
 	container[key] = nil;
