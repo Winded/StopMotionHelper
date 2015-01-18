@@ -167,7 +167,8 @@ local function SaveDataChanged(container, key, value)
 	end
 
 	local path = SMH.SaveDir .. "/" .. fileName .. ".txt";
-	file.Write(path, value);
+	local json = util.TableToJSON(value);
+	file.Write(path, json);
 
 	container[key] = nil;
 

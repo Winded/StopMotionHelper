@@ -179,8 +179,7 @@ local function Save(container, key)
 
 	end
 
-	local json = util.TableToJSON(data);
-	container.SaveData = json;
+	container.SaveData = data;
 
 end
 
