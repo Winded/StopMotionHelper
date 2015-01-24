@@ -54,6 +54,44 @@ function MOD:Load(player, entity, data)
 
 end
 
+function MOD:LoadGhost(player, entity, ghost, data)
+
+	if entity:GetClass() ~= "prop_ragdoll" then
+		
+		if entity:GetPhysicsObjectCount() == 0 then
+			return;
+		end
+
+		local pb = entity:GetPhysicsObjectNum(0);
+		local pos, angles = pb:GetPos(), pb:GetAngles();
+
+		ghost:SetPos(pos);
+		ghost:SetAngles(angles);
+		
+		return;
+
+	end
+
+	local count = ghost:GetPhysicsObjectCount();
+
+	for i = 0, count - 1 do
+
+		local pb = ghost:GetPhysicsObjectNum(i);
+
+		pb:EnableMotion(true);
+		pb:Wake();
+
+		local d = data[i];
+		pb:SetPos(d.Pos);
+		pb:SetAngles(d.Ang);
+
+		pb:EnableMotion(false);
+		pb:Wake();
+
+	end
+
+end
+
 function MOD:LoadBetween(player, entity, data1, data2, percentage)
 
 	if player.SMHData.IgnorePhysBones then

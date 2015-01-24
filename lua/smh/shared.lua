@@ -3,6 +3,8 @@ if not SMH then
 	SMH = {};
 end
 
+include("shared/modifiers.lua");
+
 SMH.DefaultData = {
 
 	Entity = nil,
@@ -29,6 +31,10 @@ SMH.DefaultData = {
 	ShowSave = false,
 	ShowLoad = false,
 
+	GhostPrevFrame = true,
+	GhostNextFrame = true,
+	GhostAllEntities = false,
+	
 	OnionSkin = false,
 
 	Rendering = false,
