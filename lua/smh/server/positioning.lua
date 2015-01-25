@@ -18,9 +18,9 @@ function SMH.GetEntities(player)
 
 end
 
--- If the position has no frame, gets the frame before the position, the frame after the position and the difference percentage
+-- If the position has no frame (or is ignored), gets the frame before the position, the frame after the position and the difference percentage
 -- otherwise returns only the frame at the position.
-function SMH.GetPositionFrames(frames, framepos)
+function SMH.GetPositionFrames(frames, framepos, ignoreCurrentFrame)
 
 	local closestPrevFramePos = 9999999;
 	local closestPrevFrame = nil;
@@ -37,13 +37,15 @@ function SMH.GetPositionFrames(frames, framepos)
 		elseif diff > 0 and aDiff < closestNextFramePos then
 			closestNextFramePos = math.abs(diff);
 			closestNextFrame = frame;
-		elseif diff == 0 then
+		elseif diff == 0 and not ignoreCurrentFrame then
 			return frame, nil;
 		end
 
 	end
 
-	if not closestPrevFrame and closestNextFrame then
+	if not closestPrevFrame and not closestNextFrame then
+		return nil, nil;
+	elseif not closestPrevFrame and closestNextFrame then
 		return closestNextFrame, nil;
 	elseif closestPrevFrame and not closestNextFrame then
 		return closestPrevFrame, nil;
@@ -52,35 +54,6 @@ function SMH.GetPositionFrames(frames, framepos)
 	local perc = (framepos - closestPrevFrame.Position) / (closestNextFrame.Position - closestPrevFrame.Position);
 	perc = math.EaseInOut(perc, closestPrevFrame.EaseOut, closestNextFrame.EaseIn);
 	return closestPrevFrame, closestNextFrame, perc;
-
-end
-
--- Return a table of bone positions from the frames for the given frame position. Used for onion skinning.
-function SMH.GetFrameBonePositions(entity, frames, framepos)
-	
-	local frame1, frame2, perc = SMH.GetPositionFrames(frames, framepos);
-
-	if not frame2 then
-		frame2 = frame1;
-		perc = 0;
-	end
-
-	local bones = {};
-
-	for id, data in pairs(frame1.EntityData["physbones"]) do
-		local data2 = frame2.EntityData["physbones"][id];
-		local boneId = entity:TranslatePhysBoneToBone(id);
-		local bone = {};
-		bone.Pos = SMH.LerpLinearVector(data.Pos, data2.Pos, perc);
-		bone.Ang = SMH.LerpLinearAngle(data.Ang, data2.Ang, perc);
-		bones[boneId] = bone;
-	end
-
-	for id, data in pairs(frame1.EntityData["bones"]) do
-		-- TODO
-	end
-
-	return bones;
 
 end
 

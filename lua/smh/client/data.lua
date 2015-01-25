@@ -217,6 +217,10 @@ local function ToggleRender(container, key, value)
 	end
 end
 
+local function GhostDataChanged(container, key, value)
+	SMH.RefreshGhosts();
+end
+
 function SMH.SetupData()
 
 	local defaults = table.Copy(SMH.DefaultData);
@@ -238,6 +242,8 @@ function SMH.SetupData()
 
 	data:_Listen("ShowSave", RefreshSaveList);
 	data:_Listen("SaveData", SaveDataChanged);
+
+	data:_Listen("GhostData", GhostDataChanged);
 
 	data:_Listen("OnionSkin", ToggleOnionSkin);
 	data:_Listen("OnionSkinData", OnionDataChanged);

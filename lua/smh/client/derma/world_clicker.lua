@@ -19,10 +19,14 @@ function PANEL:OnMousePressed(mousecode)
 
 	local playerTrace = util.GetPlayerTrace(LocalPlayer());
 	local tr = util.TraceLine(playerTrace);
-	if IsValid(tr.Entity) then
+	if self:Filter(tr.Entity) then
 		self:OnSelect(tr.Entity);
 	end
 
+end
+
+function PANEL:Filter(entity)
+	return IsValid(entity);
 end
 
 function PANEL:OnSelect(entity) end

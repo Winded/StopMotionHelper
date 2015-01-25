@@ -5,6 +5,12 @@ end
 
 include("shared/modifiers.lua");
 
+SMH.GhostTypes = {
+	PrevFrame = 1,
+	NextFrame = 2,
+	OnionSkin = 3
+};
+
 SMH.DefaultData = {
 
 	Entity = nil,
@@ -34,6 +40,7 @@ SMH.DefaultData = {
 	GhostPrevFrame = true,
 	GhostNextFrame = true,
 	GhostAllEntities = false,
+	GhostData = nil,
 	
 	OnionSkin = false,
 

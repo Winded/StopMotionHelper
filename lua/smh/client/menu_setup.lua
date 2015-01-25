@@ -12,6 +12,9 @@ function SMH.SetupMenu()
 	SMH.WorldClicker = vgui.Create("SMHWorldClicker");
 	SMH.WorldClicker:MakePopup();
 	SMH.WorldClicker:SetVisible(false);
+	SMH.WorldClicker.Filter = function(wc, entity)
+		return IsValid(entity) and not entity:GetNWBool("Ghost", false);
+	end
 	SMH.WorldClicker:Bind(SMH.Data, "Entity", "WorldClicker");
 
 	SMH.Menu = vgui.Create("SMHMenu", SMH.WorldClicker);
