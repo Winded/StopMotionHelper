@@ -30,9 +30,9 @@ function PANEL:Init()
 	self.GhostTransparency:SetMinMax(0, 1);
 	self.GhostTransparency:SetDecimals(2);
 	self.GhostTransparency:Bind(SMH.Data, "GhostTransparency", "Number");
-	self.GhostTransparency.Label = vgui.Create("DLabel", self.GhostTransparency);
-	self.GhostTransparency.Label:SetText("Ghost transparency");
-	self.GhostTransparency.Label:SizeToContents();
+	self.GhostTransparencyLabel = vgui.Create("DLabel", self);
+	self.GhostTransparencyLabel:SetText("Ghost transparency");
+	self.GhostTransparencyLabel:SizeToContents();
 
 	self.HelpButton = vgui.Create("DButton", self);
 	self.HelpButton:SetText("Help");
@@ -54,11 +54,12 @@ function PANEL:PerformLayout()
 	self.GhostNextFrame:SetPos(5, 85);
 
 	local gt = self.GhostTransparency;
-	local label = self.GhostTransparency.Label;
+	local label = self.GhostTransparencyLabel;
+	label:SizeToContents();
 	local LW, LH = label:GetSize();
-	gt:SetPos(5, 105 + LH + 2);
+	gt:SetPos(5, 105 + LH - 5);
 	gt:SetSize(self:GetWide() - 5 - 5, 25);
-	label:SetPos(0, -LH - 2);
+	label:SetPos(10, 105);
 
 	self.HelpButton:SetPos(5, 150);
 	self.HelpButton:SetSize(150, 20);
