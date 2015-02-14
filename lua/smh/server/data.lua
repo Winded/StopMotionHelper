@@ -274,12 +274,12 @@ end
 
 local function QuickSave(container, key)
 
-	local steamID = container._Player:SteamID64();
+	local nick = container._Player:Nick();
 	local qs1 = SMH.SaveDir .. "/quicksave.txt";
 	local qs2 = SMH.SaveDir .. "/quicksave_backup.txt";
 	if not game.SinglePlayer() then
-		qs1 = SMH.SaveDir .. "/quicksave_" .. steamID .. ".txt";
-		qs2 = SMH.SaveDir .. "/quicksave_" .. steamID .. "_backup.txt";
+		qs1 = SMH.SaveDir .. "/quicksave_" .. nick .. ".txt";
+		qs2 = SMH.SaveDir .. "/quicksave_" .. nick .. "_backup.txt";
 	end
 
 	if file.Exists(qs1, "DATA") then
@@ -289,7 +289,7 @@ local function QuickSave(container, key)
 	if game.SinglePlayer() then
 		container.SaveFileName = "quicksave";
 	else
-		container.SaveFileName = "quicksave_" .. steamID;
+		container.SaveFileName = "quicksave_" .. nick;
 	end
 	Save(container);
 
