@@ -1,4 +1,6 @@
 
+SMH.SaveDir = "smh/";
+
 local function RefreshActiveFrames(container)
 
 	local player = container._Player;
@@ -124,38 +126,99 @@ local function FrameCopied(container, key, copiedFrame)
 
 end
 
+local function RefreshSaveList(container)
+
+	if not container.ShowLoad and not container.ShowSave then
+		return;
+	end
+
+	local files, dirs = file.Find(SMH.SaveDir .. "*.txt", "DATA");
+
+	local saves = {};
+	for _, file in pairs(files) do
+		table.insert(saves, file:sub(1, -5));
+	end
+
+	container.SaveFiles = saves;
+
+end
+
+local function LoadFileChanged(container, key, value)
+
+	if not value or value == "" then
+		container.LoadFileEntities = {};
+		return;
+	end
+
+	local path = SMH.SaveDir .. value .. ".txt";
+	if not file.Exists(path, "DATA") then
+		container.LoadFileEntities = {};
+		return;
+	end
+
+	local json = file.Read(path);
+	local data = util.JSONToTable(json);
+	if not data then
+		container.LoadFileEntities = {};
+		return;
+	end
+
+	local ents = {};
+	for _, ent in pairs(data.Entities) do
+		table.insert(ents, ent.Model);
+	end
+
+	container.LoadFileEntities = ents;
+
+end
+
 local function Load(container, key)
 
 	local player = container._Player;
 	local entity = container.Entity;
-	local index = container.LoadDataIndex;
+	local loadFile = container.LoadFileName;
+	local loadEntName = container.LoadFileEntity;
 
-	if not IsValid(entity) or table.Count(index) == 0 then
+	if not IsValid(entity) or not loadFile or loadFile == "" or not loadEntName or loadEntName == "" then
 		return;
 	end
 
-	local loadFrames = {};
-	for _, idx in pairs(index) do
-		local frame = container["LoadDataFrame_" .. idx];
-		table.insert(loadFrames, frame);
+	local path = SMH.SaveDir .. loadFile .. ".txt";
+	if not file.Exists(path, "DATA") then
+		return;
+	end
+	local json = file.Read(path);
+	local data = util.JSONToTable(json);
+	if not data then
+		return;
 	end
 
-	local frames = table.Where(SMH.Frames, function(item) return item.Player == player and item.Entity == entity; end);
-	for _, frame in pairs(frames) do
+	local loadEnt = table.First(data.Entities, function(item) return item.Model == loadEntName; end);
+	if not loadEnt then
+		return;
+	end
+
+	local existingFrames = table.Where(SMH.Frames, function(item) return item.Player == player and item.Entity == entity; end);
+	for _, frame in pairs(existingFrames) do
 		frame:Remove();
 	end
 
-	for _, sFrame in pairs(loadFrames) do
-		local frame = SMH.Frame.New(player, entity, sFrame.Position, sFrame.EaseIn, sFrame.EaseOut);
-		frame.EntityData = table.Copy(sFrame.EntityData);
+	for _, dFrame in pairs(loadEnt.Frames) do
+		local frame = SMH.Frame.New(player, entity, dFrame.Position, dFrame.EaseIn, dFrame.EaseOut);
+		frame.EntityData = dFrame.EntityData;
 	end
 
 	RefreshActiveFrames(container);
-	container.LoadFileName = "";
 
 end
 
 local function Save(container, key)
+
+	local fileName = container.SaveFileName;
+
+	if not fileName or fileName == "" then
+		return;
+	end
 
 	local player = container._Player;
 
@@ -165,15 +228,23 @@ local function Save(container, key)
 
 	-- We don't store all frames into one table in the container because they can be huge, which causes problems with net sync
 
-	local i = 1;
 	local ents = SMH.GetEntities(player);
 	for _, entity in pairs(ents) do
 		
 		local eData = {};
-		local mdl = string.Split(entity:GetModel(), "/");
-		eData.Model = mdl[#mdl];
-		eData.FrameIndex = {};
 
+		local mdl = string.Split(entity:GetModel(), "/");
+		mdl = mdl[#mdl];
+		while true do
+			local existing = table.First(data.Entities, function(item) return item.Model == mdl; end);
+			if not existing then
+				break;
+			end
+			mdl = mdl .. "I";
+		end
+		eData.Model = mdl;
+
+		eData.Frames = {};
 		local frames = table.Where(SMH.Frames, function(item) return item.Player == player and item.Entity == entity; end);
 		for _, frame in pairs(frames) do
 			local fData = {};
@@ -181,39 +252,46 @@ local function Save(container, key)
 			fData.EaseIn = frame.EaseIn;
 			fData.EaseOut = frame.EaseOut;
 			fData.EntityData = frame.EntityData;
-			container["SaveDataFrame_" .. i] = fData;
-			table.insert(eData.FrameIndex, i);
-			i = i + 1;
+			table.insert(eData.Frames, fData);
 		end
 
 		table.insert(data.Entities, eData);
 
 	end
 
-	container.SaveData = data;
+	if not file.Exists(SMH.SaveDir, "DATA") or not file.IsDir(SMH.SaveDir, "DATA") then
+		file.CreateDir(SMH.SaveDir);
+	end
+
+	local path = SMH.SaveDir .. fileName .. ".txt";
+	local json = util.TableToJSON(data);
+	file.Write(path, json);
+
+	container.SaveFileName = "";
+	RefreshSaveList(container);
 
 end
 
-local function ToggleOnionSkin(container, key, value)
+local function QuickSave(container, key)
 
-	local player = container._Player;
-	local enabled = value;
-
-	if not enabled then
-		container.OnionSkinData = {};
-		return;
+	local steamID = container._Player:SteamID64();
+	local qs1 = SMH.SaveDir .. "/quicksave.txt";
+	local qs2 = SMH.SaveDir .. "/quicksave_backup.txt";
+	if not game.SinglePlayer() then
+		qs1 = SMH.SaveDir .. "/quicksave_" .. steamID .. ".txt";
+		qs2 = SMH.SaveDir .. "/quicksave_" .. steamID .. "_backup.txt";
 	end
 
-	local data = {};
-
-	local ents = SMH.GetEntities(player);
-	for _, entity in pairs(ents) do
-		
-		-- TODO
-
+	if file.Exists(qs1, "DATA") then
+		file.Write(qs2, file.Read(qs1));
 	end
 
-	container.OnionSkinData = data;
+	if game.SinglePlayer() then
+		container.SaveFileName = "quicksave";
+	else
+		container.SaveFileName = "quicksave_" .. steamID;
+	end
+	Save(container);
 
 end
 
@@ -237,6 +315,7 @@ function SMH.SetupData(player)
 
 	defaults.Load = Load;
 	defaults.Save = Save;
+	defaults.QuickSave = QuickSave;
 
 	local data = BiValues.New(player, "SMHData", {UseSync = true, AutoApply = true}, defaults);
 		
@@ -247,7 +326,9 @@ function SMH.SetupData(player)
 	data:_Listen("EditedFrame", FrameEdited);
 	data:_Listen("CopiedFrame", FrameCopied);
 
-	data:_Listen("OnionSkin", ToggleOnionSkin);
+	data:_Listen("ShowLoad", RefreshSaveList);
+	data:_Listen("ShowSave", RefreshSaveList);
+	data:_Listen("LoadFileName", LoadFileChanged);
 
 	-- Changes in any of these trigger ghost refresh
 	data:_Listen("Entity", RefreshGhosts);
@@ -257,6 +338,7 @@ function SMH.SetupData(player)
 	data:_Listen("GhostNextFrame", RefreshGhosts);
 	data:_Listen("GhostAllEntities", RefreshGhosts);
 	data:_Listen("GhostTransparency", RefreshGhosts);
+	data:_Listen("OnionSkin", RefreshGhosts);
 
 	player.SMHData = data;
 

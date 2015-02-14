@@ -69,9 +69,10 @@ function SMH.RefreshGhosts(player)
 	local position = data.Position;
 	local prevFrame = data.GhostPrevFrame;
 	local nextFrame = data.GhostNextFrame;
+	local onion = data.OnionSkin;
 	local rendering = data.Rendering;
 	local allEnts = data.GhostAllEntities;
-	if rendering or (not prevFrame and not nextFrame) then
+	if rendering or (not prevFrame and not nextFrame and not onion) then
 		return;
 	end
 
@@ -85,14 +86,30 @@ function SMH.RefreshGhosts(player)
 		local frames = table.Where(SMH.Frames, function(item) return item.Player == player and item.Entity == entity; end);
 		local pF, nF = SMH.GetPositionFrames(frames, position, true);
 
-		if (prevFrame and pF) or (pF and not nF and pF.Position < position) then
-			local g = SMH.CreateGhost(player, entity, SMH.GhostTypes.PrevFrame);
-			SMH.SetGhostFrame(g, pF.EntityData);
+		if pF and not nF then
+			if prevFrame and pF.Position < position then
+				local g = SMH.CreateGhost(player, entity, SMH.GhostTypes.PrevFrame);
+				SMH.SetGhostFrame(g, pF.EntityData);
+			elseif nextFrame and pF.Position > position then
+				local g = SMH.CreateGhost(player, entity, SMH.GhostTypes.NextFrame);
+				SMH.SetGhostFrame(g, pF.EntityData);
+			end
+		else
+			if prevFrame and pF then
+				local g = SMH.CreateGhost(player, entity, SMH.GhostTypes.PrevFrame);
+				SMH.SetGhostFrame(g, pF.EntityData);
+			end
+			if nextFrame and nF then
+				local g = SMH.CreateGhost(player, entity, SMH.GhostTypes.NextFrame);
+				SMH.SetGhostFrame(g, nF.EntityData);
+			end
 		end
 
-		if (nextFrame and nF) or (pf and not nF and pF.Position > position) then
-			local g = SMH.CreateGhost(player, entity, SMH.GhostTypes.NextFrame);
-			SMH.SetGhostFrame(g, nF.EntityData);
+		if onion then
+			for _, frame in pairs(frames) do
+				local g = SMH.CreateGhost(player, entity, SMH.GhostTypes.OnionSkin);
+				SMH.SetGhostFrame(g, frame.EntityData);
+			end
 		end
 
 	end

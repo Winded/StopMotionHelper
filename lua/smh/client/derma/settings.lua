@@ -26,6 +26,11 @@ function PANEL:Init()
 	self.GhostNextFrame:SizeToContents();
 	self.GhostNextFrame:Bind(SMH.Data, "GhostNextFrame", "CheckBox");
 
+	self.GhostAllEntities = vgui.Create("DCheckBoxLabel", self);
+	self.GhostAllEntities:SetText("Ghost all entities");
+	self.GhostAllEntities:SizeToContents();
+	self.GhostAllEntities:Bind(SMH.Data, "GhostAllEntities", "CheckBox");
+
 	self.GhostTransparency = vgui.Create("Slider", self);
 	self.GhostTransparency:SetMinMax(0, 1);
 	self.GhostTransparency:SetDecimals(2);
@@ -38,7 +43,7 @@ function PANEL:Init()
 	self.HelpButton:SetText("Help");
 	self.HelpButton:Bind(SMH.Data, "ShowHelpMenu", "Button");
 
-	self:SetSize(160, 175);
+	self:SetSize(160, 195);
 
 end
 
@@ -52,16 +57,17 @@ function PANEL:PerformLayout()
 
 	self.GhostPrevFrame:SetPos(5, 65);
 	self.GhostNextFrame:SetPos(5, 85);
+	self.GhostAllEntities:SetPos(5, 105);
 
 	local gt = self.GhostTransparency;
 	local label = self.GhostTransparencyLabel;
 	label:SizeToContents();
 	local LW, LH = label:GetSize();
-	gt:SetPos(5, 105 + LH - 5);
+	gt:SetPos(5, 125 + LH - 5);
 	gt:SetSize(self:GetWide() - 5 - 5, 25);
-	label:SetPos(10, 105);
+	label:SetPos(10, 125);
 
-	self.HelpButton:SetPos(5, 150);
+	self.HelpButton:SetPos(5, 170);
 	self.HelpButton:SetSize(150, 20);
 
 end

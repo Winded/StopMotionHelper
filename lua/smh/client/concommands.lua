@@ -32,17 +32,7 @@ local function Onion()
 end
 
 local function QuickSave()
-
-	local qs1 = SMH.SaveDir .. "/quicksave.txt";
-	local qs2 = SMH.SaveDir .. "/quicksave_backup.txt";
-
-	if file.Exists(qs1, "DATA") then
-		file.Write(qs2, file.Read(qs1));
-	end
-
-	SMH.Data.SaveFileName = "quicksave";
-	SMH.Data:_Call("Save");
-
+	SMH.Data:_Call("QuickSave");
 end
 
 local function MakeJPEG()
