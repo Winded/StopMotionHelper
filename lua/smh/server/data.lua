@@ -217,57 +217,9 @@ local function ToggleOnionSkin(container, key, value)
 
 end
 
-local function RefreshGhostData(container, key)
-
-	local ghostData = {};
+local function RefreshGhosts(container, key)
 	local player = container._Player;
-	local position = container.Position;
-
-	-- When onion skinning, don't display ghosts. Also don't display ghosts if we don't want ghosts.
-	if container.OnionSkin or (not container.GhostPrevFrame and not container.GhostNextFrame) then
-		container.GhostData = ghostData;
-		return;
-	end
-
-	local entities;
-	if container.GhostAllEntities then
-		entities = SMH.GetEntities(player);
-	else
-		if not IsValid(container.Entity) then
-			container.GhostData = ghostData;
-			return;
-		end
-		entities = {container.Entity};
-	end
-
-	for _, entity in pairs(entities) do
-		
-		local frames = table.Where(SMH.Frames, function(item) return item.Player == player and item.Entity == entity; end);
-		local frame1, frame2 = SMH.GetPositionFrames(frames, position, true);
-		if not frame1 or not frame2 then continue; end
-
-		if container.GhostPrevFrame then
-			local prevData = {
-				Entity = entity,
-				Type = SMH.GhostTypes.PrevFrame,
-				Data = frame1
-			};
-			table.insert(ghostData, prevData);
-		end
-
-		if container.GhostNextFrame then
-			local nextData = {
-				Entity = entity,
-				Type = SMH.GhostTypes.NextFrame,
-				Data = frame2
-			};
-			table.insert(ghostData, nextData);
-		end
-
-	end
-
-	container.GhostData = ghostData;
-
+	SMH.RefreshGhosts(player);
 end
 
 function SMH.SetupData(player)
@@ -298,11 +250,13 @@ function SMH.SetupData(player)
 	data:_Listen("OnionSkin", ToggleOnionSkin);
 
 	-- Changes in any of these trigger ghost refresh
-	data:_Listen("Entity", RefreshGhostData);
-	data:_Listen("Position", RefreshGhostData);
-	data:_Listen("GhostPrevFrame", RefreshGhostData);
-	data:_Listen("GhostNextFrame", RefreshGhostData);
-	data:_Listen("GhostAllEntities", RefreshGhostData);
+	data:_Listen("Entity", RefreshGhosts);
+	data:_Listen("Position", RefreshGhosts);
+	data:_Listen("Rendering", RefreshGhosts);
+	data:_Listen("GhostPrevFrame", RefreshGhosts);
+	data:_Listen("GhostNextFrame", RefreshGhosts);
+	data:_Listen("GhostAllEntities", RefreshGhosts);
+	data:_Listen("GhostTransparency", RefreshGhosts);
 
 	player.SMHData = data;
 

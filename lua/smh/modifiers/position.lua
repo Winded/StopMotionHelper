@@ -10,6 +10,13 @@ function MOD:Save(player, entity)
 
 end
 
+function MOD:LoadGhost(player, entity, ghost, data)
+
+	ghost:SetPos(data.Pos);
+	ghost:SetAngles(data.Ang);
+
+end
+
 function MOD:Load(player, entity, data)
 
 	entity:SetPos(data.Pos);

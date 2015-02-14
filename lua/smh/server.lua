@@ -5,6 +5,7 @@ include("server/data.lua");
 include("server/easing.lua");
 include("server/eyetarget.lua");
 include("server/frames.lua");
+include("server/ghosts.lua");
 include("server/playback.lua");
 include("server/positioning.lua");
 
@@ -16,7 +17,6 @@ AddCSLuaFile("client/concommands.lua");
 AddCSLuaFile("client/data.lua");
 AddCSLuaFile("client/entity_highlight.lua");
 AddCSLuaFile("client/entity_selection.lua");
-AddCSLuaFile("client/ghosts.lua");
 AddCSLuaFile("client/makejpeg.lua");
 AddCSLuaFile("client/menu_setup.lua");
 AddCSLuaFile("client/derma/frame_panel.lua");

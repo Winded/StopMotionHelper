@@ -20,7 +20,7 @@ function SMH.SetupMenu()
 	SMH.Menu = vgui.Create("SMHMenu", SMH.WorldClicker);
 
 	SMH.SettingsMenu = vgui.Create("SMHSettings", SMH.WorldClicker);
-	SMH.SettingsMenu:SetPos(ScrW() - 165, ScrH() - 210);
+	SMH.SettingsMenu:SetPos(ScrW() - 165, ScrH() - 250);
 	SMH.SettingsMenu:SetVisible(false);
 	SMH.SettingsMenu:Bind(SMH.Data, "ShowSettings", "Visibility");
 

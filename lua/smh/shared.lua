@@ -37,10 +37,10 @@ SMH.DefaultData = {
 	ShowSave = false,
 	ShowLoad = false,
 
-	GhostPrevFrame = true,
-	GhostNextFrame = true,
+	GhostPrevFrame = false,
+	GhostNextFrame = false,
 	GhostAllEntities = false,
-	GhostData = nil,
+	GhostTransparency = 0.5,
 	
 	OnionSkin = false,
 

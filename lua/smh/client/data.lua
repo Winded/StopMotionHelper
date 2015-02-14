@@ -195,30 +195,12 @@ local function SaveDataChanged(container, key, value)
 
 end
 
-local function ToggleOnionSkin(container, key, value)
-	if value then
-		SMH.EnableOnionSkin();
-	else
-		SMH.DisableOnionSkin();
-	end
-end
-
-local function OnionDataChanged(container, key, value)
-	if container.OnionSkin and table.Count(value) > 0 then
-		SMH.EnableOnionSkin();
-	end
-end
-
 local function ToggleRender(container, key, value)
 	if value then
 		SMH.StartRender();
 	else
 		SMH.StopRender();
 	end
-end
-
-local function GhostDataChanged(container, key, value)
-	SMH.RefreshGhosts();
 end
 
 function SMH.SetupData()
@@ -242,11 +224,6 @@ function SMH.SetupData()
 
 	data:_Listen("ShowSave", RefreshSaveList);
 	data:_Listen("SaveData", SaveDataChanged);
-
-	data:_Listen("GhostData", GhostDataChanged);
-
-	data:_Listen("OnionSkin", ToggleOnionSkin);
-	data:_Listen("OnionSkinData", OnionDataChanged);
 
 	data:_Listen("Rendering", ToggleRender);
 
