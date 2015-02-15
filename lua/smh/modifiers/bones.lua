@@ -22,6 +22,10 @@ function MOD:Save(player, entity)
 
 end
 
+function MOD:LoadGhost(player, entity, ghost, data)
+	self:Load(player, ghost, data);
+end
+
 function MOD:Load(player, entity, data)
 
 	local count = entity:GetBoneCount();

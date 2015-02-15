@@ -63,7 +63,9 @@ function SMH.RefreshGhosts(player)
 	local ghosts = table.Where(SMH.Ghosts, function(item) return item.Player == player; end);
 	for _, ghost in pairs(ghosts) do
 		table.RemoveByValue(SMH.Ghosts, ghost);
-		ghost:Remove();
+		if IsValid(ghost) then
+			ghost:Remove();
+		end
 	end
 
 	local position = data.Position;

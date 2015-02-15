@@ -56,22 +56,6 @@ end
 
 function MOD:LoadGhost(player, entity, ghost, data)
 
-	if entity:GetClass() ~= "prop_ragdoll" then
-		
-		if entity:GetPhysicsObjectCount() == 0 then
-			return;
-		end
-
-		local pb = entity:GetPhysicsObjectNum(0);
-		local pos, angles = pb:GetPos(), pb:GetAngles();
-
-		ghost:SetPos(pos);
-		ghost:SetAngles(angles);
-		
-		return;
-
-	end
-
 	local count = ghost:GetPhysicsObjectCount();
 
 	for i = 0, count - 1 do
