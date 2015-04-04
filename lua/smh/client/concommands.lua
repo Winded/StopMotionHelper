@@ -47,3 +47,13 @@ concommand.Add("-smh_playback", Stop);
 concommand.Add("smh_onionskin", Onion);
 concommand.Add("smh_quicksave", QuickSave);
 concommand.Add("smh_makejpeg", MakeJPEG);
+
+function SMH.SetupConVars()
+	local data = SMH.Data;
+	data:_BindToConVar("FreezeAll", CreateClientConVar("smh_freezeall", "0"), {ValueType = "boolean"});
+	data:_BindToConVar("IgnorePhysBones", CreateClientConVar("smh_ignorephysbones", "0"), {ValueType = "boolean"});
+	data:_BindToConVar("GhostPrevFrame", CreateClientConVar("smh_ghostprevframe", "0"), {ValueType = "boolean"});
+	data:_BindToConVar("GhostNextFrame", CreateClientConVar("smh_ghostnextframe", "0"), {ValueType = "boolean"});
+	data:_BindToConVar("GhostAllEntities", CreateClientConVar("smh_ghostallentities", "0"), {ValueType = "boolean"});
+	data:_BindToConVar("GhostTransparency", CreateClientConVar("smh_ghosttransparency", "0.5"), {ValueType = "number"});
+end

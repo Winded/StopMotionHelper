@@ -2,8 +2,9 @@
     "ignore": [
         "*.html",
         "*.css",
-        "*.git*",
-        "*README.md*"
+        "lua/bivalues/.git*",
+        "lua/bivalues/example.lua",
+        "lua/bivalues/README.md"
     ],
     "tags": [
         "movie"

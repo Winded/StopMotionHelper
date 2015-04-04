@@ -3,7 +3,7 @@ SMH.SaveDir = "smh/";
 
 local function RefreshActiveFrames(container)
 
-	local player = container._Player;
+	local player = container:_GetPlayer();
 	local entity = container.Entity;
 
 	table.Empty(container.ActiveFrames);
@@ -30,7 +30,7 @@ end
 
 local function RecordFrame(container, key)
 
-	local player = container._Player;
+	local player = container:_GetPlayer();
 	local entity = container.Entity;
 	local position = container.Position;
 
@@ -51,12 +51,12 @@ local function RecordFrame(container, key)
 end
 
 local function PositionChanged(container, key, value)
-	SMH.PositionEntities(container._Player, value);
+	SMH.PositionEntities(container:_GetPlayer(), value);
 end
 
 local function FrameEdited(container, key, editedFrame)
 
-	local player = container._Player;
+	local player = container:_GetPlayer();
 	local entity = container.Entity;
 
 	if not editedFrame or not IsValid(entity) then
@@ -99,7 +99,7 @@ end
 
 local function FrameCopied(container, key, copiedFrame)
 
-	local player = container._Player;
+	local player = container:_GetPlayer();
 	local entity = container.Entity;
 
 	if not copiedFrame or not IsValid(entity) then
@@ -174,7 +174,7 @@ end
 
 local function Load(container, key)
 
-	local player = container._Player;
+	local player = container:_GetPlayer();
 	local entity = container.Entity;
 	local loadFile = container.LoadFileName;
 	local loadEntName = container.LoadFileEntity;
@@ -220,7 +220,7 @@ local function Save(container, key)
 		return;
 	end
 
-	local player = container._Player;
+	local player = container:_GetPlayer();
 
 	local data = {};
 	data.Map = game.GetMap();
@@ -274,7 +274,7 @@ end
 
 local function QuickSave(container, key)
 
-	local nick = container._Player:Nick();
+	local nick = container:_GetPlayer():Nick();
 	local qs1 = SMH.SaveDir .. "/quicksave.txt";
 	local qs2 = SMH.SaveDir .. "/quicksave_backup.txt";
 	if not game.SinglePlayer() then
@@ -296,7 +296,7 @@ local function QuickSave(container, key)
 end
 
 local function RefreshGhosts(container, key)
-	local player = container._Player;
+	local player = container:_GetPlayer();
 	SMH.RefreshGhosts(player);
 end
 
@@ -307,17 +307,17 @@ function SMH.SetupData(player)
 	defaults.Record = RecordFrame;
 
 	defaults.Play = function(container, key)
-		SMH.StartPlayback(container._Player);
+		SMH.StartPlayback(container:_GetPlayer());
 	end
 	defaults.Stop = function(container, key)
-		SMH.StopPlayback(container._Player);
+		SMH.StopPlayback(container:_GetPlayer());
 	end
 
 	defaults.Load = Load;
 	defaults.Save = Save;
 	defaults.QuickSave = QuickSave;
 
-	local data = BiValues.New(player, "SMHData", {UseSync = true, AutoApply = true}, defaults);
+	local data = BiValues.New(player, "SMHData", {IsPrivate = true, UseSync = true, AutoApply = true}, defaults);
 		
 	data:_Listen("Entity", function(container, key, value)
 		RefreshActiveFrames(container);

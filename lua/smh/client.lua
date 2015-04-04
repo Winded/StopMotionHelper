@@ -13,6 +13,7 @@ include("client/menu_setup.lua");
 hook.Add("InitPostEntity", "SMHSetup", function()
 	SMH.SetupData();
 	SMH.SetupMenu();
+	SMH.SetupConVars();
 end);
 
 Msg("SMH client initialized.\n")
