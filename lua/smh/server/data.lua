@@ -317,7 +317,7 @@ function SMH.SetupData(player)
 	defaults.Save = Save;
 	defaults.QuickSave = QuickSave;
 
-	local data = BiValues.New(player, "SMHData", {IsPrivate = true, UseSync = true, AutoApply = true}, defaults);
+	local data = SMH.BiValues.New(player, "SMHData", {IsPrivate = true, UseSync = true, AutoApply = true}, defaults);
 		
 	data:_Listen("Entity", function(container, key, value)
 		RefreshActiveFrames(container);

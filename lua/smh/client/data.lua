@@ -90,7 +90,7 @@ function SMH.SetupData()
 	defaults.ShowSaveMenu = ShowSaveMenu;
 	defaults.ShowLoadMenu = ShowLoadMenu;
 
-	local data = BiValues.New("SMHData", {IsPrivate = true, UseSync = true, AutoApply = true}, defaults);
+	local data = SMH.BiValues.New("SMHData", {IsPrivate = true, UseSync = true, AutoApply = true}, defaults);
 
 	data:_Listen("Position", RefreshEaseOptions);
 	data:_Listen("ActiveFrames", RefreshEaseOptions);

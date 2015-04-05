@@ -9,6 +9,10 @@ local rt_Stencil	= render.GetBloomTex0()
 local rt_Store		= render.GetScreenEffectTexture( 0 )
 function SMH.RenderHalo()
 
+	if not SMH.Data then
+		return;
+	end
+
 	local entity = SMH.Data.Entity;
 	local highlight = SMH.WorldClicker:IsVisible();
 	if not IsValid(entity) or not highlight then
