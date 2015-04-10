@@ -11,11 +11,17 @@ function MOD:Save(player, entity)
 	for i = 0, count - 1 do
 
 		local pb = entity:GetPhysicsObjectNum(i);
-		local b = entity:TranslatePhysBoneToBone(i);
+		local parent = entity:GetPhysicsObjectNum(GetPhysBoneParent(entity, i));
 
 		local d = {};
+
 		d.Pos = pb:GetPos();
 		d.Ang = pb:GetAngles();
+
+		if parent then
+			d.LocalPos, d.LocalAng = WorldToLocal(pb:GetPos(), pb:GetAngles(), parent:GetPos(), parent:GetAngles());
+		end
+
 		d.Moveable = pb:IsMoveable();
 
 		data[i] = d;
@@ -37,10 +43,18 @@ function MOD:Load(player, entity, data)
 	for i = 0, count - 1 do
 
 		local pb = entity:GetPhysicsObjectNum(i);
+		local parent = entity:GetPhysicsObjectNum(GetPhysBoneParent(entity, i));
 
 		local d = data[i];
-		pb:SetPos(d.Pos);
-		pb:SetAngles(d.Ang);
+
+		if parent and player.SMHData.LocalizePhysBones and d.LocalPos and d.LocalAng then
+			local pos, ang = LocalToWorld(d.LocalPos, d.LocalAng, parent:GetPos(), parent:GetAngles());
+			pb:SetPos(pos);
+			pb:SetAngles(ang);
+		else
+			pb:SetPos(d.Pos);
+			pb:SetAngles(d.Ang);
+		end
 
 		if player.SMHData.FreezeAll then
 			pb:EnableMotion(false);

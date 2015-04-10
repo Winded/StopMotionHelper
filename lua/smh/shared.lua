@@ -15,15 +15,15 @@ SMH.BiValues = BiValuesV021;
 
 SMH.DefaultData = {
 
-	Entity = nil,
+	Entity = nil, -- Our currently selected entity
 
-	Position = 0,
+	Position = 0, -- Our current position in the frame timeline
 
 	PlaybackRate = 30,
 	PlaybackLength = 100,
 
-	ActiveFrames = {},
-	EditedFrame = nil,
+	ActiveFrames = {}, -- Client needs this to populate the frame timeline with frames
+	EditedFrame = nil, -- Used when we want to edit a frame
 
 	EaseIn = 0,
 	EaseOut = 0,
@@ -33,6 +33,7 @@ SMH.DefaultData = {
 	ShowSettings = false,
 
 	FreezeAll = false,
+	LocalizePhysBones = false,
 	IgnorePhysBones = false,
 
 	ShowHelp = false,

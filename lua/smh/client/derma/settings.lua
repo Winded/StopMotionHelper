@@ -11,6 +11,11 @@ function PANEL:Init()
 	self.FreezeAll:SizeToContents();
 	self.FreezeAll:Bind(SMH.Data, "FreezeAll", "CheckBox");
 
+	self.LocalizePhysBones = vgui.Create("DCheckBoxLabel", self);
+	self.LocalizePhysBones:SetText("Localize phys bones");
+	self.LocalizePhysBones:SizeToContents();
+	self.LocalizePhysBones:Bind(SMH.Data, "LocalizePhysBones", "CheckBox");
+
 	self.IgnorePhysBones = vgui.Create("DCheckBoxLabel", self);
 	self.IgnorePhysBones:SetText("Don't animate phys bones");
 	self.IgnorePhysBones:SizeToContents();
@@ -43,7 +48,7 @@ function PANEL:Init()
 	self.HelpButton:SetText("Help");
 	self.HelpButton:Bind(SMH.Data, "ShowHelpMenu", "Button");
 
-	self:SetSize(160, 195);
+	self:SetSize(160, 225);
 
 end
 
@@ -53,21 +58,23 @@ function PANEL:PerformLayout()
 
 	self.FreezeAll:SetPos(5, 25);
 
-	self.IgnorePhysBones:SetPos(5, 45);
+	self.LocalizePhysBones:SetPos(5, 45);
 
-	self.GhostPrevFrame:SetPos(5, 65);
-	self.GhostNextFrame:SetPos(5, 85);
-	self.GhostAllEntities:SetPos(5, 105);
+	self.IgnorePhysBones:SetPos(5, 65);
+
+	self.GhostPrevFrame:SetPos(5, 85);
+	self.GhostNextFrame:SetPos(5, 105);
+	self.GhostAllEntities:SetPos(5, 125);
 
 	local gt = self.GhostTransparency;
 	local label = self.GhostTransparencyLabel;
 	label:SizeToContents();
 	local LW, LH = label:GetSize();
-	gt:SetPos(5, 125 + LH - 5);
+	gt:SetPos(5, 145 + LH - 5);
 	gt:SetSize(self:GetWide() - 5 - 5, 25);
-	label:SetPos(10, 125);
+	label:SetPos(10, 145);
 
-	self.HelpButton:SetPos(5, 170);
+	self.HelpButton:SetPos(5, 190);
 	self.HelpButton:SetSize(150, 20);
 
 end
