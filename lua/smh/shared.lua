@@ -11,7 +11,7 @@ SMH.GhostTypes = {
 	OnionSkin = 3
 };
 
-SMH.BiValues = BiValuesV021;
+SMH.BiValues = BiValuesV022;
 
 SMH.DefaultData = {
 

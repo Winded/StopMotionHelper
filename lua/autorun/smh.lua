@@ -2,7 +2,7 @@
 -- SMH Entry point.
 ---
 
-include("bivalues/bivalues.lua");
+include("smh/bivalues/bivalues.lua");
 
 if SERVER then
 	AddCSLuaFile("smh.lua");
