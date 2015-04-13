@@ -48,4 +48,4 @@ local BIND = setmetatable({}, BiValues.ValueBind);
 function BIND:Init()
 	self.Settings.ValueFunction = self.Settings.ValueFunction or "SetLength";
 end
-BiValues.RegisterBindType("FramePanel", BIND);
+SMH.BiValues.RegisterBindType("FramePanel", BIND);

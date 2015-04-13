@@ -41,4 +41,4 @@ end
 function BIND:SetValue(value)
 	-- do nothing
 end
-BiValues.RegisterBindType("WorldClicker", BIND);
+SMH.BiValues.RegisterBindType("WorldClicker", BIND);

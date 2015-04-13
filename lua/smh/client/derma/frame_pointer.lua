@@ -128,4 +128,4 @@ function BIND:Init()
 	self.Settings.ValueFunction = self.Settings.ValueFunction or "SetPosition";
 	BiValues.ValueBind.Init(self);
 end
-BiValues.RegisterBindType("PointerPosition", BIND);
+SMH.BiValues.RegisterBindType("PointerPosition", BIND);
