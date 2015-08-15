@@ -24,6 +24,7 @@ function PANEL:Init()
 	self.Pointer.VerticalPosition = self.FramePanel:GetTall() / 4;
 	self.Pointer:SetPosition(0);
 	self.Pointer:Bind(SMH.Data, "Position", "PointerPosition");
+	self.FramePanel.Pointer = self.Pointer;
 
 	self.PositionLabel = vgui.Create("DLabel", self);
 	self.PositionLabel:SetText("Position: 0 / 100");
