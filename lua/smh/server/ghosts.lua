@@ -51,7 +51,9 @@ function SMH.SetGhostFrame(ghost, data)
 	end
 
 	for name, mod in pairs(SMH.Modifiers) do
-		mod:LoadGhost(player, entity, ghost, data[name]);
+		if data[name] ~= nil then
+			mod:LoadGhost(player, entity, ghost, data[name]);
+		end
 	end
 
 end
