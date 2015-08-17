@@ -68,13 +68,19 @@ function SMH.PositionEntity(player, entity, framepos)
 
 	if not frame2 then
 		for name, mod in pairs(SMH.Modifiers) do
-			mod:Load(player, entity, frame1.EntityData[name]);
+			local data1 = frame1.EntityData[name];
+			if data1 ~= nil then
+				mod:Load(player, entity, frame1.EntityData[name]);
+			end
 		end
 		return;
 	end
 
 	for name, mod in pairs(SMH.Modifiers) do
-		mod:LoadBetween(player, entity, frame1.EntityData[name], frame2.EntityData[name], perc);
+		local data1, data2 = frame1.EntityData[name], frame2.EntityData[name];
+		if data1 ~= nil and data2 ~= nil then
+			mod:LoadBetween(player, entity, data1, data2, perc);
+		end
 	end
 
 end
