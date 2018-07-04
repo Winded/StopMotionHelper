@@ -48,5 +48,6 @@ SMH.DefaultData = {
 	OnionSkin = false,
 
 	Rendering = false,
+	UseScreenshot = false,
 
 };

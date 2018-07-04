@@ -1,5 +1,6 @@
 
 SMH.Rendering = false;
+SMH.UseScreenshot = false;
 SMH.RenderTimerName = "SMHRender";
 
 local function RenderTick()
@@ -12,13 +13,22 @@ local function RenderTick()
 
 	SMH.Data.Position = newPos;
 
+	local command = "jpeg";
+	if SMH.UseScreenshot then
+		command = "screenshot";
+	end
+
 	timer.Create(SMH.RenderTimerName .. "Sub", 0.4, 1, function()
-		RunConsoleCommand("jpeg");
+		RunConsoleCommand(command);
 	end);
 
 end
 
-function SMH.StartRender()
+function SMH.StartRender(useScreenshot)
+
+	if useScreenshot == nil then
+		useScreenshot = false;
+	end
 
 	SMH.Data.Position = 0;
 
@@ -26,6 +36,7 @@ function SMH.StartRender()
 
 	timer.Create(SMH.RenderTimerName, 1, 0, RenderTick);
 
+	SMH.UseScreenshot = useScreenshot;
 	SMH.Rendering = true;
 
 end

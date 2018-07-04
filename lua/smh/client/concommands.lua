@@ -36,6 +36,12 @@ local function QuickSave()
 end
 
 local function MakeJPEG()
+	SMH.Data.UseScreenshot = false;
+	SMH.Data.Rendering = not SMH.Data.Rendering;
+end
+
+local function MakeScreenshot()
+	SMH.Data.UseScreenshot = true;
 	SMH.Data.Rendering = not SMH.Data.Rendering;
 end
 
@@ -47,6 +53,7 @@ concommand.Add("-smh_playback", Stop);
 concommand.Add("smh_onionskin", Onion);
 concommand.Add("smh_quicksave", QuickSave);
 concommand.Add("smh_makejpeg", MakeJPEG);
+concommand.Add("smh_makescreenshot", MakeScreenshot);
 
 function SMH.SetupConVars()
 	local data = SMH.Data;
