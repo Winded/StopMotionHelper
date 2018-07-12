@@ -10,22 +10,21 @@ include("server/playback.lua");
 include("server/positioning.lua");
 
 AddCSLuaFile("shared.lua");
-AddCSLuaFile("shared/modifiers.lua");
-
 AddCSLuaFile("client.lua");
-AddCSLuaFile("client/concommands.lua");
-AddCSLuaFile("client/data.lua");
-AddCSLuaFile("client/entity_highlight.lua");
-AddCSLuaFile("client/entity_selection.lua");
-AddCSLuaFile("client/render.lua");
-AddCSLuaFile("client/menu_setup.lua");
-AddCSLuaFile("client/derma/frame_panel.lua");
-AddCSLuaFile("client/derma/frame_pointer.lua");
-AddCSLuaFile("client/derma/load.lua");
-AddCSLuaFile("client/derma/save.lua");
-AddCSLuaFile("client/derma/settings.lua");
-AddCSLuaFile("client/derma/smh_menu.lua");
-AddCSLuaFile("client/derma/world_clicker.lua");
+
+local path, files, dirs;
+
+path = "smh/shared/";
+files, dirs = file.Find(path .. "*.lua", "LUA");
+for _, f in pairs(files) do
+	AddCSLuaFile(path .. f);
+end
+
+path = "smh/client/";
+files, dirs = file.Find(path .. "*.lua", "LUA");
+for _, f in pairs(files) do
+	AddCSLuaFile(path .. f);
+end
 
 hook.Add("PlayerInitialSpawn", "SMHSetup", function(player)
 	SMH.SetupData(player);

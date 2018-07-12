@@ -56,10 +56,6 @@ local function ShowSettingsMenu(container, key)
 	end
 end
 
-local function ShowHelpMenu(container, key)
-	gui.OpenURL("https://github.com/Winded/StopMotionHelper/blob/master/TUTORIAL.md")
-end
-
 local function ShowSaveMenu(container, key)
 	if not container.ShowSave then
 		container.ShowSave = true;
@@ -84,7 +80,6 @@ function SMH.SetupData()
 
 	local defaults = table.Copy(SMH.DefaultData);
 	defaults.ShowSettingsMenu = ShowSettingsMenu;
-	defaults.ShowHelpMenu = ShowHelpMenu;
 	defaults.ShowSaveMenu = ShowSaveMenu;
 	defaults.ShowLoadMenu = ShowLoadMenu;
 

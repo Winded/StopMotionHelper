@@ -1,85 +1,89 @@
 
-local PANEL = {};
+local Rx = include("../../rxlua/rx.lua");
 
-function PANEL:Init()
+local function Setup(parent)
 
-	self:SetBackgroundColor(Color(64, 64, 64, 64));
-	self.Length = 100;
+	local panel = vgui.Create("DPanel", parent);
 
-end
+	local function paintFunc(size, frameArea, timelineLength)
+		local w, h = size[1], size[2];
+		local startX, endX = frameArea[1], frameArea[2];
+	
+		local frameWidth = (endX - startX) / timelineLength;
+	
+		surface.SetDrawColor(255, 255, 255, 255);
+	
+		for i = 0, timelineLength do
+			local x = startX + frameWidth * i;
+			surface.DrawLine(x, 6, x, panel:GetTall() - 6);
+		end
+	
+	end
 
-function PANEL:GetFrameArea()
+	panel:SetBackgroundColor(Color(64, 64, 64, 64));
+	panel.Length = 100;
+
+	local mousePressStream = Rx.Subject.create();
+	panel.OnMousePressed = function(self, mousecode) mousePressStream(mousecode) end
+
+	local paintStream = Rx.Subject.create();
+	panel.Paint = function(self, width, height) paintStream(width, height) end
+
+	local frameAreaStream = Rx.BehaviorSubject.create({0, 1});
+
+	local sizeStream = Rx.Subject.create();
+	
+	sizeStream:subscribe(function(size) panel:SetSize(unpack(size)) end);
 
 	local padding = 10;
+	sizeStream:map(function(size) return size[1] end)
+		:map(function(width)
+			local startPoint = padding;
+			local endPoint = width - padding;
+			return {startPoint, endPoint};
+		end):subscribe(frameAreaStream);
 
-	local startPoint = padding;
-	local endPoint = self:GetWide() - padding;
-	return startPoint, endPoint;
+	local timelineLengthStream = Rx.BehaviorSubject.create(1);
 
-end
-
-function PANEL:SetLength(value)
-	if value < 1 then
-		value = 1;
-	end
-	self.Length = value;
-end
-
-function PANEL:OnMousePressed(mousecode)
-	if not IsValid(self.Pointer) then
-		return;
-	end
-
-	if mousecode == MOUSE_LEFT then
-
-		local startX, endX = self:GetFrameArea();
-		local posX, posY = self:CursorPos();
-
-		local targetX = posX - startX;
-		local width = endX - startX;
-		local frameWidth = width / self.Length;
-
-		local targetPos = 0;
-		for i = 0, self.Length do
-			local x = frameWidth * i;
-			local diff = math.abs(x - targetX);
-			if diff <= frameWidth / 2 then
-				targetPos = i;
-				break;
-			elseif i == self.Length and targetX > x then
-				targetPos = self.Length;
+	local clickPositionStream = mousePressStream:filter(function(mousecode) return mousecode == MOUSE_LEFT end)
+		:with(frameAreaStream, timelineLengthStream)
+		:map(function(mousecode, frameArea, timelineLength)
+			local startX, endX = frameArea[1], frameArea[2];
+			local posX, posY = panel:CursorPos();
+	
+			local targetX = posX - startX;
+			local width = endX - startX;
+			local frameWidth = width / timelineLength;
+	
+			local targetPos = 0;
+			for i = 0, timelineLength do
+				local x = frameWidth * i;
+				local diff = math.abs(x - targetX);
+				if diff <= frameWidth / 2 then
+					targetPos = i;
+					break;
+				elseif i == timelineLength and targetX > x then
+					targetPos = timelineLength;
+				end
 			end
-		end
 
-		if self.Pointer.Position ~= targetPos then
-			self.Pointer:SetPosition(targetPos);
-			self.Pointer:OnPositionChanged(targetPos);
-		end
-		
-	end
+			return targetPos;
+		end);
+
+	paintStream:map(function(width, height) return {width, height} end)
+		:with(frameAreaStream, timelineLengthStream):subscribe(paintFunc);
+
+	return panel, {
+		Input = {
+			Size = sizeStream,
+			TimelineLength = timelineLengthStream,
+		},
+		Output = {
+			FrameArea = frameAreaStream,
+			ClickPosition = clickPositionStream,
+		}
+	};
+	
 end
 
-function PANEL:Paint(w, h)
-
-	self.BaseClass.Paint(self, w, h);
-
-	local startX, endX = self:GetFrameArea();
-
-	local frameWidth = (endX - startX) / self.Length;
-
-	surface.SetDrawColor(255, 255, 255, 255);
-
-	for i = 0, self.Length do
-		local x = startX + frameWidth * i;
-		surface.DrawLine(x, 6, x, self:GetTall() - 6);
-	end
-
-end
-
-vgui.Register("SMHFramePanel", PANEL, "DPanel");
-
-local BIND = setmetatable({}, BiValues.ValueBind);
-function BIND:Init()
-	self.Settings.ValueFunction = self.Settings.ValueFunction or "SetLength";
-end
-SMH.BiValues.RegisterBindType("FramePanel", BIND);
+return Setup;

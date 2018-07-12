@@ -1,4 +1,6 @@
 
+local Rx = include("../rxlua/rx.lua");
+local RxUtils = include("../shared/rxutils.lua");
 
 -- Most taken from lua/includes/modules/halo.lua
 local matColor	= Material( "model_color" )
@@ -7,17 +9,7 @@ local mat_Add	= Material( "pp/add" )
 local mat_Sub	= Material( "pp/sub" )
 local rt_Stencil	= render.GetBloomTex0()
 local rt_Store		= render.GetScreenEffectTexture( 0 )
-function SMH.RenderHalo()
-
-	if not SMH.Data then
-		return;
-	end
-
-	local entity = SMH.Data.Entity;
-	local highlight = SMH.WorldClicker:IsVisible();
-	if not IsValid(entity) or not highlight then
-		return;
-	end
+local function RenderHalo(entity)
 
 	local OldRT = render.GetRenderTarget()
 	
@@ -125,4 +117,24 @@ function SMH.RenderHalo()
 	cam.IgnoreZ( false );
 
 end
-hook.Add("PostDrawEffects","smhRenderHalo",SMH.RenderHalo);
+
+local function Setup()
+	
+	local highlightStream = Rx.BehaviorSubject.create(false);
+	local entityStream = Rx.BehaviorSubject.create(nil);
+
+	RxUtils.fromHook("PostDrawEffects"):with(highlightStream, entityStream)
+		:map(function(_, highlight, entity) return highlight, entity end)
+		:filter(function(highlight, entity) return highlight and IsValid(entity) end)
+		:map(function(highlight, entity) return entity end)
+		:subscribe(RenderHalo);
+
+	return {
+		Input = {
+			Highlight = highlightStream,
+			Entity = entityStream,
+		}
+	}
+end
+
+return Setup;

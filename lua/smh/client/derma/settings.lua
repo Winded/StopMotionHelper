@@ -1,82 +1,94 @@
+local Rx = include("../../rxlua/rx.lua");
+local RxUtils = include("../../shared/rxutils.lua");
 
-local PANEL = {};
+local function Create(parent)
 
-function PANEL:Init()
+	local panel = vgui.Create("DFrame", parent);
 
-	self:SetTitle("SMH Settings");
-	self:SetDeleteOnClose(false);
+	panel:SetTitle("SMH Settings");
+	panel:SetDeleteOnClose(false);
 
-	self.FreezeAll = vgui.Create("DCheckBoxLabel", self);
-	self.FreezeAll:SetText("Freeze all");
-	self.FreezeAll:SizeToContents();
-	self.FreezeAll:Bind(SMH.Data, "FreezeAll", "CheckBox");
+	panel.FreezeAll = vgui.Create("DCheckBoxLabel", panel);
+	panel.FreezeAll:SetText("Freeze all");
+	panel.FreezeAll:SizeToContents();
 
-	self.LocalizePhysBones = vgui.Create("DCheckBoxLabel", self);
-	self.LocalizePhysBones:SetText("Localize phys bones");
-	self.LocalizePhysBones:SizeToContents();
-	self.LocalizePhysBones:Bind(SMH.Data, "LocalizePhysBones", "CheckBox");
+	panel.LocalizePhysBones = vgui.Create("DCheckBoxLabel", panel);
+	panel.LocalizePhysBones:SetText("Localize phys bones");
+	panel.LocalizePhysBones:SizeToContents();
 
-	self.IgnorePhysBones = vgui.Create("DCheckBoxLabel", self);
-	self.IgnorePhysBones:SetText("Don't animate phys bones");
-	self.IgnorePhysBones:SizeToContents();
-	self.IgnorePhysBones:Bind(SMH.Data, "IgnorePhysBones", "CheckBox");
+	panel.IgnorePhysBones = vgui.Create("DCheckBoxLabel", panel);
+	panel.IgnorePhysBones:SetText("Don't animate phys bones");
+	panel.IgnorePhysBones:SizeToContents();
 
-	self.GhostPrevFrame = vgui.Create("DCheckBoxLabel", self);
-	self.GhostPrevFrame:SetText("Ghost previous frame");
-	self.GhostPrevFrame:SizeToContents();
-	self.GhostPrevFrame:Bind(SMH.Data, "GhostPrevFrame", "CheckBox");
+	panel.GhostPrevFrame = vgui.Create("DCheckBoxLabel", panel);
+	panel.GhostPrevFrame:SetText("Ghost previous frame");
+	panel.GhostPrevFrame:SizeToContents();
 
-	self.GhostNextFrame = vgui.Create("DCheckBoxLabel", self);
-	self.GhostNextFrame:SetText("Ghost next frame");
-	self.GhostNextFrame:SizeToContents();
-	self.GhostNextFrame:Bind(SMH.Data, "GhostNextFrame", "CheckBox");
+	panel.GhostNextFrame = vgui.Create("DCheckBoxLabel", panel);
+	panel.GhostNextFrame:SetText("Ghost next frame");
+	panel.GhostNextFrame:SizeToContents();
 
-	self.GhostAllEntities = vgui.Create("DCheckBoxLabel", self);
-	self.GhostAllEntities:SetText("Ghost all entities");
-	self.GhostAllEntities:SizeToContents();
-	self.GhostAllEntities:Bind(SMH.Data, "GhostAllEntities", "CheckBox");
+	panel.GhostAllEntities = vgui.Create("DCheckBoxLabel", panel);
+	panel.GhostAllEntities:SetText("Ghost all entities");
+	panel.GhostAllEntities:SizeToContents();
 
-	self.GhostTransparency = vgui.Create("Slider", self);
-	self.GhostTransparency:SetMinMax(0, 1);
-	self.GhostTransparency:SetDecimals(2);
-	self.GhostTransparency:Bind(SMH.Data, "GhostTransparency", "Number");
-	self.GhostTransparencyLabel = vgui.Create("DLabel", self);
-	self.GhostTransparencyLabel:SetText("Ghost transparency");
-	self.GhostTransparencyLabel:SizeToContents();
+	panel.GhostTransparency = vgui.Create("Slider", panel);
+	panel.GhostTransparency:SetMinMax(0, 1);
+	panel.GhostTransparency:SetDecimals(2);
+	panel.GhostTransparencyLabel = vgui.Create("DLabel", panel);
+	panel.GhostTransparencyLabel:SetText("Ghost transparency");
+	panel.GhostTransparencyLabel:SizeToContents();
 
-	self.HelpButton = vgui.Create("DButton", self);
-	self.HelpButton:SetText("Help");
-	self.HelpButton:Bind(SMH.Data, "ShowHelpMenu", "Button");
+	panel.HelpButton = vgui.Create("DButton", panel);
+	panel.HelpButton:SetText("Help");
 
-	self:SetSize(160, 225);
+	panel:SetSize(160, 225);
+
+	local basePerformLayout = panel.PerformLayout;
+	panel.PerformLayout = function()
+
+		basePerformLayout(panel);
+
+		panel.FreezeAll:SetPos(5, 25);
+	
+		panel.LocalizePhysBones:SetPos(5, 45);
+	
+		panel.IgnorePhysBones:SetPos(5, 65);
+	
+		panel.GhostPrevFrame:SetPos(5, 85);
+		panel.GhostNextFrame:SetPos(5, 105);
+		panel.GhostAllEntities:SetPos(5, 125);
+	
+		local gt = panel.GhostTransparency;
+		local label = panel.GhostTransparencyLabel;
+		label:SizeToContents();
+		local LW, LH = label:GetSize();
+		gt:SetPos(5, 145 + LH - 5);
+		gt:SetSize(panel:GetWide() - 5 - 5, 25);
+		label:SetPos(10, 145);
+	
+		panel.HelpButton:SetPos(5, 190);
+		panel.HelpButton:SetSize(150, 20);
+
+	end
+
+	local input = {};
+	local output = {};
+
+	input.FreezeAll, output.FreezeAll = RxUtils.bindDPanel(panel.FreezeAll, "SetValue", "OnChange");
+	input.LocalizePhysBones, output.LocalizePhysBones = RxUtils.bindDPanel(panel.LocalizePhysBones, "SetValue", "OnChange");
+	input.IgnorePhysBones, output.IgnorePhysBones = RxUtils.bindDPanel(panel.IgnorePhysBones, "SetValue", "OnChange");
+	input.GhostPrevFrame, output.GhostPrevFrame = RxUtils.bindDPanel(panel.GhostPrevFrame, "SetValue", "OnChange");
+	input.GhostNextFrame, output.GhostNextFrame = RxUtils.bindDPanel(panel.GhostNextFrame, "SetValue", "OnChange");
+	input.GhostAllEntities, output.GhostAllEntities = RxUtils.bindDPanel(panel.GhostAllEntities, "SetValue", "OnChange");
+	input.GhostTransparency, output.GhostTransparency = RxUtils.bindDPanel(panel.GhostTransparency, "SetValue", "OnValueChanged");
+	input.ShowHelp, output.ShowHelp = RxUtils.bindDPanel(panel.HelpButton, nil, "DoClick");
+
+	return panel, {
+		Input = input,
+		Output = output,
+	};
 
 end
 
-function PANEL:PerformLayout()
-
-	self.BaseClass.PerformLayout(self);
-
-	self.FreezeAll:SetPos(5, 25);
-
-	self.LocalizePhysBones:SetPos(5, 45);
-
-	self.IgnorePhysBones:SetPos(5, 65);
-
-	self.GhostPrevFrame:SetPos(5, 85);
-	self.GhostNextFrame:SetPos(5, 105);
-	self.GhostAllEntities:SetPos(5, 125);
-
-	local gt = self.GhostTransparency;
-	local label = self.GhostTransparencyLabel;
-	label:SizeToContents();
-	local LW, LH = label:GetSize();
-	gt:SetPos(5, 145 + LH - 5);
-	gt:SetSize(self:GetWide() - 5 - 5, 25);
-	label:SetPos(10, 145);
-
-	self.HelpButton:SetPos(5, 190);
-	self.HelpButton:SetSize(150, 20);
-
-end
-
-vgui.Register("SMHSettings", PANEL, "DFrame");
+return Create;
