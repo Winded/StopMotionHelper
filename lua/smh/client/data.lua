@@ -57,9 +57,7 @@ local function ShowSettingsMenu(container, key)
 end
 
 local function ShowHelpMenu(container, key)
-	if not container.ShowHelp then
-		container.ShowHelp = true;
-	end
+	gui.OpenURL("https://github.com/Winded/StopMotionHelper/blob/master/TUTORIAL.md")
 end
 
 local function ShowSaveMenu(container, key)

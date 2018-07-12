@@ -34,24 +34,6 @@ function SMH.SetupMenu()
 	SMH.LoadMenu:SetVisible(false);
 	SMH.LoadMenu:Bind(SMH.Data, "ShowLoad", "Visibility");
 
-	SMH.HelpMenu = vgui.Create("DFrame");
-	SMH.HelpMenu:SetSize(650, 650);
-	SMH.HelpMenu:Center();
-	SMH.HelpMenu:SetTitle('Help');
-	SMH.HelpMenu:SetSizable(false);
-	SMH.HelpMenu:ShowCloseButton(true);
-	SMH.HelpMenu:SetDeleteOnClose(false);
-	SMH.HelpMenu:SetBackgroundBlur(true);
-	SMH.HelpMenu:MakePopup();
-	SMH.HelpMenu:Bind(SMH.Data, "ShowHelp", "Visibility");
-
-	SMH.HelpMenu.Body = vgui.Create("HTML", SMH.HelpMenu);
-	SMH.HelpMenu.Body:SetPos(5, 25);
-	SMH.HelpMenu.Body:SetSize(640, 620);
-	SMH.HelpMenu.Body:OpenURL("http://winded.org/gmod/smh_help.html");
-
-	SMH.HelpMenu:SetVisible(false);
-
 end
 
 function SMH.OpenHelp()

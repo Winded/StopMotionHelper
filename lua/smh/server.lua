@@ -17,7 +17,7 @@ AddCSLuaFile("client/concommands.lua");
 AddCSLuaFile("client/data.lua");
 AddCSLuaFile("client/entity_highlight.lua");
 AddCSLuaFile("client/entity_selection.lua");
-AddCSLuaFile("client/makejpeg.lua");
+AddCSLuaFile("client/render.lua");
 AddCSLuaFile("client/menu_setup.lua");
 AddCSLuaFile("client/derma/frame_panel.lua");
 AddCSLuaFile("client/derma/frame_pointer.lua");
