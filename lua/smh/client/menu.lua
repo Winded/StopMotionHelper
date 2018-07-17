@@ -20,7 +20,7 @@ local function Setup()
 	local smhMenuStreams = SMHMenuSetup(clicker);
 
 	local settingsMenu, settingsMenuStreams = CreateSettingsMenu(clicker);
-	settingsMenu:SetPos(ScrW() - 165, ScrH() - 270);
+	settingsMenu:SetPos(ScrW() - 165, ScrH() - 275);
 	settingsMenu:SetVisible(false);
 	smhMenuStreams.Output.Settings:subscribe(function() settingsMenu:SetVisible(true) end);
 

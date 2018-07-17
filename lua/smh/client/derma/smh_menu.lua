@@ -10,7 +10,7 @@ local function Setup(parent)
 	local menu = vgui.Create("DFrame", parent);
 
 	menu:SetTitle("Stop Motion Helper");
-	menu:SetSize(ScrW(), 70);
+	menu:SetSize(ScrW(), 75);
 	menu:SetPos(0, ScrH() - menu:GetTall());
 	menu:SetDraggable(false);
 	menu:ShowCloseButton(false);
@@ -27,7 +27,7 @@ local function Setup(parent)
 	menu.PositionLabel = positionLabel;
 
 	menu.PlaybackRateControl = vgui.Create("DNumberWang", menu);
-	menu.PlaybackRateControl:SetMinMax(1, 999);
+	menu.PlaybackRateControl:SetMinMax(1, 216000);
 	menu.PlaybackRateControl:SetDecimals(0);
 	menu.PlaybackRateControl.Label = vgui.Create("DLabel", menu);
 	menu.PlaybackRateControl.Label:SetText("Framerate");
@@ -78,7 +78,7 @@ local function Setup(parent)
 		menu:SetTitle("Stop Motion Helper");
 	
 		framePanel:SetPos(5, 25);
-		framePanelStreams.Input.Size({width - 5, 40});
+		framePanelStreams.Input.Size(width - 5 * 2, 45);
 	
 		pointer.VerticalPosition = framePanel:GetTall() / 4;
 	
@@ -135,8 +135,9 @@ local function Setup(parent)
 
 		local item, itemStreams = CreateFramePointer(framePanel, false);
 
+		item:SetSize(8, 13);
 		item.Color = Color(0, 200, 0);
-		item.VerticalPosition = framePanel:GetTall() / 4 * 3;
+		item.VerticalPosition = framePanel:GetTall() / 4 * 2.2;
 
 		local itemPositionStream = Rx.BehaviorSubject.create(frame.Position);
 		local outputPositionSub = itemStreams.Output.Position:subscribe(itemPositionStream);
@@ -161,6 +162,9 @@ local function Setup(parent)
 				newItem:Remove();
 			end);
 			
+			newItemStreams.Input.TimelineLength(timelineLengthStream:getValue());
+			newItemStreams.Input.ScrollOffset(framePanelStreams.Output.ScrollOffset:getValue());
+			newItemStreams.Input.Zoom(framePanelStreams.Output.Zoom:getValue());
 			newItemStreams.Input.Position(frame.Position);
 	
 			newItemStreams.Input.StartDrag(newItemStreams.Output.MiddleMouseRelease);
@@ -171,6 +175,8 @@ local function Setup(parent)
 			:map(function(mousecode) return frame end):subscribe(outputFrameRemoveStream);
 
 		local frameAreaSub = framePanelStreams.Output.FrameArea:subscribe(itemStreams.Input.FrameArea);
+		local scrollOffsetSub = framePanelStreams.Output.ScrollOffset:subscribe(itemStreams.Input.ScrollOffset);
+		local zoomSub = framePanelStreams.Output.Zoom:subscribe(itemStreams.Input.Zoom);
 		local timelineLengthSub = timelineLengthStream:subscribe(itemStreams.Input.TimelineLength);
 
 		itemStreams.Input.Position(frame.Position);
@@ -181,6 +187,8 @@ local function Setup(parent)
 			middleMousePressSub:unsubscribe();
 			rightClickSub:unsubscribe();
 			frameAreaSub:unsubscribe();
+			scrollOffsetSub:unsubscribe();
+			zoomSub:unsubscribe();
 			timelineLengthSub:unsubscribe();
 		end
 	
@@ -212,6 +220,8 @@ local function Setup(parent)
 	pointerStreams.Output.Position:subscribe(outputPositionStream);
 	inputPositionStream:subscribe(pointerStreams.Input.Position);
 	timelineLengthStream:subscribe(pointerStreams.Input.TimelineLength);
+	framePanelStreams.Output.ScrollOffset:subscribe(pointerStreams.Input.ScrollOffset);
+	framePanelStreams.Output.Zoom:subscribe(pointerStreams.Input.Zoom);
 
 	local combinedPositionStream = Rx.BehaviorSubject.create(0);
 	inputPositionStream:merge(outputPositionStream):subscribe(combinedPositionStream);

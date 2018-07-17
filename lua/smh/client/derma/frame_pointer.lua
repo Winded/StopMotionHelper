@@ -1,5 +1,6 @@
 
 local Rx = include("../../rxlua/rx.lua");
+local RxUtils = include("../../shared/rxutils.lua");
 
 local function Create(parent, pointyBottom)
 
@@ -40,17 +41,14 @@ local function Create(parent, pointyBottom)
 		surface.DrawLine(0, h - (h * 0.25), 0, 0);
 	end
 
-	local mousePressStream = Rx.Subject.create();
-	panel.OnMousePressed = function(self, mousecode) mousePressStream(mousecode) end
+	-- VGUI binds
 
-	local mouseReleaseStream = Rx.Subject.create();
-	panel.OnMouseReleased = function(self, mousecode) mouseReleaseStream(mousecode) end
+	local _, mousePressStream = RxUtils.bindDPanel(panel, nil, "OnMousePressed");
+	local _, mouseReleaseStream = RxUtils.bindDPanel(panel, nil, "OnMouseReleased");
+	local _, cursorMoveStream = RxUtils.bindDPanel(panel, nil, "OnCursorMoved");
+	local _, paintStream = RxUtils.bindDPanel(panel, nil, "Paint");
 
-	local cursorMoveStream = Rx.Subject.create();
-	panel.OnCursorMoved = function(self, cursorX, cursorY) cursorMoveStream(cursorX, cursorY) end
-	
-	local paintStream = Rx.Subject.create();
-	panel.Paint = function(self, width, height) paintStream(width, height) end
+	-- Other logic
 
 	local leftMousePressStream = mousePressStream:filter(function(mousecode) return mousecode == MOUSE_LEFT end);
 	local leftMouseReleaseStream = mouseReleaseStream:filter(function(mousecode) return mousecode == MOUSE_LEFT end);
@@ -62,8 +60,6 @@ local function Create(parent, pointyBottom)
 		:filter(function(mousecode) return mousecode == MOUSE_MIDDLE or (mousecode == MOUSE_RIGHT and input.IsKeyDown(KEY_LCONTROL)) end);
 
 	local startDragStream = Rx.Subject.create();
-
-	local timelineLengthStream = Rx.BehaviorSubject.create(0);
 	
 	leftMousePressStream
 		:map(function(mousecode) return leftMouseReleaseStream end)
@@ -77,14 +73,19 @@ local function Create(parent, pointyBottom)
 	
 	local combinedPositionStream = inputPositionStream:merge(outputPositionStream);
 	
-	local frameAreaStream = Rx.BehaviorSubject.create({0, 0});
+	local frameAreaStream = Rx.BehaviorSubject.create(0, 0);
+	local timelineLengthStream = Rx.BehaviorSubject.create(0);
+	local scrollOffsetStream = Rx.BehaviorSubject.create(0);
+	local zoomStream = Rx.BehaviorSubject.create(100);
 
-	Rx.Observable.combineLatest(inputPositionStream, frameAreaStream, timelineLengthStream)
-		:subscribe(function(position, frameArea, timelineLength)
-			local startX, endX = frameArea[1], frameArea[2];
+	Rx.Observable.combineLatest(combinedPositionStream, frameAreaStream:pack(), scrollOffsetStream, zoomStream)
+		:subscribe(function(position, frameArea, scrollOffset, zoom)
+			local startX, endX = unpack(frameArea);
 			local height = panel.VerticalPosition;
-		
-			local x = startX + (endX - startX) / timelineLength * position;
+
+			local frameAreaWidth = endX - startX;
+			local positionWithOffset = position - scrollOffset;
+			local x = startX + (positionWithOffset / zoom) * frameAreaWidth;
 		
 			panel:SetPos(x - panel:GetWide() / 2, height - panel:GetTall() / 2);
 		end);
@@ -93,10 +94,11 @@ local function Create(parent, pointyBottom)
 	leftMousePressStream:subscribe(function() outlineColorStream({255, 255, 255}) end);
 	leftMouseReleaseStream:subscribe(function() outlineColorStream({0, 0, 0}) end);
 
-	local filteredPaintStream = paintStream:map(function(width, height) return {width, height} end)
-		:with(outlineColorStream, combinedPositionStream, timelineLengthStream)
-		:filter(function(size, outlineColor, position, timelineLength) return position <= timelineLength end)
-		:map(function(size, outlineColor, arg4, arg5) return size[1], size[2], outlineColor end);
+	local filteredPaintStream = paintStream:pack()
+		:with(outlineColorStream, combinedPositionStream, scrollOffsetStream, zoomStream)
+		:filter(function(size, outlineColor, position, scrollOffset, zoom) return position >= scrollOffset and position <= (scrollOffset + zoom) end)
+		:map(function(size, outlineColor, ...) return size[1], size[2], outlineColor end);
+		
 	if pointyBottom then
 		filteredPaintStream:subscribe(paintFuncPointy);
 	else
@@ -104,38 +106,31 @@ local function Create(parent, pointyBottom)
 	end
 
 	startDragStream:subscribe(function(observable)
-		cursorMoveStream:map(function(cursorX, cursorY) return {cursorX, cursorY} end)
-			:with(frameAreaStream, timelineLengthStream)
-			:takeUntil(observable)
+		cursorMoveStream:pack():takeUntil(observable)
+			:with(frameAreaStream:pack(), scrollOffsetStream, zoomStream, timelineLengthStream)
 			:subscribe(handleMovement);
 	end);
 
 	local distinctOutputPositionStream = Rx.Subject.create();
 	distinctOutputPositionStream:distinctUntilChanged():subscribe(outputPositionStream);
 	
-	handleMovement = function(cursorPos, frameArea, totalFrames)
+	handleMovement = function(cursorPos, frameArea, scrollOffset, zoom, totalFrames)
 	
-		local cursorX, cursorY = unpack(cursorPos);
-		local startX, endX = unpack(frameArea);
-		local posX, posY = panel:GetPos();
-	
-		local targetX = (posX + panel:GetWide() / 2) + cursorX - startX;
-		local width = endX - startX;
-		local frameWidth = width / totalFrames;
-	
-		local targetPos = 0;
-		for i = 0, totalFrames do
-			local x = frameWidth * i;
-			local diff = math.abs(x - targetX);
-			if diff <= frameWidth / 2 then
-				targetPos = i;
-				break;
-			elseif i == totalFrames and targetX > x then
-				targetPos = totalFrames;
-			end
+		local cursorX, cursorY;
+		if parent ~= nil then 
+			cursorX, cursorY = parent:CursorPos();
+		else
+			cursorX, cursorY = input.GetCursorPos();
 		end
+		
+		local startX, endX = unpack(frameArea);
+	
+		local targetX = cursorX - startX;
+		local width = endX - startX;
 
-		inputPositionStream(targetPos);
+		local targetPos = math.Round(scrollOffset + (targetX / width) * zoom);
+		targetPos = targetPos < 0 and 0 or (targetPos > totalFrames and totalFrames - 1 or targetPos);
+
 		distinctOutputPositionStream(targetPos);
 	
 	end
@@ -146,6 +141,8 @@ local function Create(parent, pointyBottom)
 			StartDrag = startDragStream,
 			FrameArea = frameAreaStream,
 			TimelineLength = timelineLengthStream,
+			ScrollOffset = scrollOffsetStream,
+			Zoom = zoomStream,
 		},
 		Output = {
 			Position = outputPositionStream,
