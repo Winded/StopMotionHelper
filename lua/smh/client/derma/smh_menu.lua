@@ -149,19 +149,20 @@ local function Setup(parent)
 			local newItem, newItemStreams = CreateFramePointer(framePanel, false);
 	
 			newItem.Color = Color(0, 200, 0);
-			newItem.VerticalPosition = framePanel:GetTall() / 4 * 3;
+			newItem.VerticalPosition = framePanel:GetTall() / 4 * 2.2;
 
 			local middleMouseReleaseStream = newItemStreams.Output.MiddleMouseRelease:first();
 
 			middleMouseReleaseStream
 				:with(newItemStreams.Output.Position)
 				:map(function(mousecode, position) return frame.ID, position end)
-				:subscribe(outputFrameCloneStream);
+				:subscribe(function(...) outputFrameCloneStream(...) end);
 			
 			middleMouseReleaseStream:subscribe(function(mousecode)
 				newItem:Remove();
 			end);
 			
+			newItemStreams.Input.FrameArea(framePanelStreams.Output.FrameArea:getValue());
 			newItemStreams.Input.TimelineLength(timelineLengthStream:getValue());
 			newItemStreams.Input.ScrollOffset(framePanelStreams.Output.ScrollOffset:getValue());
 			newItemStreams.Input.Zoom(framePanelStreams.Output.Zoom:getValue());

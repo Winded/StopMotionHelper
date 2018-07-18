@@ -47,6 +47,7 @@ local function Create(parent, pointyBottom)
 	local _, mouseReleaseStream = RxUtils.bindDPanel(panel, nil, "OnMouseReleased");
 	local _, cursorMoveStream = RxUtils.bindDPanel(panel, nil, "OnCursorMoved");
 	local _, paintStream = RxUtils.bindDPanel(panel, nil, "Paint");
+	local mouseCaptureStream, _ = RxUtils.bindDPanel(panel, "MouseCapture", nil);
 
 	-- Other logic
 
@@ -65,8 +66,10 @@ local function Create(parent, pointyBottom)
 		:map(function(mousecode) return leftMouseReleaseStream end)
 		:subscribe(startDragStream);
 
-	leftMousePressStream:subscribe(function(mousecode) panel:MouseCapture(true) end);
-	leftMouseReleaseStream:subscribe(function(mousecode) panel:MouseCapture(false) end);
+	startDragStream:subscribe(function(observable)
+		mouseCaptureStream(true);
+		observable:first():subscribe(function() mouseCaptureStream(false) end);
+	end);
 
 	local inputPositionStream = Rx.BehaviorSubject.create(0);
 	local outputPositionStream = Rx.Subject.create();
@@ -91,8 +94,10 @@ local function Create(parent, pointyBottom)
 		end);
 
 	local outlineColorStream = Rx.BehaviorSubject.create({0, 0, 0});
-	leftMousePressStream:subscribe(function() outlineColorStream({255, 255, 255}) end);
-	leftMouseReleaseStream:subscribe(function() outlineColorStream({0, 0, 0}) end);
+	startDragStream:subscribe(function(observable)
+		outlineColorStream({255, 255, 255});
+		observable:first():subscribe(function() outlineColorStream({0, 0, 0}) end);
+	end);
 
 	local filteredPaintStream = paintStream:pack()
 		:with(outlineColorStream, combinedPositionStream, scrollOffsetStream, zoomStream)
