@@ -53,6 +53,11 @@ visible on the timeline as well as playback and rendering, which we will discuss
 
 **NOTE:** If recorded frames go outside your frame count, they are not removed. They just won't be visible in the timeline.
 
+## Scrolling and zooming on frame timeline
+
+There is a scroll bar at the bottom of the frame timeline. Drag it to scroll through frames that are outside of the current view.
+If you want to see less or more frames in the timeline at once, you can zoom in and out by using your mouse wheel.
+
 ## Animation playback
 
 To preview your current scene, you can bind `+smh_playback` command to a key and hold it down. This will play the animation from frame 0 to your frame count with the framerate specified in the `Framerate` input. Note that previewing your animation with this
@@ -64,11 +69,18 @@ You can render your animation by simply using a camera and cycling through all o
 repetitive and takes time. SMH has the `smh_makejpeg` command, which automates this tedious task for you! Simply bind it to a key,
 set up your camera and stuff, and fire away. After the rendering is complete, the resulted images are found in your local steam screenshots.
 
+Alternatively, you can use `smh_makescreenshot`, which is the same as `smh_makejpeg`, but uses the `screenshot`command internally.
+This allows you to render TGA images instead of JPEG.
+
 ## Saving
 
 You might want to continue animating later, or save your finished scene, just in case you want to come back and change things. You can
 save your scene using the save menu found in the SMH menu. In the save menu, you give it a unique name, or overwrite one of the existing
 saves, and then hit the save button. And you scene is saved!
+
+## Deleting saves
+
+You can also delete saves from the Save menu, or by navigatingto `garrysmod/data/smh` and deleting files there.
 
 ## Loading
 
