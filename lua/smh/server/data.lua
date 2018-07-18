@@ -295,6 +295,21 @@ local function QuickSave(container, key)
 
 end
 
+local function DeleteSave(container, key)
+
+	local fileName = container.SaveFileName;
+
+	if not fileName or fileName == "" then
+		return;
+	end
+
+	local path = SMH.SaveDir .. fileName .. ".txt";
+	file.Delete(path);
+
+	RefreshSaveList(container);
+
+end
+
 local function RefreshGhosts(container, key)
 	local player = container:_GetPlayer();
 	SMH.RefreshGhosts(player);
@@ -316,6 +331,7 @@ function SMH.SetupData(player)
 	defaults.Load = Load;
 	defaults.Save = Save;
 	defaults.QuickSave = QuickSave;
+	defaults.DeleteSave = DeleteSave;
 
 	local data = SMH.BiValues.New(player, "SMHData", {IsPrivate = true, UseSync = true, AutoApply = true}, defaults);
 		

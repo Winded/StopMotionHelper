@@ -22,6 +22,9 @@ local function Create(parent)
 	panel.Save = vgui.Create("DButton", panel);
 	panel.Save:SetText("Save");
 
+	panel.Delete = vgui.Create("DButton", panel);
+	panel.Delete:SetText("Delete");
+
 	local basePerformLayout = panel.PerformLayout;
 	panel.PerformLayout = function(_, w, h)
 	
@@ -36,9 +39,12 @@ local function Create(parent)
 	
 		panel.FileList:SetPos(5, 67);
 		panel.FileList:SetSize(panel:GetWide() - 5 - 5, 150);
-	
+
 		panel.Save:SetPos(panel:GetWide() - 60 - 5, 219);
 		panel.Save:SetSize(60, 20);
+	
+		panel.Delete:SetPos(panel:GetWide() - 60 - 5 - 60 - 5, 219);
+		panel.Delete:SetSize(60, 20);
 	
 	end
 
@@ -54,14 +60,15 @@ local function Create(parent)
 	fileListStream:map(function(files) return panel.FileList, files end)
 		:subscribe(addLines);
 
+	local fileSelectStream = Rx.Subject.create();
+	panel.FileList.OnRowSelected = function(self, rowID, row) fileSelectStream(row:GetValue(1)) end
+
 	local _, fileStream = RxUtils.bindDPanel(panel.FileName, nil, "OnValueChange");
 
 	local _, saveStream = RxUtils.bindDPanel(panel.Save, nil, "DoClick");
+	local _, deleteStream = RxUtils.bindDPanel(panel.Delete, nil, "DoClick");
 
-	panel.FileList:Bind(SMH.Data, "SaveFiles", "ListView");
-	panel.FileList:Bind(SMH.Data, "SaveFileName", "ListViewSelect");
-	
-	panel.Save:Bind(SMH.Data, "Save", "Button");
+	fileSelectStream:subscribe(fileStream);
 
 	return panel, {
 		Input = {
@@ -70,6 +77,7 @@ local function Create(parent)
 		Output = {
 			File = fileStream,
 			Save = saveStream,
+			Delete = deleteStream,
 		}
 	};
 

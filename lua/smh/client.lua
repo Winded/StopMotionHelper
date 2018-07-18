@@ -111,6 +111,7 @@ local function Setup()
     outputSaveFiles:subscribe(menuStreams.Save.Input.FileList);
     menuStreams.Save.Output.File:subscribe(inputSaveFile);
     menuStreams.Save.Output.Save:subscribe(function() SMH.Data:_Call("Save") end);
+    menuStreams.Save.Output.Delete:subscribe(function() SMH.Data:_Call("DeleteSave") end);
     menuStreams.Output.Save:subscribe(function() SMH.Data.ShowSave = true end);
 
     menuStreams.Settings.Output.FreezeAll:subscribe(function(value) SMH.Data.FreezeAll = value end);
