@@ -70,7 +70,7 @@ end
 
 local function ToggleRender(container, key, value)
 	if value then
-		SMH.StartRender();
+		SMH.StartRender(SMH.Data.UseScreenshot);
 	else
 		SMH.StopRender();
 	end
