@@ -3,8 +3,8 @@ include("derma/frame_panel.lua");
 include("derma/frame_pointer.lua");
 include("derma/smh_menu.lua");
 
-local Rx = include("../rxlua/rx.lua");
-local RxUtils = include("../shared/rxutils.lua");
+local Rx = SMH.Include("rxlua/rx.lua");
+local RxUtils = SMH.Include("shared/rxutils.lua");
 
 local WorldClickerSetup = include("derma/world_clicker.lua");
 local SMHMenuSetup = include("derma/smh_menu.lua");

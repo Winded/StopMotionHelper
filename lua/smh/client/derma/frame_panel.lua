@@ -1,6 +1,6 @@
 
-local Rx = include("../../rxlua/rx.lua");
-local RxUtils = include("../../shared/rxutils.lua");
+local Rx = SMH.Include("rxlua/rx.lua");
+local RxUtils = SMH.Include("shared/rxutils.lua");
 
 local function Paint(size, frameArea, zoom, scrollOffset, timelineLength)
 	local width, height = unpack(size);

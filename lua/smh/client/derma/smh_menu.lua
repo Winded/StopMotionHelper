@@ -1,6 +1,6 @@
 
-local Rx = include("../../rxlua/rx.lua");
-local RxUtils = include("../../shared/rxutils.lua");
+local Rx = SMH.Include("rxlua/rx.lua");
+local RxUtils = SMH.Include("shared/rxutils.lua");
 
 local CreateFramePanel = include("frame_panel.lua");
 local CreateFramePointer = include("frame_pointer.lua");

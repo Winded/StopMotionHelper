@@ -1,5 +1,5 @@
 
-local Rx = include("../../rxlua/rx.lua");
+local Rx = SMH.Include("rxlua/rx.lua");
 
 local function Setup()
 

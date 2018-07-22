@@ -1,6 +1,6 @@
 local RxUtils = {};
 
-local Rx = include("../rxlua/rx.lua");
+local Rx = SMH.Include("rxlua/rx.lua");
 
 local function GetOrCreateSubject(table, key, wrapper)
     if table[key] ~= nil then
