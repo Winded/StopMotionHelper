@@ -17,24 +17,24 @@ end
 local commandStreams = {};
 
 function RxUtils.fromConcommand(command)
-    return GetOrCreateSubject(commandStreams, command, function(subject)
-        concommand.Add(command, function(...) subject(...) end);
+    return GetOrCreateSubject(commandStreams, command, function(observable)
+        concommand.Add(command, function(...) observable:onNext(...) end);
     end);
 end
 
 local hooks = {};
 
 function RxUtils.fromHook(hookName)
-    return GetOrCreateSubject(hooks, hookName, function(subject)
-        hook.Add(hookName, "RxUtilsHook_" .. hookName, function(...) subject(...) end);
+    return GetOrCreateSubject(hooks, hookName, function(observable)
+        hook.Add(hookName, "RxUtilsHook_" .. hookName, function(...) observable:onNext(...) end);
     end);
 end
 
 local receivers = {};
 
 function RxUtils.fromNetReceiver(command)
-    return GetOrCreateSubject(receivers, command, function(subject)
-        net.Receive(command, function(...) subject(...) end);
+    return GetOrCreateSubject(receivers, command, function(observable)
+        net.Receive(command, function(...) observable:onNext(...) end);
     end);
 end
 
