@@ -22,6 +22,38 @@ function RxUtils.fromConcommand(command)
     end);
 end
 
+local convarStreams = {};
+
+function RxUtils.fromConVar(convar)
+    local cvName = convar:GetName();
+    if convarStreams[cvName] ~= nil then
+        return unpack(convarStreams[cvName]);
+    end
+
+    local input = Rx.Subject.create();
+    local output = Rx.BehaviorSubject.create(convar:GetString());
+    local changing = false;
+
+    input:subscribe(function(value)
+        if not changing then
+            changing = true;
+            RunConsoleCommand(cvName, tostring(value));
+            changing = false;
+        end
+    end);
+
+    cvars.AddChangeCallback(cvName, function(name, oldValue, newValue)
+        if not changing then
+            changing = true;
+            output:onNext(newValue);
+            changing = false;
+        end
+    end, "RxCallback_" .. cvName);
+
+    convarStreams[cvName] = { input, output };
+    return input, output;
+end
+
 local hooks = {};
 
 function RxUtils.fromHook(hookName)

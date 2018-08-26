@@ -2,72 +2,50 @@
 local Rx = SMH.Include("rxlua/rx.lua");
 local RxUtils = SMH.Include("shared/rxutils.lua");
 
-local function Setup()
+local function Setup(inputStreams, outputStreams)
 
-	local menuVisibilityStream = Rx.Subject.create();
-	RxUtils.fromConcommand("+smh_menu"):map(function() return true; end):subscribe(menuVisibilityStream);
-	RxUtils.fromConcommand("-smh_menu"):map(function() return false; end):subscribe(menuVisibilityStream);
+    RxUtils.fromConcommand("+smh_menu"):map(function() return true end):subscribe(outputStreams.MenuVisibility);
+    RxUtils.fromConcommand("-smh_menu"):map(function() return false end):subscribe(outputStreams.MenuVisibility);
 
-	concommand.Add("smh_record", function()
-		SMH.Data:_Call("Record");
-	end);
+    RxUtils.fromConcommand("smh_record"):map(function() return nil end):subscribe(outputStreams.Record);
 
-	concommand.Add("smh_next", function()
-		local pos = SMH.Data.Position + 1;
-		if pos > SMH.Data.PlaybackLength then
-			pos = 0;
-		end
-		SMH.Data.Position = pos;
-	end);
+    RxUtils.fromConcommand("smh_next"):map(function() return nil end)
+        :with(inputStreams.SetFrame, inputStreams.PlaybackLength)
+        :map(function(_, frame, playbackLength) return (frame + 1) < playbackLength and (frame + 1) or 0 end)
+        :subscribe(outputStreams.SetFrame);
 
-	concommand.Add("smh_previous", function()
-		local pos = SMH.Data.Position - 1;
-		if pos < 0 then
-			pos = SMH.Data.PlaybackLength;
-		end
-		SMH.Data.Position = pos;
-	end);
+    RxUtils.fromConcommand("smh_previous"):map(function() return nil end)
+        :with(inputStreams.SetFrame, inputStreams.PlaybackLength)
+        :map(function(_, frame, playbackLength) return (frame - 1) >= 0 and (frame - 1) or (playbackLength - 1) end)
+        :subscribe(outputStreams.SetFrame);
 
-	concommand.Add("+smh_playback", function()
-		SMH.Data:_Call("Play");
-	end);
+    RxUtils.fromConcommand("+smh_playback"):map(function() return true end):subscribe(outputStreams.Playback);
+    RxUtils.fromConcommand("-smh_playback"):map(function() return false end):subscribe(outputStreams.Playback);
 
-	concommand.Add("-smh_playback", function()
-		SMH.Data:_Call("Stop");
-	end);
+    RxUtils.fromConcommand("smh_onionskin"):map(function() return nil end)
+        :with(inputStreams.OnionSkin):map(function(_, onionSkin) return not onionSkin end)
+        :subscribe(outputStreams.OnionSkin);
 
-	concommand.Add("smh_onionskin", function()
-		SMH.Data.OnionSkin = not SMH.Data.OnionSkin;
-	end);
+    RxUtils.fromConcommand("smh_quicksave"):map(function() return nil end):subscribe(outputStreams.QuickSave);
 
-	concommand.Add("smh_quicksave", function()
-		SMH.Data:_Call("QuickSave");
-	end);
+    RxUtils.fromConcommand("smh_render"):map(function() return nil end):subscribe(outputStreams.Render);
 
-	concommand.Add("smh_makejpeg", function()
-		SMH.Data.UseScreenshot = false;
-		SMH.Data.Rendering = not SMH.Data.Rendering;
-	end);
+    local boolConVarHook = function(convar, inputStream, outputStream)
+        local cvInputStream, cvOutputStream = RxUtils.fromConVar(convar);
+        inputStream:map(function(value) return value and "1" or "0" end):subscribe(cvInputStream);
+        cvOutputStream:map(function(value) return value ~= "0" end):subscribe(outputStream);
+    end
 
-	concommand.Add("smh_makescreenshot", function()
-		SMH.Data.UseScreenshot = true;
-		SMH.Data.Rendering = not SMH.Data.Rendering;
-	end);
+    boolConVarHook(CreateClientConVar("smh_freezeall", "0"), inputStreams.FreezeAll, outputStreams.FreezeAll);
+    boolConVarHook(CreateClientConVar("smh_localizephysbones", "0"), inputStreams.LocalizePhysBones, outputStreams.LocalizePhysBones);
+    boolConVarHook(CreateClientConVar("smh_ignorephysbones", "0"), inputStreams.IgnorePhysBones, outputStreams.IgnorePhysBones);
+    boolConVarHook(CreateClientConVar("smh_ghostprevframe", "0"), inputStreams.GhostPrevFrame, outputStreams.GhostPrevFrame);
+    boolConVarHook(CreateClientConVar("smh_ghostnextframe", "0"), inputStreams.GhostNextFrame, outputStreams.GhostNextFrame);
+    boolConVarHook(CreateClientConVar("smh_ghostallentities", "0"), inputStreams.GhostAllEntities, outputStreams.GhostAllEntities);
 
-	local data = SMH.Data;
-	data:_BindToConVar("FreezeAll", CreateClientConVar("smh_freezeall", "0"), {ValueType = "boolean"});
-	data:_BindToConVar("LocalizePhysBones", CreateClientConVar("smh_localizephysbones", "0"), {ValueType = "boolean"});
-	data:_BindToConVar("IgnorePhysBones", CreateClientConVar("smh_ignorephysbones", "0"), {ValueType = "boolean"});
-	data:_BindToConVar("GhostPrevFrame", CreateClientConVar("smh_ghostprevframe", "0"), {ValueType = "boolean"});
-	data:_BindToConVar("GhostNextFrame", CreateClientConVar("smh_ghostnextframe", "0"), {ValueType = "boolean"});
-	data:_BindToConVar("GhostAllEntities", CreateClientConVar("smh_ghostallentities", "0"), {ValueType = "boolean"});
-	data:_BindToConVar("GhostTransparency", CreateClientConVar("smh_ghosttransparency", "0.5"), {ValueType = "number"});
-
-	return {
-		Output = {
-			MenuVisibility = menuVisibilityStream,
-		}
-	};
+    local cvGhostTransparencyInput, cvGhostTransparencyOutput = RxUtils.fromConVar(CreateClientConVar("smh_ghosttransparency", "0.5"));
+    inputStreams.GhostTransparency:map(function(value) return tostring(value) end):subscribe(cvGhostTransparencyInput);
+    cvGhostTransparencyOutput:map(function(value) return tonumber(value) end):subscribe(outputStreams.GhostTransparency);
 
 end
 
