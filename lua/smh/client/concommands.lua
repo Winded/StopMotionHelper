@@ -2,50 +2,88 @@
 local Rx = SMH.Include("rxlua/rx.lua");
 local RxUtils = SMH.Include("shared/rxutils.lua");
 
-local function Setup(inputStreams, outputStreams)
+local function Setup()
 
-    RxUtils.fromConcommand("+smh_menu"):map(function() return true end):subscribe(outputStreams.MenuVisibility);
-    RxUtils.fromConcommand("-smh_menu"):map(function() return false end):subscribe(outputStreams.MenuVisibility);
+    local menuVisiblity = RxUtils.fromConcommand("+smh_menu"):map(function() return true end)
+        :merge(RxUtils.fromConcommand("-smh_menu"):map(function() return false end));
 
-    RxUtils.fromConcommand("smh_record"):map(function() return nil end):subscribe(outputStreams.Record);
+    local record = RxUtils.fromConcommand("smh_record"):map(function() return nil end);
 
-    RxUtils.fromConcommand("smh_next"):map(function() return nil end)
-        :with(inputStreams.SetFrame, inputStreams.PlaybackLength)
-        :map(function(_, frame, playbackLength) return (frame + 1) < playbackLength and (frame + 1) or 0 end)
-        :subscribe(outputStreams.SetFrame);
+    local inputFrame = Rx.Subject.create();
+    local outputFrame = RxUtils.fromConcommand("smh_next"):map(function() return 1 end)
+        :merge(RxUtils.fromConcommand("smh_previous"):map(function() return -1 end))
+        :with(inputFrame, playbackLength)
+        :map(function(frameDelta, frame, playbackLength)
+            local newFrame = frame + frameDelta;
+            newFrame = newFrame < playbackLength and newFrame or 0;
+            newFrame = newFrame >= 0 and newFrame or playbackLength - 1;
+            return newFrame;
+        end);
 
-    RxUtils.fromConcommand("smh_previous"):map(function() return nil end)
-        :with(inputStreams.SetFrame, inputStreams.PlaybackLength)
-        :map(function(_, frame, playbackLength) return (frame - 1) >= 0 and (frame - 1) or (playbackLength - 1) end)
-        :subscribe(outputStreams.SetFrame);
+    local playback = RxUtils.fromConcommand("+smh_playback"):map(function() return true end)
+        :merge(RxUtils.fromConcommand("-smh_playback"):map(function() return false end));
 
-    RxUtils.fromConcommand("+smh_playback"):map(function() return true end):subscribe(outputStreams.Playback);
-    RxUtils.fromConcommand("-smh_playback"):map(function() return false end):subscribe(outputStreams.Playback);
+    local inputOnionSkin = Rx.Subject.create();
+    local outputOnionSkin = RxUtils.fromConcommand("smh_onionskin"):map(function() return nil end)
+        :with(inputOnionSkin):map(function(_, onionSkin) return not onionSkin end);
 
-    RxUtils.fromConcommand("smh_onionskin"):map(function() return nil end)
-        :with(inputStreams.OnionSkin):map(function(_, onionSkin) return not onionSkin end)
-        :subscribe(outputStreams.OnionSkin);
+    local quickSave = RxUtils.fromConcommand("smh_quicksave"):map(function() return nil end);
 
-    RxUtils.fromConcommand("smh_quicksave"):map(function() return nil end):subscribe(outputStreams.QuickSave);
+    local render = RxUtils.fromConcommand("smh_render"):map(function() return nil end);
 
-    RxUtils.fromConcommand("smh_render"):map(function() return nil end):subscribe(outputStreams.Render);
-
-    local boolConVarHook = function(convar, inputStream, outputStream)
+    local boolConVarHook = function(convar)
         local cvInputStream, cvOutputStream = RxUtils.fromConVar(convar);
-        inputStream:map(function(value) return value and "1" or "0" end):subscribe(cvInputStream);
-        cvOutputStream:map(function(value) return value ~= "0" end):subscribe(outputStream);
+        local input = Rx.Subject.create();
+        input:map(function(value) return value and "1" or "0" end):subscribe(cvInputStream);
+        local output = cvOutputStream:map(function(value) return value ~= "0" end);
+        return input, output;
     end
 
-    boolConVarHook(CreateClientConVar("smh_freezeall", "0"), inputStreams.FreezeAll, outputStreams.FreezeAll);
-    boolConVarHook(CreateClientConVar("smh_localizephysbones", "0"), inputStreams.LocalizePhysBones, outputStreams.LocalizePhysBones);
-    boolConVarHook(CreateClientConVar("smh_ignorephysbones", "0"), inputStreams.IgnorePhysBones, outputStreams.IgnorePhysBones);
-    boolConVarHook(CreateClientConVar("smh_ghostprevframe", "0"), inputStreams.GhostPrevFrame, outputStreams.GhostPrevFrame);
-    boolConVarHook(CreateClientConVar("smh_ghostnextframe", "0"), inputStreams.GhostNextFrame, outputStreams.GhostNextFrame);
-    boolConVarHook(CreateClientConVar("smh_ghostallentities", "0"), inputStreams.GhostAllEntities, outputStreams.GhostAllEntities);
+    local freezeAllInput, freezeAllOutput = boolConVarHook(CreateClientConVar("smh_freezeall", "0"));
+    local localizePhysBonesInput, localizePhysBonesOutput = boolConVarHook(CreateClientConVar("smh_localizephysbones", "0"));
+    local ignorePhysBonesInput, ignorePhysBonesOutput = boolConVarHook(CreateClientConVar("smh_ignorephysbones", "0"));
+    local ghostPrevFrameInput, ghostPrevFrameOutput = boolConVarHook(CreateClientConVar("smh_ghostprevframe", "0"));
+    local ghostNextFrameInput, ghostNextFrameOutput = boolConVarHook(CreateClientConVar("smh_ghostnextframe", "0"));
+    local ghostAllEntitiesInput, ghostAllEntitiesOutput = boolConVarHook(CreateClientConVar("smh_ghostallentities", "0"));
 
     local cvGhostTransparencyInput, cvGhostTransparencyOutput = RxUtils.fromConVar(CreateClientConVar("smh_ghosttransparency", "0.5"));
-    inputStreams.GhostTransparency:map(function(value) return tostring(value) end):subscribe(cvGhostTransparencyInput);
-    cvGhostTransparencyOutput:map(function(value) return tonumber(value) end):subscribe(outputStreams.GhostTransparency);
+    local ghostTransparencyInput = Rx.Subject.create();
+    ghostTransparencyInput:map(function(value) return tostring(value) end):subscribe(cvGhostTransparencyInput);
+    local ghostTransparencyOutput = cvGhostTransparencyOutput:map(function(value) return tonumber(value) end);
+
+    return {
+        Input = {
+            Frame = inputFrame,
+            OnionSkin = inputOnionSkin,
+
+            FreezeAll = freezeAllInput,
+            LocalizePhysBones = localizePhysBonesInput,
+            IgnorePhysBones = ignorePhysBonesInput,
+            GhostPrevFrame = ghostPrevFrameInput,
+            GhostNextFrame = ghostNextFrameInput,
+            GhostAllEntities = ghostAllEntitiesInput,
+
+            GhostTransparency = ghostTransparencyInput,
+        },
+        Output = {
+            MenuVisiblity = menuVisiblity,
+            Record = record,
+            Frame = outputFrame,
+            Playback = playback,
+            OnionSkin = outputOnionSkin,
+            QuickSave = quickSave,
+            Render = render,
+
+            FreezeAll = freezeAllOutput,
+            LocalizePhysBones = localizePhysBonesOutput,
+            IgnorePhysBones = ignorePhysBonesOutput,
+            GhostPrevFrame = ghostPrevFrameOutput,
+            GhostNextFrame = ghostNextFrameOutput,
+            GhostAllEntities = ghostAllEntitiesOutput,
+
+            GhostTransparency = ghostTransparencyOutput,
+        }
+    };
 
 end
 

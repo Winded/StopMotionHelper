@@ -2,19 +2,18 @@ local Rx = SMH.Include("rxlua/rx.lua");
 local RxUtils = SMH.Include("shared/rxutils.lua");
 local NetProtocol = SMH.Include("shared/net_protocol.lua");
 
-local function Setup(inputStreams, outputStreams)
+local function Setup()
 
-    RxUtils.fromNetReceiver("SMHAddKeyframeAck"):map(function()
+    local addKeyframe = RxUtils.fromNetReceiver("SMHAddKeyframeAck"):map(function()
         local id = net.ReadInt(32);
         local data = NetProtocol.ReadKeyframeData();
         data.Id = id;
         return data;
-    end):subscribe(outputStreams.AddKeyframe);
+    end);
 
-    RxUtils.fromNetReceiver("SMHRemoveKeyframeAck"):map(function() return net.ReadInt(32) end)
-        :subscribe(outputStreams.RemoveKeyframe);
+    local removeKeyframe = RxUtils.fromNetReceiver("SMHRemoveKeyframeAck"):map(function() return net.ReadInt(32) end);
 
-    RxUtils.fromNetReceiver("SMHReloadKeyframes"):map(function()
+    local reloadKeyframes = RxUtils.fromNetReceiver("SMHReloadKeyframes"):map(function()
         local keyframes = {};
         local numKeyframes = net.ReadInt(32);
         for i = 1, numKeyframes do
@@ -24,38 +23,58 @@ local function Setup(inputStreams, outputStreams)
             });
         end
         return keyframes;
-    end):subscribe(outputStreams.ReloadKeyframes);
+    end);
 
-    inputStreams.SetFrame:subscribe(function(newFrame)
+    local frame = Rx.Subject.create();
+    frame:subscribe(function(newFrame)
         net.Start("SMHSetFrame");
         net.WriteInt(newFrame, 32);
         net.SendToServer();
     end);
 
-    inputStreams.SetEntity:subscribe(function(newEntity)
+    local entity = Rx.Subject.create();
+    entity:subscribe(function(newEntity)
         net.Start("SMHSetEntity");
         net.WriteEntity(newEntity);
         net.SendToServer();
     end);
 
-    inputStreams.AddKeyframe:subscribe(function(data)
+    local addKeyframe = Rx.Subject.create();
+    addKeyframe:subscribe(function(data)
         net.Start("SMHAddKeyframeReq");
         NetProtocol.WriteKeyframeData(data);
         net.SendToServer();
     end);
 
-    inputStreams.UpdateKeyframe:subscribe(function(data)
+    local updateKeyframe = Rx.Subject.create();
+    updateKeyframe:subscribe(function(data)
         net.Start("SMHUpdateKeyframe");
         net.WriteInt(data.Id, 32);
         NetProtocol.WriteKeyframeData(data);
         net.SendToServer();
     end);
 
-    inputStreams.RemoveKeyframe:subscribe(function(id)
+    local removeKeyframe = Rx.Subject.create();
+    removeKeyframe:subscribe(function(id)
         net.Start("SMHRemoveKeyframeReq");
         net.WriteInt(id, 32);
         net.SendToServer();
     end);
+
+    return {
+        Input = {
+            Frame = frame,
+            Entity = entity,
+            AddKeyframe = addKeyframe,
+            UpdateKeyframe = updateKeyframe,
+            RemoveKeyframe = removeKeyframe,
+        },
+        Output = {
+            AddKeyframe = addKeyframe,
+            RemoveKeyframe = removeKeyframe,
+            ReloadKeyframes = reloadKeyframes,
+        }
+    };
 
 end
 
