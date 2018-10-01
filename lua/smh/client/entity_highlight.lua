@@ -118,10 +118,10 @@ local function RenderHalo(entity)
 
 end
 
-local function Setup()
+local function Setup(eventStream)
 	
-	local highlightStream = Rx.BehaviorSubject.create(false);
-	local entityStream = Rx.BehaviorSubject.create(nil);
+	local highlightStream = RxUtils.eventObservable(eventStream, "SetHighlight");
+	local entityStream = RxUtils.eventObservable(eventStream, "SetEntity");
 
 	RxUtils.fromHook("PostDrawEffects"):with(highlightStream, entityStream)
 		:map(function(_, highlight, entity) return highlight, entity end)
@@ -129,12 +129,6 @@ local function Setup()
 		:map(function(highlight, entity) return entity end)
 		:subscribe(RenderHalo);
 
-	return {
-		Input = {
-			Highlight = highlightStream,
-			Entity = entityStream,
-		}
-	}
 end
 
 return Setup;

@@ -70,6 +70,11 @@ function RxUtils.fromNetReceiver(command)
     end);
 end
 
+function RxUtils.eventObservable(observable, eventId)
+    return observable:filter(function(id, data) return id == eventId end)
+        :map(function(id, data) return data end);
+end
+
 if CLIENT then
 
     function RxUtils.bindDPanel(panel, setFunc, onChangeFunc)
