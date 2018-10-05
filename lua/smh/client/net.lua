@@ -25,6 +25,25 @@ local function Setup(sendPacketStream)
         return keyframes;
     end);
 
+    local getSaveFiles = RxUtils.fromNetReceiver("SMHGetSaveFilesAck"):map(function()
+        local saveFiles = {};
+        local numFiles = net.ReadInt(32);
+        for i = 1, numFiles do
+            table.insert(saveFiles, net.ReadString());
+        end
+        return saveFiles;
+    end);
+
+    local getSaveFileEntities = RxUtils.fromNetReceiver("SMHGetSaveFileEntitiesAck"):map(function()
+        local fileName = net.ReadString();
+        local entities = {};
+        local numEntities = net.ReadInt(32);
+        for i = 1, numEntities do
+            table.insert(entities, net.ReadString());
+        end
+        return { FileName = fileName, Entities = entities };
+    end);
+
     local sendFuncs = {
         SetFrame = function(newFrame)
             net.Start("SMHSetFrame");
@@ -63,6 +82,42 @@ local function Setup(sendPacketStream)
             net.WriteInt(id, 32);
             net.SendToServer();
         end,
+
+        UpdateSettings = function(data)
+            net.Start("SMHUpdateSettings");
+            net.WriteTable(data);
+            net.SendToServer();
+        end,
+
+        GetSaveFilesReq = function(data)
+            net.Start("SMHGetSaveFilesReq");
+            net.SendToServer();
+        end,
+
+        GetSaveFileEntitiesReq = function(fileName)
+            net.Start("SMHGetSaveFileEntitiesReq");
+            net.WriteString(fileName);
+            net.SendToServer();
+        end,
+
+        Save = function(fileName)
+            net.Start("SMHSave");
+            net.WriteString(fileName);
+            net.SendToServer();
+        end,
+
+        Load = function(data)
+            net.Start("SMHLoad");
+            net.WriteString(data.FileName);
+            net.WriteString(data.Model);
+            net.SendToServer();
+        end,
+
+        DeleteSave = function(fileName)
+            net.Start("SMHDeleteSave");
+            net.WriteString(fileName);
+            net.SendToServer();
+        end,
     };
 
     sendPacketStream:subscribe(function(type, data)
@@ -74,7 +129,9 @@ local function Setup(sendPacketStream)
     return Rx.Observable.merge(
         addKeyframe:map(function(data) return "AddKeyframeAck", data end),
         removeKeyframe:map(function(data) return "RemoveKeyframeAck", data end),
-        reloadKeyframes:map(function(data) return "ReloadKeyframes", data end)
+        reloadKeyframes:map(function(data) return "ReloadKeyframes", data end),
+        getSaveFiles:map(function(data) return "GetSaveFilesAck", data end),
+        getSaveFileEntities:map(function(data) return "GetSaveFileEntitiesAck", data end)
     );
 
 end
