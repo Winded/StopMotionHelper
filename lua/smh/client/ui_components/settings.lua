@@ -1,7 +1,4 @@
-local Rx = SMH.Include("rxlua/rx.lua");
-local RxUtils = SMH.Include("shared/rxutils.lua");
-
-local function Create(parent)
+return function(parent)
 
 	local panel = vgui.Create("DFrame", parent);
 
@@ -71,24 +68,7 @@ local function Create(parent)
 		panel.HelpButton:SetSize(150, 20);
 
 	end
-
-	local input = {};
-	local output = {};
-
-	input.FreezeAll, output.FreezeAll = RxUtils.bindDPanel(panel.FreezeAll, "SetValue", "OnChange");
-	input.LocalizePhysBones, output.LocalizePhysBones = RxUtils.bindDPanel(panel.LocalizePhysBones, "SetValue", "OnChange");
-	input.IgnorePhysBones, output.IgnorePhysBones = RxUtils.bindDPanel(panel.IgnorePhysBones, "SetValue", "OnChange");
-	input.GhostPrevFrame, output.GhostPrevFrame = RxUtils.bindDPanel(panel.GhostPrevFrame, "SetValue", "OnChange");
-	input.GhostNextFrame, output.GhostNextFrame = RxUtils.bindDPanel(panel.GhostNextFrame, "SetValue", "OnChange");
-	input.GhostAllEntities, output.GhostAllEntities = RxUtils.bindDPanel(panel.GhostAllEntities, "SetValue", "OnChange");
-	input.GhostTransparency, output.GhostTransparency = RxUtils.bindDPanel(panel.GhostTransparency, "SetValue", "OnValueChanged");
-	input.ShowHelp, output.ShowHelp = RxUtils.bindDPanel(panel.HelpButton, nil, "DoClick");
-
-	return panel, {
-		Input = input,
-		Output = output,
-	};
+	
+	return panel
 
 end
-
-return Create;
