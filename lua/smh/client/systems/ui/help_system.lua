@@ -7,4 +7,4 @@ function SYS:EventShowHelp()
     gui.OpenURL("https://github.com/Winded/StopMotionHelper/blob/master/TUTORIAL.md")
 end
 
-SMH.RegisterSystem("HelpSystem", SYS)
+SMH.Systems.Register("HelpSystem", SYS)

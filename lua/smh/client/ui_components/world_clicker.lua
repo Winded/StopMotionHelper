@@ -1,18 +1,16 @@
-local function create()
+local PANEL = {}
 
-    local clicker = vgui.Create("EditablePanel")
+function PANEL:Init()
 
-    clicker:SetWorldClicker(true)
-    clicker.m_bStretchToFit = true
+    self:SetWorldClicker(true)
+    self.m_bStretchToFit = true
 
-    clicker:SetPos(0, 0)
-    clicker:SetSize(ScrW(), ScrH())
+    self:SetPos(0, 0)
+    self:SetSize(ScrW(), ScrH())
 
-    clicker:MakePopup()
-    clicker:SetVisible(false)
-
-    return clicker
+    self:MakePopup()
+    self:SetVisible(false)
 
 end
 
-return create
+vgui.Register("SMHWorldClicker", PANEL, "EditablePanel")

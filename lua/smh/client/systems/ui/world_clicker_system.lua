@@ -24,4 +24,4 @@ function SYS:EventUiVisibilityChanged(visible)
     end
 end
 
-SMH.RegisterSystem("WorldClickerSystem", SYS)
+SMH.Systems.Register("WorldClickerSystem", SYS)

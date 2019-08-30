@@ -48,4 +48,4 @@ function SYS:invokeSet(changedSettings, settingKey, element)
     end
 end
 
-SMH.RegisterSystem("SettingsSystem", SYS)
+SMH.Systems.Register("SettingsSystem", SYS)
