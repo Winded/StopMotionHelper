@@ -4,23 +4,27 @@ function SYS:Init(sequencer)
     self.sequencer = sequencer
 end
 
-function SYS:EventMousePressed(element, mouseCode)
-    element:MouseCapture(true)
+function SYS:EventKeyframeMousePressed(element, mouseCode)
+    if mouseCode ~= MOUSE_LEFT then
+        return
+    end
 
+    element:MouseCapture(true)
     element.Dragging = true
 end
 
-function SYS:EventMouseReleased(element, mouseCode)
-    if not element.Dragging then
+function SYS:EventKeyframeMouseReleased(element, mouseCode)
+    if mouseCode ~= MOUSE_LEFT or not element.Dragging then
         return
     end
 
     element:MouseCapture(false)
-
     element.Dragging = false
+
+    self.sequencer:Next(self, "UpdateKeyframe", element.KeyframeId, { Position = targetPos })
 end
 
-function SYS:EventCursorMoved(element, cursorX, cursorY)
+function SYS:EventKeyframeCursorMoved(element, cursorX, cursorY)
     if not element.Dragging then
         return
     end
@@ -34,6 +38,4 @@ function SYS:EventCursorMoved(element, cursorX, cursorY)
 
     local targetPos = math.Round(panel.ScrollOffset + (targetX / width) * panel.Zoom)
     targetPos = targetPos < 0 and 0 or (targetPos > panel.TotalFrames and panel.TotalFrames - 1 or targetPos)
-
-    self.sequencer:Next(self, "UpdateFrame", element.FrameId, { Position = targetPos })
 end

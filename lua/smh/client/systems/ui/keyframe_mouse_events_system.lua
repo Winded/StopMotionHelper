@@ -4,22 +4,23 @@ function SYS:Init(sequencer)
     self.sequencer = sequencer
 end
 
-function SYS:EventFramePointerElementCreated(element)
+function SYS:EventKeyframeElementCreated(element)
     element.OnMousePressed = function(el, mouseCode)
-        self.sequencer:Next(self, "MousePressed", el, mouseCode)
+        self.sequencer:Next(self, "KeyframeMousePressed", el, mouseCode)
     end
     element.OnMouseReleased = function(el, mouseCode)
-        self.sequencer:Next(self, "MouseReleased", el, mouseCode)
+        self.sequencer:Next(self, "KeyframeMouseReleased", el, mouseCode)
     end
     element.OnCursorMoved = function(el)
         local cursorX, cursorY = el.FramePanel:CursorPos()
-        self.sequencer:Next(self, "CursorMoved", el, cursorX, cursorY)
+        self.sequencer:Next(self, "KeyframeCursorMoved", el, cursorX, cursorY)
     end
 end
 
 function SYS:EventFramePointerElementRemoved(element)
     element.OnMousePressed = function() end
     element.OnMouseReleased = function() end
+    element.OnMouseWheeled = function() end
     element.OnCursorMoved = function() end
 end
 

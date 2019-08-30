@@ -35,8 +35,10 @@ function SYS:EventSettingsChanged(changedSettings)
 end
 
 function SYS:bind(settingKey, element, elementChangeFunc)
-    element[elementChangeFunc] = function(self, newValue)
+    element[elementChangeFunc] = function(_, newValue)
+        self.changing = true
         self.sequencer:Next(self, "SettingsChanged", { [settingKey] = newValue })
+        self.changing = false
     end
 end
 
