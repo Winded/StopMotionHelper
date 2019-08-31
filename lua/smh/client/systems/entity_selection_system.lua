@@ -9,7 +9,7 @@ function SYS:EventTrace(trace)
         return
     end
 
-    self.sequencer:Next(self, "EntitySelected", trace.Entity)
+    self.sequencer:Next(self, "SelectEntity", trace.Entity)
 end
 
 SMH.Systems.Register("EntitySelectionSystem", SYS)

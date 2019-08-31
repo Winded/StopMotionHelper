@@ -14,7 +14,7 @@ function SYS:Init(sequencer, element)
     end
 end
 
-function SYS:EventUiVisibilityChanged(visible)
+function SYS:EventSetUIVisibility(visible)
     if not visible then
         RememberCursorPosition()
     end

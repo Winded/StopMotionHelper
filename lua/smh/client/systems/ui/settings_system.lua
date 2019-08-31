@@ -17,11 +17,7 @@ function SYS:Init(sequencer, element)
     end
 end
 
-function SYS:EventSettingsChanged(changedSettings)
-    if self.changing then
-        return
-    end
-
+function SYS:EventChangeSettings(changedSettings)
     self.changing = true
 
     self:invokeSet(changedSettings, "FreezeAll", element.FreezeAll)
@@ -36,9 +32,11 @@ end
 
 function SYS:bind(settingKey, element, elementChangeFunc)
     element[elementChangeFunc] = function(_, newValue)
-        self.changing = true
-        self.sequencer:Next(self, "SettingsChanged", { [settingKey] = newValue })
-        self.changing = false
+        if self.changing then
+            return
+        end
+
+        self.sequencer:Next(self, "ChangeSettings", { [settingKey] = newValue })
     end
 end
 
