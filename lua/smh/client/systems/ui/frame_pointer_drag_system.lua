@@ -6,6 +6,7 @@ end
 
 function SYS:EventFramePointerDragStart(element)
     element:MouseCapture(true)
+    element.OutlineColor = Color(255, 255, 255)
     element.Dragging = true
 end
 
@@ -15,6 +16,7 @@ function SYS:EventFramePointerDragStop(element)
     end
 
     element:MouseCapture(false)
+    element.OutlineColor = Color(0, 0, 0)
     element.Dragging = false
 end
 

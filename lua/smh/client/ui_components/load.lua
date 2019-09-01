@@ -1,80 +1,39 @@
+local PANEL = {}
 
-local Rx = SMH.Include("rxlua/rx.lua");
-local RxUtils = SMH.Include("shared/rxutils.lua");
+function PANEL:Init()
 
-local function Create(parent)
+	self:SetTitle("Load")
+	self:SetDeleteOnClose(false)
 
-	local panel = vgui.Create("DFrame", parent);
+	self.FileList = vgui.Create("DListView", self)
+	self.FileList:AddColumn("Saved scenes")
+	self.FileList:SetMultiSelect(false)
 
-	panel:SetTitle("Load");
-	panel:SetDeleteOnClose(false);
+	self.EntityList = vgui.Create("DListView", self)
+	self.EntityList:AddColumn("Entities")
+	self.EntityList:SetMultiSelect(false)
 
-	panel.FileList = vgui.Create("DListView", panel);
-	panel.FileList:AddColumn("Saved scenes");
-	panel.FileList:SetMultiSelect(false);
-
-	panel.EntityList = vgui.Create("DListView", panel);
-	panel.EntityList:AddColumn("Entities");
-	panel.EntityList:SetMultiSelect(false);
-
-	panel.Load = vgui.Create("DButton", panel);
-	panel.Load:SetText("Load");
-
-	local basePerformLayout = panel.PerformLayout;
-	panel.PerformLayout = function(panel, w, h)
-
-		basePerformLayout(panel, w, h);
-
-		panel:SetSize(250, 210);
-		panel:SetPos(ScrW() / 2 - panel:GetWide() / 2, ScrH() / 2 - panel:GetTall() / 2);
-	
-		panel.FileList:SetPos(5, 30);
-		panel.FileList:SetSize(panel:GetWide() / 2 - 5 - 5, 150);
-	
-		panel.EntityList:SetPos(panel:GetWide() / 2 + 5, 30);
-		panel.EntityList:SetSize(panel:GetWide() / 2 - 5 - 5, 150);
-	
-		panel.Load:SetPos(panel:GetWide() - 60 - 5, 182);
-		panel.Load:SetSize(60, 20);
-
-	end
-
-	local function addLines(item, lines)
-		item:ClearSelection();
-		item:Clear();
-		for _, line in pairs(lines) do
-			item:AddLine(line);
-		end
-	end
-	
-	local fileListStream = Rx.Subject.create();
-	fileListStream:map(function(files) return panel.FileList, files end)
-		:subscribe(addLines);
-	
-	local entitiesStream = Rx.Subject.create();
-	entitiesStream:map(function(entities) return panel.EntityList, entities end)
-		:subscribe(addLines);
-
-	local fileSelectStream = Rx.Subject.create();
-	panel.FileList.OnRowSelected = function(self, rowID, row) fileSelectStream(row:GetValue(1)) end
-
-	local entitySelectStream = Rx.Subject.create();
-	panel.EntityList.OnRowSelected = function(self, rowID, row) entitySelectStream(row:GetValue(1)) end
-
-	local _, loadStream = RxUtils.bindDPanel(panel.Load, nil, "DoClick");
-
-	return panel, {
-		Input = {
-			FileList = fileListStream,
-			Entities = entitiesStream,
-		},
-		Output = {
-			File = fileSelectStream,
-			Entity = entitySelectStream,
-			Load = loadStream,
-		}
-	};
+	self.Load = vgui.Create("DButton", self)
+	self.Load:SetText("Load")
 
 end
 
-return Create;
+function PANEL:PerformLayout(w, h)
+
+	self.BaseClass.PerformLayout(self, w, h)
+
+	self:SetSize(250, 210)
+	self:SetPos(ScrW() / 2 - self:GetWide() / 2, ScrH() / 2 - self:GetTall() / 2)
+
+	self.FileList:SetPos(5, 30)
+	self.FileList:SetSize(self:GetWide() / 2 - 5 - 5, 150)
+
+	self.EntityList:SetPos(self:GetWide() / 2 + 5, 30)
+	self.EntityList:SetSize(self:GetWide() / 2 - 5 - 5, 150)
+
+	self.Load:SetPos(self:GetWide() - 60 - 5, 182)
+	self.Load:SetSize(60, 20)
+
+end
+
+vgui.Register("SMHLoad", PANEL, "DFrame")
