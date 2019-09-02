@@ -20,7 +20,7 @@ function SYS:EventFramePointerDragStop(element)
     element.Dragging = false
 end
 
-function SYS:EventFramePointerCursorMoved(element, cursorX, cursorY)
+function SYS:EventCursorMoved(element, cursorX, cursorY)
     if not element.Dragging then
         return
     end

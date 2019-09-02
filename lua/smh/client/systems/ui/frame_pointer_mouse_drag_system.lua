@@ -4,7 +4,7 @@ function SYS:Init(sequencer)
     self.sequencer = sequencer
 end
 
-function SYS:EventFramePointerMousePressed(element, mouseCode)
+function SYS:EventMousePressed(element, mouseCode)
     if mouseCode ~= MOUSE_LEFT then
         return
     end
@@ -12,7 +12,7 @@ function SYS:EventFramePointerMousePressed(element, mouseCode)
     self.sequencer:Next(self, "FramePointerDragStart", element)
 end
 
-function SYS:EventFramePointerMouseReleased(element, mouseCode)
+function SYS:EventMouseReleased(element, mouseCode)
     if mouseCode ~= MOUSE_LEFT then
         return
     end

@@ -4,7 +4,7 @@ function SYS:Init(sequencer)
     self.sequencer = sequencer
 end
 
-function SYS:EventFramePointerMousePressed(element, mouseCode)
+function SYS:EventMousePressed(element, mouseCode)
     if mouseCode ~= MOUSE_RIGHT or input.IsKeyDown(KEY_LCONTROL) then
         return
     end

@@ -18,12 +18,12 @@ end
 
 function SEQ:Next(source, sequenceName, ...)
     local hash = self:sequenceHash(source._Name, source._Id, sequenceName)
-    if self.sequenceTable[hash] == nil then 
-        error("Sequence " .. hash .. " not defined")
+    if self.sequenceTable[hash] == nil then
+        return
     end
 
     for _, receiver in pairs(self.sequenceTable[hash]) do
-        receiver["Event" .. sequenceName](...)
+        receiver["Event" .. sequenceName](receiver, ...)
     end
 end
 

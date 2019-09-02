@@ -23,7 +23,7 @@ local function Setup(parent)
 	local panel = vgui.Create("DPanel", parent);
 
 	panel:SetBackgroundColor(Color(64, 64, 64, 64));
-	panel.Length = 100;
+	panel.TimelineLength = 100;
 
 	local scrollBar = vgui.Create("DPanel", panel);
 	scrollBar.Paint = function(self, w, h) derma.SkinHook("Paint", "ScrollBarGrip", self, w, h) end
