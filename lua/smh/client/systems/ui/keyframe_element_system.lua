@@ -16,6 +16,7 @@ function SYS:EventCreateKeyframe(keyframe)
     element.KeyframeId = keyframe.Id
 
     self.framePanel.Keyframes[keyframe.Id] = element
+    element.FramePanel = self.framePanel
 
     self.sequencer:Next(self, "CreateUIElement", element)
 end
@@ -29,6 +30,7 @@ function SYS:EventDeleteKeyframe(keyframeId)
     self.sequencer:Next(self, "DeleteUIElement", element)
 
     self.framePanel.Keyframes[keyframeId] = nil
+    element.FramePanel = nil
     element:Remove()
 end
 

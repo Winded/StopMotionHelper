@@ -1,13 +1,15 @@
 local SYS = {}
 
-function SYS:Init(sequencer, element)
+function SYS:Init(sequencer, elements)
     self.sequencer = sequencer
 
-    if element == nil then
+    if elements == nil then
         return
     end
 
-    self:bind(element)
+    for _, element in pairs(elements) do
+        self:bind(element)
+    end
 end
 
 function SYS:bind(element)
