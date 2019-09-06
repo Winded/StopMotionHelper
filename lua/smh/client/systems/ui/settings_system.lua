@@ -1,48 +1,28 @@
 local SYS = {}
 
-function SYS:Init(sequencer, element)
+function SYS:Init(sequencer, bindings)
     self.sequencer = sequencer
-    self.element = element
-    self.changing = false
-
-    self:bind("FreezeAll", element.FreezeAll, "OnChange")
-    self:bind("IgnorePhysBones", element.IgnorePhysBones, "OnChange")
-    self:bind("GhostPrevFrame", element.GhostPrevFrame, "OnChange")
-    self:bind("GhostNextFrame", element.GhostNextFrame, "OnChange")
-    self:bind("GhostAllEntities", element.GhostAllEntities, "OnChange")
-    self:bind("GhostTransparency", element.GhostTransparency, "OnValueChanged")
+    self.bindings = bindings
 
     element.ShowHelp.DoClick = function()
         self.sequencer:Next(self, "ShowHelp")
     end
 end
 
-function SYS:EventChangeSettings(changedSettings)
-    self.changing = true
-
-    self:invokeSet(changedSettings, "FreezeAll", element.FreezeAll)
-    self:invokeSet(changedSettings, "IgnorePhysBones", element.IgnorePhysBones)
-    self:invokeSet(changedSettings, "GhostPrevFrame", element.GhostPrevFrame)
-    self:invokeSet(changedSettings, "GhostNextFrame", element.GhostNextFrame)
-    self:invokeSet(changedSettings, "GhostAllEntities", element.GhostAllEntities)
-    self:invokeSet(changedSettings, "GhostTransparency", element.GhostTransparency)
-
-    self.changing = false
-end
-
-function SYS:bind(settingKey, element, elementChangeFunc)
-    element[elementChangeFunc] = function(_, newValue)
-        if self.changing then
-            return
-        end
-
-        self.sequencer:Next(self, "ChangeSettings", { [settingKey] = newValue })
+function SYS:EventChangeBindingValue(binding, newValue)
+    if binding.ShowHelp then
+        self.sequencer:Next(self, "ShowHelp")
+        return
     end
+
+    self.sequencer:Next(self, "ChangeSettings", { [binding.SettingKey] = newValue })
 end
 
-function SYS:invokeSet(changedSettings, settingKey, element)
-    if changedSettings[settingKey] ~= nil then
-        element:SetValue(changedSettings[settingKey])
+function SYS:EventChangeSettings(changedSettings)
+    for _, binding in pairs(self.bindings) do
+        if changedSettings[binding.SettingKey] ~= nil then
+            self.sequencer:next(self, "ChangeBindingValue", binding, changedSettings[binding.SettingKey])
+        end
     end
 end
 

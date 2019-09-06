@@ -1,11 +1,12 @@
 local SYS = {}
 
-function SYS:Init()
+function SYS:Init(pointerNormalizedVerticalPosition)
+    self.pointerNormalizedVerticalPosition = pointerNormalizedVerticalPosition
 end
 
 function SYS:EventSetFramePointerPosition(element, position)
     local startX, endX = unpack(element.FramePanel.FrameArea)
-    local height = element.VerticalPosition
+    local height = element.FramePanel:GetTall() * self.pointerNormalizedVerticalPosition
 
     local frameAreaWidth = endX - startX
     local positionWithOffset = position - scrollOffset
