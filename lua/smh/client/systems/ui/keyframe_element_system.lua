@@ -8,17 +8,20 @@ function SYS:Init(sequencer, framePanel)
 end
 
 function SYS:EventCreateKeyframe(keyframe)
-    local element = vgui.Create("SMHFramePointer", self.framePanel)
+    self.keyframe = keyframe
+    self.sequencer:Next(self, "CreateKeyframeElement")
+    self.keyframe = nil
+end
 
-    element.Color = Color(0, 200, 0)
-    element.VerticalPosition = self.framePanel:GetTall() / 4 * 2.2
-    element.Pointy = false
-    element.KeyframeId = keyframe.Id
+function SYS:EventCreateUIElement(element)
+    if self.keyframe == nil then
+        return
+    end
 
-    self.framePanel.Keyframes[keyframe.Id] = element
-    element.FramePanel = self.framePanel
+    element.KeyframeId = self.keyframe.Id
+    element.FramePosition = self.keyframe.Position
 
-    self.sequencer:Next(self, "CreateUIElement", element)
+    self.framePanel.Keyframes[self.keyframe.Id] = element
 end
 
 function SYS:EventDeleteKeyframe(keyframeId)
@@ -27,11 +30,8 @@ function SYS:EventDeleteKeyframe(keyframeId)
         return
     end
 
-    self.sequencer:Next(self, "DeleteUIElement", element)
-
     self.framePanel.Keyframes[keyframeId] = nil
-    element.FramePanel = nil
-    element:Remove()
+    self.sequencer:Next(self, "DeleteUIElement", element)
 end
 
 SMH.Systems.Register("KeyframeElementSystem", SYS)
