@@ -4,3 +4,6 @@
 [submodule "lua/smh/rxlua"]
 	path = lua/smh/rxlua
 	url = git@github.com:Winded/RxLua.git
+[submodule "lua/smh/submodules/ludi"]
+	path = lua/smh/submodules/ludi
+	url = git@github.com:Winded/ludi.git
