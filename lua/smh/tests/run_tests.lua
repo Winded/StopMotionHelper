@@ -10,6 +10,20 @@ function includeMock(path)
     return smhInclude("/smh/tests/mocks" .. path)
 end
 
+function math.Round(value)
+    local fraction = math.floor(value) - value
+    if fraction >= 0.5 then
+        return math.ceil(value)
+    else
+        return math.floor(value)
+    end
+end
+
+-- GMOD constants
+MOUSE_LEFT = 107
+MOUSE_RIGHT = 108
+MOUSE_MIDDLE = 109
+
 LU = smhInclude("/smh/tests/luaunit.lua")
 Ludi = smhInclude("/smh/submodules/ludi/ludi.lua")
 

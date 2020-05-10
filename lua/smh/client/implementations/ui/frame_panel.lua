@@ -1,10 +1,9 @@
 local PANEL = {}
 
-function PANEL:_initialize(uiDependencies, surfaceDrawer, serverCommands, mathUtility)
+function PANEL:_initialize(uiDependencies, surfaceDrawer, playbackUpdater)
     
     self._surfaceDrawer = surfaceDrawer
-    self._serverCommands = serverCommands
-    self._mathUtility = mathUtility
+    self._playbackUpdater = playbackUpdater
 
     self._playhead = uiDependencies.playhead
     self._scrollBar = uiDependencies.scrollBar
@@ -80,22 +79,30 @@ end
 
 function PANEL:OnMouseWheeled(scrollDelta)
     scrollDelta = -scrollDelta
-    self.zoom = self.zoom + scrollDelta
-    self.zoom = self.zoom > 500 and 500 or (self.zoom < 30 and 30 or self.zoom)
-
-    self._serverCommands:setPlaybackRange(self.scrollOffset, self.zoom)
+    self:setScrollOffsetAndZoom(self.scrollOffset, self.zoom + scrollDelta)
+    self._playbackUpdater:setPlaybackRange(self.scrollOffset, self.zoom)
 end
 
-function PANEL:OnMousePressed(mousecode)
+function PANEL:OnMousePressed(mouseCode)
+    if mouseCode ~= MOUSE_LEFT then
+        return
+    end
+
     local startX, endX = unpack(self.frameArea)
     local posX, posY = self:CursorPos()
 
     local targetX = posX - startX
     local width = endX - startX
-    local framePosition = self._mathUtility:round(self.scrollOffset + (targetX / width) * self.zoom)
+    local framePosition = math.Round(self.scrollOffset + (targetX / width) * self.zoom)
     framePosition = framePosition < 0 and 0 or (framePosition >= self.timelineLength and self.timelineLength - 1 or framePosition)
 
     self._playehead:setFrame(framePosition)
+end
+
+function PANEL:setScrollOffsetAndZoom(scrollOffset, zoom)
+    self.scrollOffset = scrollOffset
+    self.zoom = zoom
+    self.zoom = self.zoom > 500 and 500 or (self.zoom < 30 and 30 or self.zoom)
 end
 
 return PANEL
