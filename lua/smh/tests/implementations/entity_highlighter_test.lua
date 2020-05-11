@@ -1,8 +1,8 @@
 TestEntityHighlighter = {
     _cfg = {
-        hookCreator = includeMock("/gmod/hook_creator_mock.lua"),
-        haloRenderer = includeMock("/gmod/halo_renderer_mock.lua"),
-        entityValidator = includeMock("/gmod/entity_validator_mock.lua"),
+        hookCreator = includeMock("/gmod/hook_creator.lua"),
+        haloRenderer = includeMock("/gmod/halo_renderer.lua"),
+        entityValidator = includeMock("/gmod/entity_validator.lua"),
         entityHighlighter = smhInclude("/smh/client/implementations/entity_highlighter.lua")
     },
 

@@ -10,9 +10,9 @@ local ctr = function(surfaceDrawer, frameChangeListener, vguiFactory)
             self._vguiFactory:register("SMHFramePointer", PANEL, "DPanel")
         end,
 
-        create = function(self, framePanel, color, pointy)
+        create = function(self, framePanel, verticalPosition, color, pointy)
             local pointer = self._vguiFactory:create("SMHFramePointer")
-            pointer:_initialize(self._surfaceDrawer, self._frameChangeListener, framePanel, color, pointy)
+            pointer:_initialize(self._surfaceDrawer, self._frameChangeListener, framePanel, verticalPosition, color, pointy)
             pointer:SetParent(framePanel)
 
             return pointer

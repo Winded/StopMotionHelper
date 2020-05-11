@@ -1,8 +1,8 @@
 TestEntitySelector = {
     _cfg = {
-        entityValidator = includeMock("/gmod/entity_validator_mock.lua"),
-        serverCommands = includeMock("/server_commands_mock.lua"),
-        entityHighlighter = includeMock("/entity_highlighter_mock.lua"),
+        entityValidator = includeMock("/gmod/entity_validator.lua"),
+        serverCommands = includeMock("/server_commands.lua"),
+        entityHighlighter = includeMock("/entity_highlighter.lua"),
         entitySelector = smhInclude("/smh/client/implementations/entity_selector.lua"),
     },
 

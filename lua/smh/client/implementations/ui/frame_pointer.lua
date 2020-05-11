@@ -28,6 +28,7 @@ function PANEL:setFrame(frame)
     local positionWithOffset = frame - self._framePanel.scrollOffset
     local x = startX + (positionWithOffset / self._framePanel.zoom) * frameAreaWidth
 
+    self._frame = frame
     self:SetPos(x - self:GetWide() / 2, height - self:GetTall() / 2)
 end
 
@@ -94,7 +95,7 @@ function PANEL:Paint(width, height)
         self._surfaceDrawer:setDrawColor(unpack(self._outlineColor))
         self._surfaceDrawer:drawLine(0, 0, width, 0)
         self._surfaceDrawer:drawLine(width, 0, width, height - (height * 0.25))
-        self._surfaceDrawer:drawLine(width, height - (height * 0.25), w / 2, height)
+        self._surfaceDrawer:drawLine(width, height - (height * 0.25), width / 2, height)
         self._surfaceDrawer:drawLine(width / 2, height, 0, height - (height * 0.25))
         self._surfaceDrawer:drawLine(0, height - (height * 0.25), 0, 0)
     else
