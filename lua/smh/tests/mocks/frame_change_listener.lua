@@ -1,9 +1,11 @@
 local ctr = function()
     return {
-        frameChangeCalled = false,
+        frameChangeCalledCount = 0,
+        lastFrame = nil,
 
         onFrameChange = function(self, frame)
-            self.frameChangeCalled = true
+            self.frameChangeCalledCount = self.frameChangeCalledCount + 1
+            self.lastFrame = frame
         end,
     }
 end

@@ -10,8 +10,10 @@ function includeMock(path)
     return smhInclude("/smh/tests/mocks" .. path)
 end
 
+inspect = smhInclude("/smh/tests/inspect.lua")
+
 function math.Round(value)
-    local fraction = math.floor(value) - value
+    local fraction = math.abs(value - math.floor(value))
     if fraction >= 0.5 then
         return math.ceil(value)
     else

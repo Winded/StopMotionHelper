@@ -1,0 +1,4 @@
+return {
+    SQUARE = [[{ { "drawRect", { 1, 1, 7, 14 }, { { 255, 255, 255, 255 } } }, { "drawLine", { 0, 0, 8, 0 }, <1>{ 0, 0, 0, 255 } }, { "drawLine", { 8, 0, 8, 15 }, <table 1> }, { "drawLine", { 8, 15, 0, 15 }, <table 1> }, { "drawLine", { 0, 15, 0, 0 }, <table 1> } }]],
+    POINTY = [[{ { "drawRect", { 1, 1, 7, 11.25 }, <1>{ 255, 255, 255, 255 } }, { "drawPoly", { { {x = 1,y = 11.25}, {x = 7,y = 11.25}, {x = 4,y = 14} } }, <table 1> }, { "drawLine", { 0, 0, 8, 0 }, <2>{ 0, 0, 0, 255 } }, { "drawLine", { 8, 0, 8, 11.25 }, <table 2> }, { "drawLine", { 8, 11.25, 4, 15 }, <table 2> }, { "drawLine", { 4, 15, 0, 11.25 }, <table 2> }, { "drawLine", { 0, 11.25, 0, 0 }, <table 2> } }]],
+}
