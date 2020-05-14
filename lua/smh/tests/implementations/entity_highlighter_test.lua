@@ -1,60 +1,64 @@
 TestEntityHighlighter = {
-    _cfg = {
-        hookCreator = includeStub("/gmod/hook_creator.lua"),
-        haloRenderer = includeStub("/gmod/halo_renderer.lua"),
-        entityValidator = includeStub("/gmod/entity_validator.lua"),
-        entityHighlighter = smhInclude("/smh/client/implementations/entity_highlighter.lua")
-    },
+    _ctr = smhInclude("/smh/client/implementations/entity_highlighter.lua")[1],
 
     test_initialize = function(self)
-        local c = Ludi.newContainer()
-        c:addConfig(self._cfg)
-
-        local highlighter = c:get("entityHighlighter")
+        local calls = {}
+        local highlighter = self._ctr(nil, {
+            create = trackCalls(calls, "create", function(self, hookName, identifier, callback)
+                LU.assertEquals(hookName, "PostDrawEffects")
+                LU.assertEquals(identifier, "SMHEntityHighlight")
+                LU.assertNotNil(callback)
+            end)
+        }, nil)
+        
         highlighter:initialize()
-
-        local hookCreator = c:get("hookCreator")
-
-        LU.assertEquals(#hookCreator.hooks, 1)
-        LU.assertEquals(hookCreator.hooks[1][1], "PostDrawEffects")
-        LU.assertEquals(hookCreator.hooks[1][2], "SMHEntityHighlight")
+        LU.assertEquals(calls, { create = 1 })
     end,
 
     test_enabledInvalidEntity = function(self)
-        local c = Ludi.newContainer()
-        c:addConfig(self._cfg)
-
-        local highlighter = c:get("entityHighlighter")
-        highlighter:initialize()
+        local calls = {}
+        local highlighter = self._ctr({
+            render = trackCalls(calls, "render", function(self, entity)
+                LU.assertNotNil(entity)
+            end)
+        }, nil, {
+            isValid = trackCalls(calls, "isValid", function(self, entity)
+                return false
+            end)
+        })
 
         highlighter:setEnabled(true)
         LU.assertTrue(highlighter:isEnabled())
         LU.assertEquals(highlighter:getEntity(), nil)
 
-        local hookCreator = c:get("hookCreator")
-        hookCreator.hooks[1][3]()
-
-        local haloRenderer = c:get("haloRenderer")
-        LU.assertEquals(#haloRenderer.renderEvents, 0)
+        highlighter:onPostDrawEffects()
+        LU.assertEquals(calls, {
+            isValid = 1,
+        })
     end,
 
     test_successfulRender = function(self)
-        local c = Ludi.newContainer()
-        c:addConfig(self._cfg)
-
-        local highlighter = c:get("entityHighlighter")
-        highlighter:initialize()
+        local calls = {}
+        local highlighter = self._ctr({
+            render = trackCalls(calls, "render", function(self, entity)
+                LU.assertNotNil(entity)
+            end)
+        }, nil, {
+            isValid = trackCalls(calls, "isValid", function(self, entity)
+                LU.assertEquals(entity, 1234)
+                return true
+            end)
+        })
 
         highlighter:setEnabled(true)
-        highlighter:setEntity(1234) -- fake Entity ID
+        highlighter:setEntity(1234)
         LU.assertTrue(highlighter:isEnabled())
         LU.assertEquals(highlighter:getEntity(), 1234)
 
-        local hookCreator = c:get("hookCreator")
-        hookCreator.hooks[1][3]()
-
-        local haloRenderer = c:get("haloRenderer")
-        LU.assertEquals(#haloRenderer.renderEvents, 1)
-        LU.assertEquals(haloRenderer.renderEvents[1], 1234)
+        highlighter:onPostDrawEffects()
+        LU.assertEquals(calls, {
+            isValid = 1,
+            render = 1,
+        })
     end,
 }

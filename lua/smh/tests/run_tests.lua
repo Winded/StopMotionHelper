@@ -10,6 +10,17 @@ function includeStub(path)
     return smhInclude("/smh/tests/stub" .. path)
 end
 
+function trackCalls(target, name, fn)
+    return function(...)
+        if target[name] == nil then
+            target[name] = 1
+        else
+            target[name] = target[name] + 1
+        end
+        return fn(...)
+    end
+end
+
 inspect = smhInclude("/smh/tests/inspect.lua")
 
 function math.Round(value)
