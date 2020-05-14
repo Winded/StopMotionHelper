@@ -6,8 +6,8 @@ function smhInclude(path)
     return dofile(rootPath .. path)
 end
 
-function includeMock(path)
-    return smhInclude("/smh/tests/mocks" .. path)
+function includeStub(path)
+    return smhInclude("/smh/tests/stub" .. path)
 end
 
 inspect = smhInclude("/smh/tests/inspect.lua")

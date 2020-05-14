@@ -1,8 +1,8 @@
 TestFramePointer = {
     _cfg = {
-        surfaceDrawer = includeMock("/gmod/surface_drawer.lua"),
-        frameChangeListener = includeMock("/frame_change_listener.lua"),
-        vguiFactory = includeMock("/gmod/vgui_factory.lua"),
+        surfaceDrawer = includeStub("/gmod/surface_drawer.lua"),
+        frameChangeListener = includeStub("/frame_change_listener.lua"),
+        vguiFactory = includeStub("/gmod/vgui_factory.lua"),
         framePointerFactory = smhInclude("/smh/client/implementations/ui/frame_pointer_factory.lua"),
     },
 
