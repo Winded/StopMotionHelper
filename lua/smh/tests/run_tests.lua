@@ -21,6 +21,23 @@ function trackCalls(target, name, fn)
     end
 end
 
+function wrapMetatables(...)
+    local tables = {...}
+    local metatable = {
+        __index = function(self, key)
+            for _, mt in ipairs(tables) do
+                if mt[key] ~= nil then
+                    return mt[key]
+                end
+            end
+            return nil
+        end
+    }
+    local obj = {}
+    setmetatable(obj, metatable)
+    return obj
+end
+
 inspect = smhInclude("/smh/tests/inspect.lua")
 
 function math.Round(value)
@@ -41,6 +58,7 @@ LU = smhInclude("/smh/tests/luaunit.lua")
 Ludi = smhInclude("/smh/submodules/ludi/ludi.lua")
 
 local testFiles = {
+    "implementations/ui/frame_pointer_factory_test.lua",
     "implementations/ui/frame_pointer_test.lua",
     "implementations/entity_highlighter_test.lua",
     "implementations/entity_selector_test.lua",

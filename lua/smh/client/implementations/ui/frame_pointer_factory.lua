@@ -1,13 +1,12 @@
-local ctr = function(surfaceDrawer, frameChangeListener, vguiFactory)
-    local PANEL = smhInclude("/smh/client/implementations/ui/frame_pointer.lua")
-
+local ctr = function(framePointerMetatable, surfaceDrawer, frameChangeListener, vguiFactory)
     return {
+        _framePointerMetatable = framePointerMetatable,
         _surfaceDrawer = surfaceDrawer,
         _frameChangeListener = frameChangeListener,
         _vguiFactory = vguiFactory,
 
         initialize = function(self)
-            self._vguiFactory:register("SMHFramePointer", PANEL, "DPanel")
+            self._vguiFactory:register("SMHFramePointer", self._framePointerMetatable, "DPanel")
         end,
 
         create = function(self, framePanel, verticalPosition, color, pointy)
@@ -20,4 +19,4 @@ local ctr = function(surfaceDrawer, frameChangeListener, vguiFactory)
     }
 end
 
-return {ctr, "surfaceDrawer", "frameChangeListener", "vguiFactory"}
+return {ctr, "framePointerMetatable", "surfaceDrawer", "frameChangeListener", "vguiFactory"}

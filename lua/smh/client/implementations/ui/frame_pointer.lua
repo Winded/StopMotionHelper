@@ -1,15 +1,16 @@
 
 local PANEL = {}
 
-function PANEL:_initialize(surfaceDrawer, frameChangeListener, framePanel, verticalPosition, color, pointy)
+function PANEL:_initialize(surfaceDrawer, keyframeController, framePanel, verticalPosition, color, pointy)
     self._surfaceDrawer = surfaceDrawer
-    self._frameChangeListener = frameChangeListener
+    self._keyframeController = keyframeController
     self._framePanel = framePanel
 
     self:SetSize(8, 15)
     self.color = color
     self.verticalPosition = verticalPosition;
     self.pointy = pointy
+
     self._frame = 0
 
     self._outlineColor = {0, 0, 0, 255}
@@ -33,13 +34,15 @@ function PANEL:setFrame(frame)
 end
 
 function PANEL:OnMousePressed(mouseCode)
-    if mouseCode ~= MOUSE_LEFT then
-        return
+    if mouseCode == MOUSE_LEFT then
+        self:MouseCapture(true)
+        self._outlineColor = {255, 255, 255, 255}
+        self._dragging = true
+    elseif mouseCode == MOUSE_RIGHT then
+        self._keyframeController:delete()
+    elseif mouseCode == MOUSE_MIDDLE then
+        self._keyframeController:copy()
     end
-
-    self:MouseCapture(true)
-    self._outlineColor = {255, 255, 255, 255}
-    self._dragging = true
 end
 
 function PANEL:OnMouseReleased(mouseCode)
@@ -50,6 +53,7 @@ function PANEL:OnMouseReleased(mouseCode)
     self:MouseCapture(false)
     self._outlineColor = {0, 0, 0, 255}
     self._dragging = false
+    self._keyframeController:setFrame(self._frame)
 end
 
 function PANEL:OnCursorMoved(cursorX, cursorY)
@@ -57,21 +61,17 @@ function PANEL:OnCursorMoved(cursorX, cursorY)
         return
     end
 
-    local panel = self._framePanel
-
-    local startX, endX = unpack(panel.frameArea)
+    local startX, endX = unpack(self._framePanel.frameArea)
 	
     local targetX = cursorX - startX
     local width = endX - startX
 
-    local targetPos = math.Round(panel.scrollOffset + (targetX / width) * panel.zoom)
-    targetPos = targetPos < 0 and 0 or (targetPos > panel.timelineLength and panel.timelineLength - 1 or targetPos)
-
-    if self._frame == nil or self._frame ~= targetPos then
-        self._frameChangeListener:onFrameChange(self, targetPos)
+    local targetPos = math.Round(self._framePanel.scrollOffset + (targetX / width) * self._framePanel.zoom)
+    targetPos = targetPos < 0 and 0 or (targetPos > self._framePanel.timelineLength and self._framePanel.timelineLength - 1 or targetPos)
+    
+    if self._frame ~= targetPos then
+        self:setFrame(targetPos)
     end
-
-    self._frame = targetPos
 end
 
 function PANEL:Paint(width, height)
@@ -110,4 +110,4 @@ function PANEL:Paint(width, height)
     end
 end
 
-return PANEL
+return {function() return PANEL end}
