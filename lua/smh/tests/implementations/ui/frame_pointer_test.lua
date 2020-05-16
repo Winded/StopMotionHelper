@@ -172,4 +172,72 @@ TestFramePointer = {
         instance:OnCursorMoved(25, 0)
         LU.assertEquals(calls.setFrame, 1)
     end,
+
+    test_PaintNoFramePanel = function(self)
+        local instance = wrapMetatables({
+            _framePanel = nil,
+        }, self._ctr())
+
+        instance:Paint(0, 0)
+    end,
+
+    test_PaintNonDrawable = function(self)
+        local instance = wrapMetatables({
+            _framePanel = {
+                scrollOffset = 10,
+                zoom = 100,
+            },
+            _frame = 1,
+        }, self._ctr())
+
+        instance:Paint(0, 0)
+    end,
+
+    test_PaintNonPointy = function(self)
+        local calls = {}
+        local instance = wrapMetatables({
+            _surfaceDrawer = {
+                noTexture = trackCalls(calls, "drawEvent", function(self) end),
+                setDrawColor = trackCalls(calls, "drawEvent", function(self) end),
+                drawRect = trackCalls(calls, "drawEvent", function(self) end),
+                drawLine = trackCalls(calls, "drawEvent", function(self) end),
+                drawPoly = trackCalls(calls, "drawEvent", function(self) end),
+            },
+            _framePanel = {
+                scrollOffset = 0,
+                zoom = 100,
+            },
+            _frame = 1,
+            _outlineColor = {255, 255, 255, 255},
+            color = {255, 255, 255, 255},
+            pointy = false,
+        }, self._ctr())
+
+        instance:Paint(8, 15)
+        LU.assertTrue(calls.drawEvent > 0)
+    end,
+
+    test_PaintPointy = function(self)
+        local calls = {}
+        local instance = wrapMetatables({
+            _surfaceDrawer = {
+                noTexture = trackCalls(calls, "drawEvent", function(self) end),
+                setDrawColor = trackCalls(calls, "drawEvent", function(self) end),
+                drawRect = trackCalls(calls, "drawEvent", function(self) end),
+                drawLine = trackCalls(calls, "drawEvent", function(self) end),
+                drawPoly = trackCalls(calls, "drawEvent", function(self) end),
+            },
+            _framePanel = {
+                scrollOffset = 0,
+                zoom = 100,
+            },
+            _frame = 1,
+            _outlineColor = {255, 255, 255, 255},
+            color = {255, 255, 255, 255},
+            pointy = true,
+        }, self._ctr())
+
+        instance:Paint(8, 15)
+        LU.assertTrue(calls.drawEvent > 0)
+    end,
 }

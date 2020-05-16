@@ -4,7 +4,7 @@ TestFramePointerFactory = {
     test_initialize = function(self)
         local calls = {}
         local metatable = {}
-        local instance = self._ctr(metatable, nil, nil, {
+        local instance = self._ctr(metatable, nil, {
             register = trackCalls(calls, "register", function(self, name, mt, type)
                 LU.assertEquals(name, "SMHFramePointer")
                 LU.assertEquals(metatable, mt)
@@ -18,7 +18,7 @@ TestFramePointerFactory = {
 
     test_create = function(self)
         local calls = {}
-        local instance = self._ctr(nil, nil, nil, {
+        local instance = self._ctr(nil, nil, {
             create = trackCalls(calls, "create", function(self, name)
                 LU.assertEquals(name, "SMHFramePointer")
                 return {
@@ -28,7 +28,7 @@ TestFramePointerFactory = {
             end),
         })
 
-        instance:create(nil, nil, nil, nil)
+        instance:create(nil, nil, nil, nil, nil)
         LU.assertEquals(calls.create, 1)
         LU.assertEquals(calls.initialize, 1)
         LU.assertEquals(calls.SetParent, 1)
