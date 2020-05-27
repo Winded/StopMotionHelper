@@ -1,5 +1,5 @@
 TestEntitySelector = {
-    _ctr = smhInclude("/smh/client/implementations/entity_selector.lua")[1],
+    _ctr = smhInclude("/smh/client/implementations/entity_selector.lua"),
 
     test_traceNilEntity = function(self)
         local calls = {}

@@ -110,4 +110,4 @@ function PANEL:Paint(width, height)
     end
 end
 
-return {function() return PANEL end}
+return PANEL

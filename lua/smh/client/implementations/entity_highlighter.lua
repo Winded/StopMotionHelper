@@ -1,4 +1,4 @@
-local ctr = function(haloRenderer, hookCreator, entityValidator)
+return function(haloRenderer, hookCreator, entityValidator)
     return {
         _haloRenderer = haloRenderer,
         _hookCreator = hookCreator,
@@ -34,5 +34,3 @@ local ctr = function(haloRenderer, hookCreator, entityValidator)
         end,
     }
 end
-
-return {ctr, "haloRenderer", "hookCreator", "entityValidator"}

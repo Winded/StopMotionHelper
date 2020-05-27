@@ -1,4 +1,4 @@
-local ctr = function(entityHighlighter, serverCommands, entityValidator)
+return function(entityHighlighter, serverCommands, entityValidator)
     return {
         _entityHighlighter = entityHighlighter,
         _serverCommands = serverCommands,
@@ -14,5 +14,3 @@ local ctr = function(entityHighlighter, serverCommands, entityValidator)
         end,
     }
 end
-
-return {ctr, "entityHighlighter", "serverCommands", "entityValidator"}

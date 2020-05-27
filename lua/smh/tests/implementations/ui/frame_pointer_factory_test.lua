@@ -1,5 +1,5 @@
 TestFramePointerFactory = {
-    _ctr = smhInclude("/smh/client/implementations/ui/frame_pointer_factory.lua")[1],
+    _ctr = smhInclude("/smh/client/implementations/ui/frame_pointer_factory.lua"),
 
     test_initialize = function(self)
         local calls = {}

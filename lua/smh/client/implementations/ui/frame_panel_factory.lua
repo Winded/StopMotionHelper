@@ -1,4 +1,4 @@
-local ctr = function(surfaceDrawer, vguiFactory, serverCommands)
+return function(surfaceDrawer, vguiFactory, serverCommands)
     local PANEL = smhInclude("/smh/client/implementations/ui/frame_panel.lua")
 
     return {
@@ -19,5 +19,3 @@ local ctr = function(surfaceDrawer, vguiFactory, serverCommands)
         end,
     }
 end
-
-return {ctr, "surfaceDrawer", "vguiFactory", "serverCommands"}

@@ -1,4 +1,4 @@
-local ctr = function()
+return function()
     return {
         create = function(self, name)
             return vgui.Create(name)
@@ -8,5 +8,3 @@ local ctr = function()
         end
     }
 end
-
-return {ctr}

@@ -1,4 +1,4 @@
-local ctr = function()
+return function()
     return {
         initialize = function(self)
             self._matColor = Material("model_color")
@@ -118,5 +118,3 @@ local ctr = function()
         end
     }
 end
-
-return {ctr}

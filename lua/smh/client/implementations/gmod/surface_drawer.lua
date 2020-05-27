@@ -1,4 +1,4 @@
-local ctr = function()
+return function()
     return {
         setDrawColor = function(self, r, g, b, a)
             surface.SetDrawColor(r, g, b, a)
@@ -19,5 +19,3 @@ local ctr = function()
         end
     }
 end
-
-return {ctr}

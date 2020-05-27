@@ -1,5 +1,5 @@
 TestEntityHighlighter = {
-    _ctr = smhInclude("/smh/client/implementations/entity_highlighter.lua")[1],
+    _ctr = smhInclude("/smh/client/implementations/entity_highlighter.lua"),
 
     test_initialize = function(self)
         local calls = {}

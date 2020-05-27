@@ -1,9 +1,9 @@
 TestFramePointer = {
-    _ctr = smhInclude("/smh/client/implementations/ui/frame_pointer.lua")[1],
+    _panel = smhInclude("/smh/client/implementations/ui/frame_pointer.lua"),
 
     test_initialize = function(self)
         local calls = {}
-        local instance = wrapMetatables(self._ctr(), {
+        local instance = wrapMetatables(self._panel, {
             SetSize = trackCalls(calls, "SetSize", function(self, x, y)
                 LU.assertEquals(x, 8)
                 LU.assertEquals(y, 15)
@@ -16,7 +16,7 @@ TestFramePointer = {
 
     test_setFrame = function(self)
         local calls = {}
-        local instance = wrapMetatables(self._ctr(), {
+        local instance = wrapMetatables(self._panel, {
             GetWide = trackCalls(calls, "GetWide", function(self) return 8 end),
             GetTall = trackCalls(calls, "GetTall", function(self) return 15 end),
             SetPos = trackCalls(calls, "SetPos", function(self, x, y)
@@ -42,7 +42,7 @@ TestFramePointer = {
 
     test_OnMousePressedLeft = function(self)
         local calls = {}
-        local instance = wrapMetatables(self._ctr(), {
+        local instance = wrapMetatables(self._panel, {
             MouseCapture = trackCalls(calls, "MouseCapture", function(self, capture)
                 LU.assertEquals(capture, true)
             end)
@@ -56,7 +56,7 @@ TestFramePointer = {
 
     test_OnMousePressedRight = function(self)
         local calls = {}
-        local instance = wrapMetatables(self._ctr(), {
+        local instance = wrapMetatables(self._panel, {
             _keyframeController = {
                 delete = trackCalls(calls, "keyframeController_delete", function(self) end)
             }
@@ -68,7 +68,7 @@ TestFramePointer = {
 
     test_OnMousePressedMiddle = function(self)
         local calls = {}
-        local instance = wrapMetatables(self._ctr(), {
+        local instance = wrapMetatables(self._panel, {
             _keyframeController = {
                 copy = trackCalls(calls, "keyframeController_copy", function(self) end)
             }
@@ -80,7 +80,7 @@ TestFramePointer = {
 
     test_OnMouseReleasedNotDragging = function(self)
         local calls = {}
-        local instance = wrapMetatables(self._ctr(), {
+        local instance = wrapMetatables(self._panel, {
             MouseCapture = trackCalls(calls, "MouseCapture", function(self, capture) end),
             _dragging = false
         })
@@ -91,7 +91,7 @@ TestFramePointer = {
 
     test_OnMouseReleasedOtherMousecode = function(self)
         local calls = {}
-        local instance = wrapMetatables(self._ctr(), {
+        local instance = wrapMetatables(self._panel, {
             MouseCapture = trackCalls(calls, "MouseCapture", function(self, capture) end),
             _dragging = true
         })
@@ -113,7 +113,7 @@ TestFramePointer = {
             _dragging = true,
             _outlineColor = {255, 255, 255, 255},
             _frame = 10,
-        }, self._ctr(), {
+        }, self._panel, {
             MouseCapture = trackCalls(calls, "MouseCapture", function(self, capture)
                 LU.assertFalse(capture)
             end),
@@ -131,7 +131,7 @@ TestFramePointer = {
         local instance = wrapMetatables({
             setFrame = trackCalls(calls, "setFrame", function(self) end),
             _dragging = false,
-        }, self._ctr())
+        }, self._panel)
 
         instance:OnCursorMoved(0, 0)
         LU.assertEquals(calls.setFrame or 0, 0)
@@ -149,7 +149,7 @@ TestFramePointer = {
                 frameArea = {10, 110},
                 timelineLength = 100,
             },
-        }, self._ctr())
+        }, self._panel)
 
         instance:OnCursorMoved(20, 0)
         LU.assertEquals(calls.setFrame or 0, 0)
@@ -167,7 +167,7 @@ TestFramePointer = {
                 frameArea = {10, 110},
                 timelineLength = 100,
             },
-        }, self._ctr())
+        }, self._panel)
 
         instance:OnCursorMoved(25, 0)
         LU.assertEquals(calls.setFrame, 1)
@@ -176,7 +176,7 @@ TestFramePointer = {
     test_PaintNoFramePanel = function(self)
         local instance = wrapMetatables({
             _framePanel = nil,
-        }, self._ctr())
+        }, self._panel)
 
         instance:Paint(0, 0)
     end,
@@ -188,7 +188,7 @@ TestFramePointer = {
                 zoom = 100,
             },
             _frame = 1,
-        }, self._ctr())
+        }, self._panel)
 
         instance:Paint(0, 0)
     end,
@@ -211,7 +211,7 @@ TestFramePointer = {
             _outlineColor = {255, 255, 255, 255},
             color = {255, 255, 255, 255},
             pointy = false,
-        }, self._ctr())
+        }, self._panel)
 
         instance:Paint(8, 15)
         LU.assertTrue(calls.drawEvent > 0)
@@ -235,7 +235,7 @@ TestFramePointer = {
             _outlineColor = {255, 255, 255, 255},
             color = {255, 255, 255, 255},
             pointy = true,
-        }, self._ctr())
+        }, self._panel)
 
         instance:Paint(8, 15)
         LU.assertTrue(calls.drawEvent > 0)

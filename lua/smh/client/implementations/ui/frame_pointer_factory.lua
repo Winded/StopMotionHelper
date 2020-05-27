@@ -1,4 +1,4 @@
-local ctr = function(framePointerMetatable, surfaceDrawer, vguiFactory)
+return function(framePointerMetatable, surfaceDrawer, vguiFactory)
     return {
         _framePointerMetatable = framePointerMetatable,
         _surfaceDrawer = surfaceDrawer,
@@ -17,5 +17,3 @@ local ctr = function(framePointerMetatable, surfaceDrawer, vguiFactory)
         end,
     }
 end
-
-return {ctr, "framePointerMetatable", "surfaceDrawer", "vguiFactory"}
