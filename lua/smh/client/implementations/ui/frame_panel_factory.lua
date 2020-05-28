@@ -1,19 +1,14 @@
-return function(surfaceDrawer, vguiFactory, serverCommands)
-    local PANEL = smhInclude("/smh/client/implementations/ui/frame_panel.lua")
+local CTR = smhInclude("/smh/client/implementations/ui/frame_panel.lua")
 
+return function(surfaceDrawer, playbackManager)
     return {
-        _surfaceDrawer = surfaceDrawer,
-        _vguiFactory = vguiFactory,
-        _serverCommands = serverCommands,
+        create = function(self, element)
+            local panel = CTR(element, surfaceDrawer, playbackManager)
 
-        initialize = function(self)
-            self._vguiFactory:register("SMHFramePanel", PANEL, "DPanel")
-        end,
-
-        create = function(self, menu)
-            local panel = self._vguiFactory:create("SMHFramePanel")
-            panel:_initialize({}, self._surfaceDrawer, self._serverCommands)
-            panel:SetParent(menu)
+            element.PerformLayout = function(self, ...) panel:performLayout(...) end
+            element.Paint = function(self, ...) panel:paint(...) end
+            element.OnMouseWheeled = function(self, ...) panel:onMouseWheeled(...) end
+            element.OnMousePressed = function(self, ...) panel:onMousePressed(...) end
 
             return panel
         end,

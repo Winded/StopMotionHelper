@@ -1,62 +1,47 @@
 
-local PANEL = {}
+local P = {}
+P.__index = P
 
-function PANEL:_initialize(surfaceDrawer, keyframeController, framePanel, verticalPosition, color, pointy)
-    self._surfaceDrawer = surfaceDrawer
-    self._keyframeController = keyframeController
-    self._framePanel = framePanel
-
-    self:SetSize(8, 15)
-    self.color = color
-    self.verticalPosition = verticalPosition;
-    self.pointy = pointy
-
-    self._frame = 0
-
-    self._outlineColor = {0, 0, 0, 255}
-    self._dragging = false
-end
-
-function PANEL:getFrame()
+function P:getFrame()
     return self._frame
 end
 
-function PANEL:setFrame(frame)
+function P:setFrame(frame)
     local startX, endX = unpack(self._framePanel.frameArea)
-    local height = self._framePanel:GetTall() * self.verticalPosition
+    local height = self._framePanel:getTall() * self.verticalPosition
 
     local frameAreaWidth = endX - startX
     local positionWithOffset = frame - self._framePanel.scrollOffset
     local x = startX + (positionWithOffset / self._framePanel.zoom) * frameAreaWidth
 
     self._frame = frame
-    self:SetPos(x - self:GetWide() / 2, height - self:GetTall() / 2)
+    self.element:SetPos(x - self.element:GetWide() / 2, height - self.element:GetTall() / 2)
 end
 
-function PANEL:OnMousePressed(mouseCode)
+function P:onMousePressed(mouseCode)
     if mouseCode == MOUSE_LEFT then
-        self:MouseCapture(true)
+        self.element:MouseCapture(true)
         self._outlineColor = {255, 255, 255, 255}
         self._dragging = true
     elseif mouseCode == MOUSE_RIGHT then
-        self._keyframeController:delete()
+        self._frameEventListener:onRightClick()
     elseif mouseCode == MOUSE_MIDDLE then
-        self._keyframeController:copy()
+        self._frameEventListener:onMiddleClick()
     end
 end
 
-function PANEL:OnMouseReleased(mouseCode)
+function P:onMouseReleased(mouseCode)
     if mouseCode ~= MOUSE_LEFT or not self._dragging then
         return
     end
 
-    self:MouseCapture(false)
+    self.element:MouseCapture(false)
     self._outlineColor = {0, 0, 0, 255}
     self._dragging = false
-    self._keyframeController:setFrame(self._frame)
+    self._frameEventListener:onRelease(self._frame)
 end
 
-function PANEL:OnCursorMoved(cursorX, cursorY)
+function P:onCursorMoved(cursorX, cursorY)
     if not self._dragging then
         return
     end
@@ -74,7 +59,7 @@ function PANEL:OnCursorMoved(cursorX, cursorY)
     end
 end
 
-function PANEL:Paint(width, height)
+function P:paint(width, height)
     if self._framePanel == nil then
         return
     end
@@ -110,4 +95,23 @@ function PANEL:Paint(width, height)
     end
 end
 
-return PANEL
+return function(element, framePanel, surfaceDrawer, frameEventListener, verticalPosition, color, pointy)
+    local pointer = {
+        element = element,
+        _surfaceDrawer = surfaceDrawer,
+        _frameEventListener = frameEventListener,
+        _framePanel = framePanel,
+
+        verticalPosition = verticalPosition,
+        color = color,
+        pointy = pointy,
+
+        _frame = 0,
+        _outlineColor = {0, 0, 0, 255},
+        _dragging = false,
+    }
+
+    setmetatable(pointer, P)
+
+    return pointer
+end
