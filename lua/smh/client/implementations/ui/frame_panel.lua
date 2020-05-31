@@ -4,10 +4,13 @@ P.__index = P
 P.SCROLL_PADDING = 18
 P.SCROLL_HEIGHT = 12
 
+P.MIN_ZOOM = 30
+P.MAX_ZOOM = 500
+
 --[[function P:_initialize(uiDependencies, surfaceDrawer, playbackUpdater)
     
     self._surfaceDrawer = surfaceDrawer
-    self._playbackManager = playbackUpdater
+    self._frameTimelineSettings = playbackUpdater
 
     self._playhead = uiDependencies.playhead
     self._scrollBar = uiDependencies.scrollBar
@@ -64,9 +67,9 @@ end]]
 
 function P:paint()
     local height = self.element:GetTall()
-    local playbackOffset = self._playbackManager:getPlaybackOffset()
-    local playbackLength = self._playbackManager:getPlaybackLength()
-    local timelineLength = self._playbackManager:getTimelineLength()
+    local playbackOffset = self._frameTimelineSettings:getScrollOffset()
+    local playbackLength = self._frameTimelineSettings:getZoom()
+    local timelineLength = self._frameTimelineSettings:getTimelineLength()
 	local startX, endX = unpack(self.frameArea)
 
 	local frameWidth = (endX - startX) / playbackLength
@@ -83,7 +86,7 @@ end
 
 function P:onMouseWheeled(scrollDelta)
     scrollDelta = -scrollDelta
-    self._playbackManager:setPlaybackLength(self._playbackManager:getPlaybackLength() + scrollDelta)
+    self._frameTimelineSettings:setZoom(self._frameTimelineSettings:getZoom() + scrollDelta)
 end
 
 function P:onMousePressed(mouseCode)
@@ -92,38 +95,45 @@ function P:onMousePressed(mouseCode)
     end
 
     local startX, endX = unpack(self.frameArea)
-    local posX, posY = self.element:CursorPos()
+    local posX, _ = self.element:CursorPos()
 
-    local playbackOffset = self._playbackManager:getPlaybackOffset()
-    local playbackLength = self._playbackManager:getPlaybackLength()
-    local timelineLength = self._playbackManager:getTimelineLength()
+    local scrollOffset = self._frameTimelineSettings:getScrollOffset()
+    local zoom = self._frameTimelineSettings:getZoom()
+    local timelineLength = self._frameTimelineSettings:getTimelineLength()
 
     local targetX = posX - startX
     local width = endX - startX
 
-    local framePosition = math.Round(playbackOffset + (targetX / width) * playbackLength)
+    local framePosition = math.Round(scrollOffset + (targetX / width) * zoom)
     if framePosition < 0 then
         framePosition = 0
     elseif framePosition >= timelineLength then
         framePosition = timelineLength - 1
     end
 
-    self._playbackManager:setFrame(framePosition)
+    self._framePositionClickEvent:send(framePosition)
 end
 
-return function(element, surfaceDrawer, playbackManager)
+return function(menuElements, framePositionClickEvent, surfaceDrawer, frameTimelineSettings)
+    local element = menuElements.mainMenu.framePanel
+
     local panel = {
         element = element,
+        _framePositionClickEvent = framePositionClickEvent,
         _surfaceDrawer = surfaceDrawer,
-        _playbackManager = playbackManager,
+        _frameTimelineSettings = frameTimelineSettings,
 
-        timelineLength = 100,
         scrollOffset = 0,
         zoom = 100,
         frameArea = {0, 1},
     }
 
     setmetatable(panel, P)
+
+    element.PerformLayout = function(self, ...) panel:performLayout(...) end
+    element.Paint = function(self, ...) panel:paint(...) end
+    element.OnMouseWheeled = function(self, ...) panel:onMouseWheeled(...) end
+    element.OnMousePressed = function(self, ...) panel:onMousePressed(...) end
 
     return panel
 end

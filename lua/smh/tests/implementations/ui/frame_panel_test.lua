@@ -1,24 +1,42 @@
 TestFramePanel = {
     _ctr = smhInclude("/smh/client/implementations/ui/frame_panel.lua"),
 
+    test_create = function(self)
+        local element = {}
+        self._ctr({
+            mainMenu = {
+                framePanel = element
+            }
+        }, nil, nil, nil)
+
+        LU.assertNotNil(element.PerformLayout)
+        LU.assertNotNil(element.Paint)
+        LU.assertNotNil(element.OnMouseWheeled)
+        LU.assertNotNil(element.OnMousePressed)
+    end,
+
     performPaintTest = function(self, playbackOffset, playbackLength, timelineLength, expectedDrawCalls)
         local calls = {}
         local instance = self._ctr({
-            GetTall = trackCalls(calls, "GetTall", function() return 10 end),
-        }, {
+            mainMenu = {
+                framePanel = {
+                    GetTall = trackCalls(calls, "GetTall", function() return 10 end),
+                }
+            }
+        }, nil, {
             setDrawColor = function() end,
             drawLine = trackCalls(calls, "drawLine", function() end),
         }, {
-            getPlaybackOffset = trackCalls(calls, "getPlaybackOffset", function() return playbackOffset end),
-            getPlaybackLength = trackCalls(calls, "getPlaybackLength", function() return playbackLength end),
+            getScrollOffset = trackCalls(calls, "getScrollOffset", function() return playbackOffset end),
+            getZoom = trackCalls(calls, "getZoom", function() return playbackLength end),
             getTimelineLength = trackCalls(calls, "getTimelineLength", function() return timelineLength end),
         })
 
         instance:paint()
 
         LU.assertTrue(calls.GetTall > 0)
-        LU.assertTrue(calls.getPlaybackOffset > 0)
-        LU.assertTrue(calls.getPlaybackLength > 0)
+        LU.assertTrue(calls.getScrollOffset > 0)
+        LU.assertTrue(calls.getZoom > 0)
         LU.assertTrue(calls.getTimelineLength > 0)
         LU.assertEquals(calls.drawLine, expectedDrawCalls)
     end,
@@ -37,19 +55,19 @@ TestFramePanel = {
 
     test_onMouseWheeled = function(self)
         local calls = {}
-        local instance = self._ctr(nil, nil, {
-            getPlaybackLength = trackCalls(calls, "getPlaybackLength", function() return 10 end),
-            setPlaybackLength = trackCalls(calls, "setPlaybackLength", function(self, length) LU.assertEquals(length, 11) end),
+        local instance = self._ctr({ mainMenu = { framePanel = {} } }, nil, nil, {
+            getZoom = trackCalls(calls, "getZoom", function() return 10 end),
+            setZoom = trackCalls(calls, "setZoom", function(self, length) LU.assertEquals(length, 11) end),
         })
 
         instance:onMouseWheeled(-1)
 
-        LU.assertEquals(calls.getPlaybackLength, 1)
-        LU.assertEquals(calls.setPlaybackLength, 1)
+        LU.assertEquals(calls.getZoom, 1)
+        LU.assertEquals(calls.setZoom, 1)
     end,
 
     test_onMousePressed_notLeftButton = function(self)
-        local instance = self._ctr(nil, nil, nil)
+        local instance = self._ctr({ mainMenu = { framePanel = {} } }, nil, nil, nil)
 
         instance:onMousePressed(MOUSE_MIDDLE)
         instance:onMousePressed(MOUSE_RIGHT)
@@ -58,22 +76,27 @@ TestFramePanel = {
     performMousePressedTest = function(self, playbackOffset, playbackLength, timelineLength, cursorPosX, expectedFramePosition)
         local calls = {}
         local instance = self._ctr({
-            CursorPos = trackCalls(calls, "CursorPos", function() return cursorPosX, 0 end),
+            mainMenu = {
+                framePanel = {
+                    CursorPos = trackCalls(calls, "CursorPos", function() return cursorPosX, 0 end),
+                }
+            }
+        }, {
+            send = trackCalls(calls, "framePositionClickEvent", function(self, frame) LU.assertEquals(frame, expectedFramePosition) end),
         }, nil, {
-            getPlaybackOffset = trackCalls(calls, "getPlaybackOffset", function() return playbackOffset end),
-            getPlaybackLength = trackCalls(calls, "getPlaybackLength", function() return playbackLength end),
+            getScrollOffset = trackCalls(calls, "getScrollOffset", function() return playbackOffset end),
+            getZoom = trackCalls(calls, "getZoom", function() return playbackLength end),
             getTimelineLength = trackCalls(calls, "getTimelineLength", function() return timelineLength end),
-            setFrame = trackCalls(calls, "setFrame", function(self, frame) LU.assertEquals(frame, expectedFramePosition) end),
         })
         instance.frameArea = {10, 110}
 
         instance:onMousePressed(MOUSE_LEFT)
 
         LU.assertTrue(calls.CursorPos > 0)
-        LU.assertTrue(calls.getPlaybackOffset > 0)
-        LU.assertTrue(calls.getPlaybackLength > 0)
+        LU.assertTrue(calls.getScrollOffset > 0)
+        LU.assertTrue(calls.getZoom > 0)
         LU.assertTrue(calls.getTimelineLength > 0)
-        LU.assertEquals(calls.setFrame, 1)
+        LU.assertEquals(calls.framePositionClickEvent, 1)
     end,
 
     test_onMousePressed1 = function(self)
