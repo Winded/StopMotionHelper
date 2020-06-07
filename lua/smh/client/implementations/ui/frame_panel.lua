@@ -123,8 +123,6 @@ return function(menuElements, framePositionClickEvent, surfaceDrawer, frameTimel
         _surfaceDrawer = surfaceDrawer,
         _frameTimelineSettings = frameTimelineSettings,
 
-        scrollOffset = 0,
-        zoom = 100,
         frameArea = {0, 1},
     }
 
