@@ -6,10 +6,6 @@ function smhInclude(path)
     return dofile(rootPath .. path)
 end
 
-function includeStub(path)
-    return smhInclude("/smh/tests/stub" .. path)
-end
-
 function trackCalls(target, name, fn)
     return function(...)
         if target[name] == nil then
@@ -21,24 +17,11 @@ function trackCalls(target, name, fn)
     end
 end
 
-function wrapMetatables(...)
-    local tables = {...}
-    local metatable = {
-        __index = function(self, key)
-            for _, mt in ipairs(tables) do
-                if mt[key] ~= nil then
-                    return mt[key]
-                end
-            end
-            return nil
-        end
-    }
-    local obj = {}
-    setmetatable(obj, metatable)
-    return obj
+function makeTestRegistry()
+    local r = Ludi.Registry.new()
+    r:default():use({})
+    return r
 end
-
-inspect = smhInclude("/smh/tests/inspect.lua")
 
 function math.Round(value)
     local fraction = math.abs(value - math.floor(value))

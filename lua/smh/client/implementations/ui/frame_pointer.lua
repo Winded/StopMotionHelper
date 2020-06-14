@@ -1,12 +1,62 @@
 
-local P = {}
-P.__index = P
+local CLASS = {}
+CLASS.__index = CLASS
+CLASS.__depends = {
+    "FramePanel",
+    "VguiFactory",
+    "SurfaceDrawer",
+    "FrameTimelineSettings",
+    "FramePointerClickEvent",
+    "FramePointerReleaseEvent",
+    "FramePointerMoveEvent"
+}
 
-function P:getFrame()
+function CLASS.__new(framePanel,
+                     vguiFactory,
+                     surfaceDrawer,
+                     frameTimelineSettings,
+                     framePointerClickEvent,
+                     framePointerReleaseEvent,
+                     framePointerMoveEvent)
+
+    local element = vguiFactory:create("DPanel")
+
+    local pointer = {
+        element = element,
+        _framePanel = framePanel,
+        _surfaceDrawer = surfaceDrawer,
+        _frameTimelineSettings = frameTimelineSettings,
+        _framePointerClickEvent = framePointerClickEvent,
+        _framePointerReleaseEvent = framePointerReleaseEvent,
+        _framePointerMoveEvent = framePointerMoveEvent,
+
+        verticalPosition = 0,
+        color = {255, 255, 255, 255},
+        pointy = false,
+
+        _frame = 0,
+        _outlineColor = {0, 0, 0, 255},
+        _dragging = false,
+    }
+
+    setmetatable(pointer, CLASS)
+
+    element.OnMousePressed = function(self, ...) pointer:onMousePressed(...) end
+    element.OnMouseReleased = function(self, ...) pointer:onMouseReleased(...) end
+    element.OnCursorMoved = function(self, ...) pointer:onCursorMoved(...) end
+    element.Paint = function(self, ...) pointer:paint(...) end
+    element:SetParent(framePanel.element)
+    element:SetSize(8, 15)
+
+    return pointer
+
+end
+
+function CLASS:getFrame()
     return self._frame
 end
 
-function P:setFrame(frame)
+function CLASS:setFrame(frame)
     local startX, endX = unpack(self._framePanel.frameArea)
     local height = self._framePanel:getTall() * self.verticalPosition
 
@@ -18,7 +68,7 @@ function P:setFrame(frame)
     self.element:SetPos(x - self.element:GetWide() / 2, height - self.element:GetTall() / 2)
 end
 
-function P:onMousePressed(mouseCode)
+function CLASS:onMousePressed(mouseCode)
     if mouseCode == MOUSE_LEFT then
         self.element:MouseCapture(true)
         self._outlineColor = {255, 255, 255, 255}
@@ -28,7 +78,7 @@ function P:onMousePressed(mouseCode)
     self._framePointerClickEvent:send(self, mouseCode)
 end
 
-function P:onMouseReleased(mouseCode)
+function CLASS:onMouseReleased(mouseCode)
     if mouseCode ~= MOUSE_LEFT or not self._dragging then
         return
     end
@@ -39,7 +89,7 @@ function P:onMouseReleased(mouseCode)
     self._framePointerReleaseEvent:send(self, self._frame)
 end
 
-function P:onCursorMoved(cursorX)
+function CLASS:onCursorMoved(cursorX)
     if not self._dragging then
         return
     end
@@ -60,7 +110,7 @@ function P:onCursorMoved(cursorX)
     end
 end
 
-function P:paint(width, height)
+function CLASS:paint(width, height)
     local scrollOffset = self._frameTimelineSettings:getScrollOffset()
     local zoom = self._frameTimelineSettings:getZoom()
     if self._frame < scrollOffset or self._frame > (scrollOffset + zoom) then
@@ -95,40 +145,8 @@ function P:paint(width, height)
     end
 end
 
-function P:delete()
+function CLASS:delete()
     self.element:Delete()
 end
 
-return function(framePanel, vguiFactory, surfaceDrawer, frameTimelineSettings,
-                framePointerClickEvent, framePointerReleaseEvent, framePointerMoveEvent)
-    local element = vguiFactory:create("DPanel")
-
-    local pointer = {
-        element = element,
-        _framePanel = framePanel,
-        _surfaceDrawer = surfaceDrawer,
-        _frameTimelineSettings = frameTimelineSettings,
-        _framePointerClickEvent = framePointerClickEvent,
-        _framePointerReleaseEvent = framePointerReleaseEvent,
-        _framePointerMoveEvent = framePointerMoveEvent,
-
-        verticalPosition = 0,
-        color = {255, 255, 255, 255},
-        pointy = false,
-
-        _frame = 0,
-        _outlineColor = {0, 0, 0, 255},
-        _dragging = false,
-    }
-
-    setmetatable(pointer, P)
-
-    element.OnMousePressed = function(self, ...) pointer:onMousePressed(...) end
-    element.OnMouseReleased = function(self, ...) pointer:onMouseReleased(...) end
-    element.OnCursorMoved = function(self, ...) pointer:onCursorMoved(...) end
-    element.Paint = function(self, ...) pointer:paint(...) end
-    element:SetParent(framePanel.element)
-    element:SetSize(8, 15)
-
-    return pointer
-end
+return CLASS

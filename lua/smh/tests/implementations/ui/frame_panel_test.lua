@@ -1,13 +1,22 @@
 TestFramePanel = {
     _ctr = smhInclude("/smh/client/implementations/ui/frame_panel.lua"),
 
+    makeRegistry = function(self)
+        local r = makeTestRegistry()
+        r:forType("FramePanel"):use(self._ctr)
+        return r
+    end,
+
     test_create = function(self)
         local element = {}
-        self._ctr({
+        local r = self:makeRegistry()
+        r:forType("MenuElements"):use({
             mainMenu = {
                 framePanel = element
             }
-        }, nil, nil, nil)
+        })
+        local c = Ludi.Container.new(r)
+        c:get("FramePanel")
 
         LU.assertNotNil(element.PerformLayout)
         LU.assertNotNil(element.Paint)
@@ -17,20 +26,25 @@ TestFramePanel = {
 
     performPaintTest = function(self, playbackOffset, playbackLength, timelineLength, expectedDrawCalls)
         local calls = {}
-        local instance = self._ctr({
+        local r = self:makeRegistry()
+        r:forType("MenuElements"):use({
             mainMenu = {
                 framePanel = {
                     GetTall = trackCalls(calls, "GetTall", function() return 10 end),
                 }
             }
-        }, nil, {
+        })
+        r:forType("SurfaceDrawer"):use({
             setDrawColor = function() end,
             drawLine = trackCalls(calls, "drawLine", function() end),
-        }, {
+        })
+        r:forType("FrameTimelineSettings"):use({
             getScrollOffset = trackCalls(calls, "getScrollOffset", function() return playbackOffset end),
             getZoom = trackCalls(calls, "getZoom", function() return playbackLength end),
             getTimelineLength = trackCalls(calls, "getTimelineLength", function() return timelineLength end),
         })
+        local c = Ludi.Container.new(r)
+        local instance = c:get("FramePanel")
 
         instance:paint()
 
@@ -55,10 +69,14 @@ TestFramePanel = {
 
     test_onMouseWheeled = function(self)
         local calls = {}
-        local instance = self._ctr({ mainMenu = { framePanel = {} } }, nil, nil, {
+        local r = self:makeRegistry()
+        r:forType("MenuElements"):use({ mainMenu = { framePanel = {} } })
+        r:forType("FrameTimelineSettings"):use({
             getZoom = trackCalls(calls, "getZoom", function() return 10 end),
             setZoom = trackCalls(calls, "setZoom", function(self, length) LU.assertEquals(length, 11) end),
         })
+        local c = Ludi.Container.new(r)
+        local instance = c:get("FramePanel")
 
         instance:onMouseWheeled(-1)
 
@@ -67,7 +85,10 @@ TestFramePanel = {
     end,
 
     test_onMousePressed_notLeftButton = function(self)
-        local instance = self._ctr({ mainMenu = { framePanel = {} } }, nil, nil, nil)
+        local r = self:makeRegistry()
+        r:forType("MenuElements"):use({ mainMenu = { framePanel = {} } })
+        local c = Ludi.Container.new(r)
+        local instance = c:get("FramePanel")
 
         instance:onMousePressed(MOUSE_MIDDLE)
         instance:onMousePressed(MOUSE_RIGHT)
@@ -75,19 +96,24 @@ TestFramePanel = {
 
     performMousePressedTest = function(self, playbackOffset, playbackLength, timelineLength, cursorPosX, expectedFramePosition)
         local calls = {}
-        local instance = self._ctr({
+        local r = self:makeRegistry()
+        r:forType("MenuElements"):use({
             mainMenu = {
                 framePanel = {
                     CursorPos = trackCalls(calls, "CursorPos", function() return cursorPosX, 0 end),
                 }
             }
-        }, {
+        })
+        r:forType("FramePositionClickEvent"):use({
             send = trackCalls(calls, "framePositionClickEvent", function(self, frame) LU.assertEquals(frame, expectedFramePosition) end),
-        }, nil, {
+        })
+        r:forType("FrameTimelineSettings"):use({
             getScrollOffset = trackCalls(calls, "getScrollOffset", function() return playbackOffset end),
             getZoom = trackCalls(calls, "getZoom", function() return playbackLength end),
             getTimelineLength = trackCalls(calls, "getTimelineLength", function() return timelineLength end),
         })
+        local c = Ludi.Container.new(r)
+        local instance = c:get("FramePanel")
         instance.frameArea = {10, 110}
 
         instance:onMousePressed(MOUSE_LEFT)

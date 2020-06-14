@@ -1,13 +1,12 @@
 return function()
     return {
-        initialize = function(self)
-            self._matColor = Material("model_color")
-            self._mat_Copy = Material("pp/copy")
-            self._mat_Add = Material("pp/add")
-            self._mat_Sub = Material("pp/sub")
-            self._rt_Stencil = render.GetBloomTex0()
-            self._rt_Store = render.GetScreenEffectTexture(0)
-        end,
+        _matColor = Material("model_color"),
+        _mat_Copy = Material("pp/copy"),
+        _mat_Add = Material("pp/add"),
+        _mat_Sub = Material("pp/sub"),
+        _rt_Stencil = render.GetBloomTex0(),
+        _rt_Store = render.GetScreenEffectTexture(0),
+        
         render = function(self, entity)
 
             local OldRT = render.GetRenderTarget()

@@ -1,17 +1,27 @@
 TestFramePointer = {
     _ctr = smhInclude("/smh/client/implementations/ui/frame_pointer.lua"),
 
+    makeRegistry = function(self)
+        local r = makeTestRegistry()
+        r:forType("FramePointer"):use(self._ctr)
+        return r
+    end,
+
     test_create = function(self)
         local calls = {}
         local element = {
             SetSize = trackCalls(calls, "SetSize", function() end),
             SetParent = trackCalls(calls, "SetParent", function() end),
         }
-        local instance = self._ctr({
+        local r = self:makeRegistry()
+        r:forType("FramePanel"):use({
             element = {}
-        }, {
+        })
+        r:forType("VguiFactory"):use({
             create = trackCalls(calls, "vguiFactoryCreate", function() return element end),
-        }, nil, nil, nil, nil, nil)
+        })
+        local c = Ludi.Container.new(r)
+        local instance = c:get("FramePointer")
 
         LU.assertEquals(calls.vguiFactoryCreate, 1)
         LU.assertEquals(calls.SetSize, 1)
@@ -24,10 +34,12 @@ TestFramePointer = {
 
     test_setFrame = function(self)
         local calls = {}
-        local instance = self._ctr({
+        local r = self:makeRegistry()
+        r:forType("FramePanel"):use({
             frameArea = {10, 110},
             getTall = trackCalls(calls, "framePanel_getTall", function() return 10 end),
-        }, {
+        })
+        r:forType("VguiFactory"):use({
             create = function()
                 return {
                     GetWide = trackCalls(calls, "GetWide", function() return 8 end),
@@ -40,10 +52,13 @@ TestFramePointer = {
                     SetParent = function() end,
                 }
             end,
-        }, nil, {
+        })
+        r:forType("FrameTimelineSettings"):use({
             getScrollOffset = trackCalls(calls, "getScrollOffset", function() return 0 end),
             getZoom = trackCalls(calls, "getZoom", function() return 100 end),
         })
+        local c = Ludi.Container.new(r)
+        local instance = c:get("FramePointer")
         instance.verticalPosition = 0.5
 
         instance:setFrame(10)
@@ -58,7 +73,8 @@ TestFramePointer = {
 
     test_onMousePressed_left = function(self)
         local calls = {}
-        local instance = self._ctr({}, {
+        local r = self:makeRegistry()
+        r:forType("VguiFactory"):use({
             create = function()
                 return {
                     MouseCapture = trackCalls(calls, "MouseCapture", function(self, capture)
@@ -68,11 +84,14 @@ TestFramePointer = {
                     SetParent = function() end,
                 }
             end,
-        }, nil, nil, {
+        })
+        r:forType("FramePointerClickEvent"):use({
             send = trackCalls(calls, "framePointerClickEvent", function(self, element, mouseCode)
                 LU.assertEquals(mouseCode, MOUSE_LEFT)
             end),
-        }, nil, nil)
+        })
+        local c = Ludi.Container.new(r)
+        local instance = c:get("FramePointer")
 
         instance:onMousePressed(MOUSE_LEFT)
 
@@ -84,18 +103,22 @@ TestFramePointer = {
 
     test_onMousePressed_right = function(self)
         local calls = {}
-        local instance = self._ctr({}, {
+        local r = self:makeRegistry()
+        r:forType("VguiFactory"):use({
             create = function()
                 return {
                     SetSize = function() end,
                     SetParent = function() end,
                 }
             end,
-        }, nil, nil, {
+        })
+        r:forType("FramePointerClickEvent"):use({
             send = trackCalls(calls, "framePointerClickEvent", function(self, element, mouseCode)
                 LU.assertEquals(mouseCode, MOUSE_RIGHT)
             end),
-        }, nil, nil)
+        })
+        local c = Ludi.Container.new(r)
+        local instance = c:get("FramePointer")
 
         instance:onMousePressed(MOUSE_RIGHT)
 
@@ -104,18 +127,22 @@ TestFramePointer = {
 
     test_onMousePressed_middle = function(self)
         local calls = {}
-        local instance = self._ctr({}, {
+        local r = self:makeRegistry()
+        r:forType("VguiFactory"):use({
             create = function()
                 return {
                     SetSize = function() end,
                     SetParent = function() end,
                 }
             end,
-        }, nil, nil, {
+        })
+        r:forType("FramePointerClickEvent"):use({
             send = trackCalls(calls, "framePointerClickEvent", function(self, element, mouseCode)
                 LU.assertEquals(mouseCode, MOUSE_MIDDLE)
             end),
-        }, nil, nil)
+        })
+        local c = Ludi.Container.new(r)
+        local instance = c:get("FramePointer")
 
         instance:onMousePressed(MOUSE_MIDDLE)
 
@@ -124,7 +151,8 @@ TestFramePointer = {
 
     test_onMouseReleased_notDragging = function(self)
         local calls = {}
-        local instance = self._ctr({}, {
+        local r = self:makeRegistry()
+        r:forType("VguiFactory"):use({
             create = function()
                 return {
                     MouseCapture = trackCalls(calls, "MouseCapture", function() end),
@@ -132,7 +160,9 @@ TestFramePointer = {
                     SetParent = function() end,
                 }
             end,
-        }, nil, nil, nil, nil, nil)
+        })
+        local c = Ludi.Container.new(r)
+        local instance = c:get("FramePointer")
 
         instance:onMouseReleased(MOUSE_LEFT)
 
@@ -141,7 +171,8 @@ TestFramePointer = {
 
     test_onMouseReleased_otherMousecode = function(self)
         local calls = {}
-        local instance = self._ctr({}, {
+        local r = self:makeRegistry()
+        r:forType("VguiFactory"):use({
             create = function()
                 return {
                     MouseCapture = trackCalls(calls, "MouseCapture", function() end),
@@ -149,7 +180,9 @@ TestFramePointer = {
                     SetParent = function() end,
                 }
             end,
-        }, nil, nil, nil, nil, nil)
+        })
+        local c = Ludi.Container.new(r)
+        local instance = c:get("FramePointer")
         instance._dragging = true
 
         instance:onMouseReleased(MOUSE_RIGHT)
@@ -160,7 +193,8 @@ TestFramePointer = {
 
     test_onMouseReleased = function(self)
         local calls = {}
-        local instance = self._ctr({}, {
+        local r = self:makeRegistry()
+        r:forType("VguiFactory"):use({
             create = function()
                 return {
                     MouseCapture = trackCalls(calls, "MouseCapture", function() end),
@@ -168,9 +202,12 @@ TestFramePointer = {
                     SetParent = function() end,
                 }
             end,
-        }, nil, nil, nil, {
+        })
+        r:forType("FramePointerReleaseEvent"):use({
             send = trackCalls(calls, "framePointerReleaseEvent", function(self, element, frame) LU.assertEquals(frame, 10) end),
-        }, nil)
+        })
+        local c = Ludi.Container.new(r)
+        local instance = c:get("FramePointer")
         instance._dragging = true
         instance._outlineColor = {255, 255, 255, 255}
         instance._frame = 10
@@ -184,33 +221,41 @@ TestFramePointer = {
     end,
 
     test_onCursorMoved_notDragging = function(self)
-        local instance = self._ctr({}, {
+        local r = self:makeRegistry()
+        r:forType("VguiFactory"):use({
             create = function()
                 return {
                     SetSize = function() end,
                     SetParent = function() end,
                 }
             end,
-        }, nil, nil, nil, nil, nil)
+        })
+        local c = Ludi.Container.new(r)
+        local instance = c:get("FramePointer")
 
         instance:onCursorMoved(0, 0)
     end,
 
     test_onCursorMoved_frameUnchanged = function(self)
-        local instance = self._ctr({
+        local r = self:makeRegistry()
+        r:forType("FramePanel"):use({
             frameArea = {10, 110},
-        }, {
+        })
+        r:forType("VguiFactory"):use({
             create = function()
                 return {
                     SetSize = function() end,
                     SetParent = function() end,
                 }
             end,
-        }, nil, {
+        })
+        r:forType("FrameTimelineSettings"):use({
             getScrollOffset = function() return 0 end,
             getZoom = function() return 100 end,
             getTimelineLength = function() return 100 end,
         })
+        local c = Ludi.Container.new(r)
+        local instance = c:get("FramePointer")
         instance._dragging = true
         instance._frame = 10
 
@@ -219,10 +264,12 @@ TestFramePointer = {
 
     test_onCursorMoved = function(self)
         local calls = {}
-        local instance = self._ctr({
+        local r = self:makeRegistry()
+        r:forType("FramePanel"):use({
             frameArea = {10, 110},
             getTall = function() return 1 end,
-        }, {
+        })
+        r:forType("VguiFactory"):use({
             create = function()
                 return {
                     GetWide = function() return 1 end,
@@ -232,13 +279,17 @@ TestFramePointer = {
                     SetParent = function() end,
                 }
             end,
-        }, nil, {
+        })
+        r:forType("FrameTimelineSettings"):use({
             getScrollOffset = function() return 0 end,
             getZoom = function() return 100 end,
             getTimelineLength = function() return 100 end,
-        }, nil, nil, {
+        })
+        r:forType("FramePointerMoveEvent"):use({
             send = trackCalls(calls, "framePointerMoveEvent", function(self, element, frame) LU.assertEquals(frame, 15) end),
         })
+        local c = Ludi.Container.new(r)
+        local instance = c:get("FramePointer")
         instance._dragging = true
         instance._frame = 10
 
@@ -249,17 +300,22 @@ TestFramePointer = {
     end,
 
     test_paint_notDrawable = function(self)
-        local instance = self._ctr({}, {
+        local calls = {}
+        local r = self:makeRegistry()
+        r:forType("VguiFactory"):use({
             create = function()
                 return {
                     SetSize = function() end,
                     SetParent = function() end,
                 }
             end,
-        }, nil, {
+        })
+        r:forType("FrameTimelineSettings"):use({
             getScrollOffset = function() return 10 end,
             getZoom = function() return 100 end,
-        }, nil, nil, nil)
+        })
+        local c = Ludi.Container.new(r)
+        local instance = c:get("FramePointer")
         instance._frame = 1
 
         instance:paint(0, 0)
@@ -267,23 +323,28 @@ TestFramePointer = {
 
     test_paint_nonPointy = function(self)
         local calls = {}
-        local instance = self._ctr({}, {
+        local r = self:makeRegistry()
+        r:forType("VguiFactory"):use({
             create = function()
                 return {
                     SetSize = function() end,
                     SetParent = function() end,
                 }
             end,
-        }, {
+        })
+        r:forType("SurfaceDrawer"):use({
             noTexture = trackCalls(calls, "drawEvent", function() end),
             setDrawColor = trackCalls(calls, "drawEvent", function() end),
             drawRect = trackCalls(calls, "drawEvent", function() end),
             drawLine = trackCalls(calls, "drawEvent", function() end),
             drawPoly = trackCalls(calls, "drawEvent", function() end),
-        }, {
+        })
+        r:forType("FrameTimelineSettings"):use({
             getScrollOffset = function() return 0 end,
             getZoom = function() return 100 end,
-        }, nil, nil, nil)
+        })
+        local c = Ludi.Container.new(r)
+        local instance = c:get("FramePointer")
         instance._frame = 1
 
         instance:paint(8, 15)
@@ -292,23 +353,28 @@ TestFramePointer = {
 
     test_paint_pointy = function(self)
         local calls = {}
-        local instance = self._ctr({}, {
+        local r = self:makeRegistry()
+        r:forType("VguiFactory"):use({
             create = function()
                 return {
                     SetSize = function() end,
                     SetParent = function() end,
                 }
             end,
-        }, {
+        })
+        r:forType("SurfaceDrawer"):use({
             noTexture = trackCalls(calls, "drawEvent", function() end),
             setDrawColor = trackCalls(calls, "drawEvent", function() end),
             drawRect = trackCalls(calls, "drawEvent", function() end),
             drawLine = trackCalls(calls, "drawEvent", function() end),
             drawPoly = trackCalls(calls, "drawEvent", function() end),
-        }, {
+        })
+        r:forType("FrameTimelineSettings"):use({
             getScrollOffset = function() return 0 end,
             getZoom = function() return 100 end,
-        }, nil, nil, nil)
+        })
+        local c = Ludi.Container.new(r)
+        local instance = c:get("FramePointer")
         instance._frame = 1
         instance.pointy = true
 

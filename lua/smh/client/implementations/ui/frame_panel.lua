@@ -1,11 +1,12 @@
-local P = {}
-P.__index = P
+local CLASS = {}
+CLASS.__index = CLASS
+CLASS.__depends = { "MenuElements", "FramePositionClickEvent", "SurfaceDrawer", "FrameTimelineSettings" }
 
-P.SCROLL_PADDING = 18
-P.SCROLL_HEIGHT = 12
+CLASS.SCROLL_PADDING = 18
+CLASS.SCROLL_HEIGHT = 12
 
-P.MIN_ZOOM = 30
-P.MAX_ZOOM = 500
+CLASS.MIN_ZOOM = 30
+CLASS.MAX_ZOOM = 500
 
 --[[function P:_initialize(uiDependencies, surfaceDrawer, playbackUpdater)
     
@@ -65,7 +66,29 @@ end]]
 
 end]]
 
-function P:paint()
+function CLASS.__new(menuElements, framePositionClickEvent, surfaceDrawer, frameTimelineSettings)
+    local element = menuElements.mainMenu.framePanel
+
+    local panel = {
+        element = element,
+        _framePositionClickEvent = framePositionClickEvent,
+        _surfaceDrawer = surfaceDrawer,
+        _frameTimelineSettings = frameTimelineSettings,
+
+        frameArea = {0, 1},
+    }
+
+    setmetatable(panel, CLASS)
+
+    element.PerformLayout = function(self, ...) panel:performLayout(...) end
+    element.Paint = function(self, ...) panel:paint(...) end
+    element.OnMouseWheeled = function(self, ...) panel:onMouseWheeled(...) end
+    element.OnMousePressed = function(self, ...) panel:onMousePressed(...) end
+
+    return panel
+end
+
+function CLASS:paint()
     local height = self.element:GetTall()
     local playbackOffset = self._frameTimelineSettings:getScrollOffset()
     local playbackLength = self._frameTimelineSettings:getZoom()
@@ -84,12 +107,12 @@ function P:paint()
 	end
 end
 
-function P:onMouseWheeled(scrollDelta)
+function CLASS:onMouseWheeled(scrollDelta)
     scrollDelta = -scrollDelta
     self._frameTimelineSettings:setZoom(self._frameTimelineSettings:getZoom() + scrollDelta)
 end
 
-function P:onMousePressed(mouseCode)
+function CLASS:onMousePressed(mouseCode)
     if mouseCode ~= MOUSE_LEFT then
         return
     end
@@ -114,24 +137,4 @@ function P:onMousePressed(mouseCode)
     self._framePositionClickEvent:send(framePosition)
 end
 
-return function(menuElements, framePositionClickEvent, surfaceDrawer, frameTimelineSettings)
-    local element = menuElements.mainMenu.framePanel
-
-    local panel = {
-        element = element,
-        _framePositionClickEvent = framePositionClickEvent,
-        _surfaceDrawer = surfaceDrawer,
-        _frameTimelineSettings = frameTimelineSettings,
-
-        frameArea = {0, 1},
-    }
-
-    setmetatable(panel, P)
-
-    element.PerformLayout = function(self, ...) panel:performLayout(...) end
-    element.Paint = function(self, ...) panel:paint(...) end
-    element.OnMouseWheeled = function(self, ...) panel:onMouseWheeled(...) end
-    element.OnMousePressed = function(self, ...) panel:onMousePressed(...) end
-
-    return panel
-end
+return CLASS

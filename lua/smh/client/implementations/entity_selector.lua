@@ -1,8 +1,8 @@
-return function(entityHighlighter, serverCommands, entityValidator)
+return function(ctx)
     return {
-        _entityHighlighter = entityHighlighter,
-        _serverCommands = serverCommands,
-        _entityValidator = entityValidator,
+        _entityHighlighter = ctx:get("EntityHighlighter"),
+        _serverCommands = ctx:get("ServerCommands"),
+        _entityValidator = ctx:get("EntityValidator"),
 
         selectFromTrace = function(self, trace)
             if not self._entityValidator:isValid(trace.Entity) then
