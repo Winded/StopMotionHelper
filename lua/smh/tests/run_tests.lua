@@ -41,6 +41,7 @@ LU = smhInclude("/smh/tests/luaunit.lua")
 Ludi = smhInclude("/smh/submodules/ludi/ludi.lua")
 
 local testFiles = {
+    "implementations/ui/element_events_test.lua",
     "implementations/ui/frame_panel_test.lua",
     "implementations/ui/frame_pointer_test.lua",
     "implementations/entity_highlighter_test.lua",
