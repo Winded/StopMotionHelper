@@ -57,14 +57,10 @@ function CLASS:getFrame()
 end
 
 function CLASS:setFrame(frame)
-    local startX, endX = unpack(self._framePanel.frameArea)
-    local height = self._framePanel:getTall() * self.verticalPosition
-
-    local frameAreaWidth = endX - startX
-    local positionWithOffset = frame - self._frameTimelineSettings:getScrollOffset()
-    local x = startX + (positionWithOffset / self._frameTimelineSettings:getZoom()) * frameAreaWidth
-
     self._frame = frame
+
+    local x = self._framePanel:getLocalPositionFromFrame(frame)
+    local height = self._framePanel:getTall() * self.verticalPosition
     self.element:SetPos(x - self.element:GetWide() / 2, height - self.element:GetTall() / 2)
 end
 

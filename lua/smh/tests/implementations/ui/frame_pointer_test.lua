@@ -36,8 +36,8 @@ TestFramePointer = {
         local calls = {}
         local r = self:makeRegistry()
         r:forType("FramePanel"):use({
-            frameArea = {10, 110},
             getTall = trackCalls(calls, "framePanel_getTall", function() return 10 end),
+            getLocalPositionFromFrame = trackCalls(calls, "framePanel_getLocalPositionFromFrame", function() return 20 end),
         })
         r:forType("VguiFactory"):use({
             create = function()
@@ -67,8 +67,7 @@ TestFramePointer = {
         LU.assertEquals(calls.GetTall, 1)
         LU.assertEquals(calls.SetPos, 1)
         LU.assertEquals(calls.framePanel_getTall, 1)
-        LU.assertTrue(calls.getScrollOffset > 0)
-        LU.assertTrue(calls.getZoom > 0)
+        LU.assertTrue(calls.framePanel_getLocalPositionFromFrame > 0)
     end,
 
     test_onMousePressed_left = function(self)
@@ -251,8 +250,6 @@ TestFramePointer = {
             end,
         })
         r:forType("FrameTimelineSettings"):use({
-            getScrollOffset = function() return 0 end,
-            getZoom = function() return 100 end,
             getTimelineLength = function() return 100 end,
         })
         local c = Ludi.Container.new(r)
@@ -270,6 +267,7 @@ TestFramePointer = {
             frameArea = {10, 110},
             getTall = function() return 1 end,
             getFrameFromScreenPosition = function() return 15 end,
+            getLocalPositionFromFrame = function() return 0 end,
         })
         r:forType("VguiFactory"):use({
             create = function()
@@ -283,8 +281,6 @@ TestFramePointer = {
             end,
         })
         r:forType("FrameTimelineSettings"):use({
-            getScrollOffset = function() return 0 end,
-            getZoom = function() return 100 end,
             getTimelineLength = function() return 100 end,
         })
         r:forType("FramePointerMoveEvent"):use({
