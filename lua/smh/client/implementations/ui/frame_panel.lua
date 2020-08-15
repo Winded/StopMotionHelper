@@ -117,17 +117,10 @@ function CLASS:onMousePressed(mouseCode)
         return
     end
 
-    local startX, endX = unpack(self.frameArea)
     local posX, _ = self.element:CursorPos()
-
-    local scrollOffset = self._frameTimelineSettings:getScrollOffset()
-    local zoom = self._frameTimelineSettings:getZoom()
     local timelineLength = self._frameTimelineSettings:getTimelineLength()
 
-    local targetX = posX - startX
-    local width = endX - startX
-
-    local framePosition = math.Round(scrollOffset + (targetX / width) * zoom)
+    local framePosition = self:getFrameFromScreenPosition(posX)
     if framePosition < 0 then
         framePosition = 0
     elseif framePosition >= timelineLength then
@@ -135,6 +128,27 @@ function CLASS:onMousePressed(mouseCode)
     end
 
     self._framePositionClickEvent:send(framePosition)
+end
+
+function CLASS:getFrameFromScreenPosition(posX)
+    local startX, endX = unpack(self.frameArea)
+
+    local scrollOffset = self._frameTimelineSettings:getScrollOffset()
+    local zoom = self._frameTimelineSettings:getZoom()
+
+    local targetX = posX - startX
+    local width = endX - startX
+
+    return math.Round(scrollOffset + (targetX / width) * zoom)
+end
+
+function CLASS:getLocalPositionFromFrame(frame)
+    local startX, endX = unpack(self.frameArea)
+
+    local frameAreaWidth = endX - startX
+    local positionWithOffset = frame - self._frameTimelineSettings:getScrollOffset()
+
+    return startX + (positionWithOffset / self._frameTimelineSettings:getZoom() * frameAreaWidth)
 end
 
 return CLASS

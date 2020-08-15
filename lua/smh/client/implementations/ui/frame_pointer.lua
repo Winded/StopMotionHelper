@@ -94,19 +94,14 @@ function CLASS:onCursorMoved(cursorX)
         return
     end
 
-    local startX, endX = unpack(self._framePanel.frameArea)
-	
-    local targetX = cursorX - startX
-    local width = endX - startX
-
     local timelineLength = self._frameTimelineSettings:getTimelineLength()
 
-    local targetPos = math.Round(self._frameTimelineSettings:getScrollOffset() + (targetX / width) * self._frameTimelineSettings:getZoom())
-    targetPos = targetPos < 0 and 0 or (targetPos > timelineLength and timelineLength - 1 or targetPos)
+    local targetFrame = self._framePanel:getFrameFromScreenPosition(cursorX)
+    targetFrame = targetFrame < 0 and 0 or (targetFrame > timelineLength and timelineLength - 1 or targetFrame)
     
-    if self._frame ~= targetPos then
-        self:setFrame(targetPos)
-        self._framePointerMoveEvent:send(self, self._frame)
+    if self._frame ~= targetFrame then
+        self:setFrame(targetFrame)
+        self._framePointerMoveEvent:send(self, targetFrame)
     end
 end
 

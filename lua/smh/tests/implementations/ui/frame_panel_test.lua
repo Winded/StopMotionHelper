@@ -136,4 +136,23 @@ TestFramePanel = {
     test_onMousePressed3 = function(self)
         self:performMousePressedTest(10, 30, 25, 80, 24)
     end,
+
+    test_getLocalPositionFromFrame = function(self)
+        local calls = {}
+        local r = self:makeRegistry()
+        r:forType("MenuElements"):use({ mainMenu = { framePanel = {} } })
+        r:forType("FrameTimelineSettings"):use({
+            getScrollOffset = trackCalls(calls, "getScrollOffset", function() return 17 end),
+            getZoom = trackCalls(calls, "getZoom", function() return 50 end),
+        })
+        local c = Ludi.Container.new(r)
+        local instance = c:get("FramePanel")
+        c.frameArea = {10, 110}
+
+        local result = instance:getLocalPositionFromFrame(21)
+
+        LU.assertEquals(calls.getScrollOffset, 1)
+        LU.assertEquals(calls.getZoom, 1)
+        LU.assertEquals(result, 0.08)
+    end,
 }

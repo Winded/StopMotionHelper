@@ -240,6 +240,7 @@ TestFramePointer = {
         local r = self:makeRegistry()
         r:forType("FramePanel"):use({
             frameArea = {10, 110},
+            getFrameFromScreenPosition = function() return 10 end,
         })
         r:forType("VguiFactory"):use({
             create = function()
@@ -268,6 +269,7 @@ TestFramePointer = {
         r:forType("FramePanel"):use({
             frameArea = {10, 110},
             getTall = function() return 1 end,
+            getFrameFromScreenPosition = function() return 15 end,
         })
         r:forType("VguiFactory"):use({
             create = function()
