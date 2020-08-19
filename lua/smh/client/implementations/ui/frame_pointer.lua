@@ -8,8 +8,9 @@ CLASS.__depends = {
     "FrameTimelineSettings",
     "FramePointerClickEvent",
     "FramePointerReleaseEvent",
-    "FramePointerMoveEvent"
+    "FramePointerMoveEvent",
 }
+CLASS.__lifecycle = Ludi.Lifecycle.Transient
 
 function CLASS.__new(framePanel,
                      vguiFactory,
@@ -134,6 +135,11 @@ function CLASS:paint(width, height)
         self._surfaceDrawer:drawLine(width, height, 0, height)
         self._surfaceDrawer:drawLine(0, height, 0, 0)
     end
+end
+
+function CLASS:onFrameTimelineSettingsChanged()
+    -- Refresh pointer position when timeline settings change
+    self:setFrame(self._frame)
 end
 
 function CLASS:delete()
