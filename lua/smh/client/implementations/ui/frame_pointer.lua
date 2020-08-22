@@ -65,24 +65,32 @@ function CLASS:setFrame(frame)
     self.element:SetPos(x - self.element:GetWide() / 2, height - self.element:GetTall() / 2)
 end
 
-function CLASS:onMousePressed(mouseCode)
-    if mouseCode == MOUSE_LEFT then
+function CLASS:setDragging(dragging)
+    if dragging then
         self.element:MouseCapture(true)
         self._outlineColor = {255, 255, 255, 255}
-        self._dragging = true
+    else
+        self.element:MouseCapture(false)
+        self._outlineColor = {0, 0, 0, 255}
+    end
+
+    self._dragging = dragging
+end
+
+function CLASS:onMousePressed(mouseCode)
+    if mouseCode == MOUSE_LEFT then
+        self:setDragging(true)
     end
 
     self._framePointerClickEvent:send(self, mouseCode)
 end
 
 function CLASS:onMouseReleased(mouseCode)
-    if mouseCode ~= MOUSE_LEFT or not self._dragging then
+    if not self._dragging then
         return
     end
 
-    self.element:MouseCapture(false)
-    self._outlineColor = {0, 0, 0, 255}
-    self._dragging = false
+    self:setDragging(false)
     self._framePointerReleaseEvent:send(self, self._frame)
 end
 

@@ -168,28 +168,6 @@ TestFramePointer = {
         LU.assertEquals(calls.MouseCapture or 0, 0)
     end,
 
-    test_onMouseReleased_otherMousecode = function(self)
-        local calls = {}
-        local r = self:makeRegistry()
-        r:forType("VguiFactory"):use({
-            create = function()
-                return {
-                    MouseCapture = trackCalls(calls, "MouseCapture", function() end),
-                    SetSize = function() end,
-                    SetParent = function() end,
-                }
-            end,
-        })
-        local c = Ludi.Container.new(r)
-        local instance = c:get("FramePointer")
-        instance._dragging = true
-
-        instance:onMouseReleased(MOUSE_RIGHT)
-        LU.assertEquals(calls.MouseCapture or 0, 0)
-        instance:onMouseReleased(MOUSE_MIDDLE)
-        LU.assertEquals(calls.MouseCapture or 0, 0)
-    end,
-
     test_onMouseReleased = function(self)
         local calls = {}
         local r = self:makeRegistry()
