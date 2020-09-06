@@ -51,6 +51,17 @@ function CLASS:onKeyframeCreated(keyframe)
     self._pointerKeyframeMap[pointer] = keyframe.id
 end
 
+function CLASS:onKeyframeUpdated(keyframeId, updatedData)
+    local pointer = self._keyframePointerMap[keyframeId]
+    if pointer == nil then
+        return
+    end
+
+    if updatedData.frame ~= nil and pointer:getFrame() ~= updatedData.frame then
+        pointer:setFrame(updatedData.frame)
+    end
+end
+
 function CLASS:onKeyframeDeleted(keyframeId)
     local pointer = self._keyframePointerMap[keyframeId]
     if pointer == nil then
