@@ -88,7 +88,7 @@ local function Create(parent, pointyBottom)
 
 			local frameAreaWidth = endX - startX;
 			if position == nil then
-			position = -1;
+				position = -1;
 			end
 			local positionWithOffset = position - scrollOffset;
 			local x = startX + (positionWithOffset / zoom) * frameAreaWidth;
