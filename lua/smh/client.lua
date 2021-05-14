@@ -127,7 +127,7 @@ local function Setup()
     end);
 
     menuStreams.Settings.Input.FreezeAll(SMH.DefaultData.FreezeAll);
-	menuStreams.Settings.Input.TweenDisable(SMH.DefaultData.TweenDisable);
+    menuStreams.Settings.Input.TweenDisable(SMH.DefaultData.TweenDisable);
     menuStreams.Settings.Input.LocalizePhysBones(SMH.DefaultData.LocalizePhysBones);
     menuStreams.Settings.Input.IgnorePhysBones(SMH.DefaultData.IgnorePhysBones);
     menuStreams.Settings.Input.GhostPrevFrame(SMH.DefaultData.GhostPrevFrame);
