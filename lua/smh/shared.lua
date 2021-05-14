@@ -40,7 +40,7 @@ SMH.DefaultData = {
     LocalizePhysBones = false,
     IgnorePhysBones = false,
 	
-	TweenDisable = false,
+    TweenDisable = false,
 
     ShowHelp = false,
     ShowSave = false,
