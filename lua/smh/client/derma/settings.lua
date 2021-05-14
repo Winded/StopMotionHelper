@@ -31,6 +31,10 @@ local function Create(parent)
 	panel.GhostAllEntities = vgui.Create("DCheckBoxLabel", panel);
 	panel.GhostAllEntities:SetText("Ghost all entities");
 	panel.GhostAllEntities:SizeToContents();
+	
+	panel.TweenDisable = vgui.Create("DCheckBoxLabel", panel);
+	panel.TweenDisable:SetText("Disable tweening");
+	panel.TweenDisable:SizeToContents();
 
 	panel.GhostTransparency = vgui.Create("Slider", panel);
 	panel.GhostTransparency:SetMinMax(0, 1);
@@ -42,7 +46,7 @@ local function Create(parent)
 	panel.HelpButton = vgui.Create("DButton", panel);
 	panel.HelpButton:SetText("Help");
 
-	panel:SetSize(160, 225);
+	panel:SetSize(160, 245); --225
 
 	local basePerformLayout = panel.PerformLayout;
 	panel.PerformLayout = function()
@@ -59,15 +63,17 @@ local function Create(parent)
 		panel.GhostNextFrame:SetPos(5, 105);
 		panel.GhostAllEntities:SetPos(5, 125);
 	
+		panel.TweenDisable:SetPos(5, 145);
+	
 		local gt = panel.GhostTransparency;
 		local label = panel.GhostTransparencyLabel;
 		label:SizeToContents();
 		local LW, LH = label:GetSize();
-		gt:SetPos(5, 145 + LH - 5);
+		gt:SetPos(5, 165 + LH - 5);
 		gt:SetSize(panel:GetWide() - 5 - 5, 25);
-		label:SetPos(10, 145);
+		label:SetPos(10, 165);
 	
-		panel.HelpButton:SetPos(5, 190);
+		panel.HelpButton:SetPos(5, 210);
 		panel.HelpButton:SetSize(150, 20);
 
 	end
@@ -81,6 +87,7 @@ local function Create(parent)
 	input.GhostPrevFrame, output.GhostPrevFrame = RxUtils.bindDPanel(panel.GhostPrevFrame, "SetValue", "OnChange");
 	input.GhostNextFrame, output.GhostNextFrame = RxUtils.bindDPanel(panel.GhostNextFrame, "SetValue", "OnChange");
 	input.GhostAllEntities, output.GhostAllEntities = RxUtils.bindDPanel(panel.GhostAllEntities, "SetValue", "OnChange");
+	input.TweenDisable, output.TweenDisable = RxUtils.bindDPanel(panel.TweenDisable, "SetValue", "OnChange");
 	input.GhostTransparency, output.GhostTransparency = RxUtils.bindDPanel(panel.GhostTransparency, "SetValue", "OnValueChanged");
 	input.ShowHelp, output.ShowHelp = RxUtils.bindDPanel(panel.HelpButton, nil, "DoClick");
 

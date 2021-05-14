@@ -15,6 +15,10 @@ function MOD:Load(player, entity, data)
 end
 
 function MOD:LoadBetween(player, entity, data1, data2, percentage)
-	local lerpedModelScale = SMH.LerpLinear(data1.ModelScale, data2.ModelScale, percentage);
-	entity:SetModelScale(lerpedModelScale);
+	if not player.SMHData.TweenDisable then
+	
+		local lerpedModelScale = SMH.LerpLinear(data1.ModelScale, data2.ModelScale, percentage);
+		entity:SetModelScale(lerpedModelScale);
+	
+	end
 end

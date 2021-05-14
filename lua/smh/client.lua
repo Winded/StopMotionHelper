@@ -115,6 +115,7 @@ local function Setup()
     menuStreams.Output.Save:subscribe(function() SMH.Data.ShowSave = true end);
 
     menuStreams.Settings.Output.FreezeAll:subscribe(function(value) SMH.Data.FreezeAll = value end);
+	menuStreams.Settings.Output.TweenDisable:subscribe(function(value) SMH.Data.TweenDisable = value end);
     menuStreams.Settings.Output.LocalizePhysBones:subscribe(function(value) SMH.Data.LocalizePhysBones = value end);
     menuStreams.Settings.Output.IgnorePhysBones:subscribe(function(value) SMH.Data.IgnorePhysBones = value end);
     menuStreams.Settings.Output.GhostPrevFrame:subscribe(function(value) SMH.Data.GhostPrevFrame = value end);
@@ -126,6 +127,7 @@ local function Setup()
     end);
 
     menuStreams.Settings.Input.FreezeAll(SMH.DefaultData.FreezeAll);
+	menuStreams.Settings.Input.TweenDisable(SMH.DefaultData.TweenDisable);
     menuStreams.Settings.Input.LocalizePhysBones(SMH.DefaultData.LocalizePhysBones);
     menuStreams.Settings.Input.IgnorePhysBones(SMH.DefaultData.IgnorePhysBones);
     menuStreams.Settings.Input.GhostPrevFrame(SMH.DefaultData.GhostPrevFrame);

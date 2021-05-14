@@ -39,6 +39,8 @@ SMH.DefaultData = {
     FreezeAll = false,
     LocalizePhysBones = false,
     IgnorePhysBones = false,
+	
+	TweenDisable = false,
 
     ShowHelp = false,
     ShowSave = false,

@@ -42,22 +42,22 @@ function MOD:Load(player, entity, data)
 end
 
 function MOD:LoadBetween(player, entity, data1, data2, percentage)
+	if not player.SMHData.TweenDisable then
+		local count = entity:GetBoneCount();
 
-	local count = entity:GetBoneCount();
+		for b = 0, count - 1 do
 
-	for b = 0, count - 1 do
+			local d1 = data1[b];
+			local d2 = data2[b];
 
-		local d1 = data1[b];
-		local d2 = data2[b];
+			local Pos = SMH.LerpLinearVector(d1.Pos, d2.Pos, percentage);
+			local Ang = SMH.LerpLinearAngle(d1.Ang, d2.Ang, percentage);
+			local Scale = SMH.LerpLinear(d1.Scale, d2.Scale, percentage);
 
-		local Pos = SMH.LerpLinearVector(d1.Pos, d2.Pos, percentage);
-		local Ang = SMH.LerpLinearAngle(d1.Ang, d2.Ang, percentage);
-		local Scale = SMH.LerpLinear(d1.Scale, d2.Scale, percentage);
+			entity:ManipulateBonePosition(b, Pos);
+			entity:ManipulateBoneAngles(b, Ang);
+			entity:ManipulateBoneScale(b, Scale);
 
-		entity:ManipulateBonePosition(b, Pos);
-		entity:ManipulateBoneAngles(b, Ang);
-		entity:ManipulateBoneScale(b, Scale);
-
+		end
 	end
-
 end
