@@ -31,11 +31,11 @@ function MOD:Load(player, entity, data)
 end
 
 function MOD:LoadBetween(player, entity, data1, data2, percentage)
-	if not player.SMHData.TweenDisable then
-		if not self:HasEyes(entity) then return; end --Shouldn't happen, but meh
 
-		local et = SMH.LerpLinearVector(data1.EyeTarget, data2.EyeTarget, percentage);
+	if not self:HasEyes(entity) then return; end --Shouldn't happen, but meh
 
-		entity:SetEyeTarget(et);
-	end
+	local et = SMH.LerpLinearVector(data1.EyeTarget, data2.EyeTarget, percentage);
+
+	entity:SetEyeTarget(et);
+
 end

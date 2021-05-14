@@ -46,7 +46,7 @@ local function Create(parent)
 	panel.HelpButton = vgui.Create("DButton", panel);
 	panel.HelpButton:SetText("Help");
 
-	panel:SetSize(160, 245); --225
+	panel:SetSize(160, 245);
 
 	local basePerformLayout = panel.PerformLayout;
 	panel.PerformLayout = function()
