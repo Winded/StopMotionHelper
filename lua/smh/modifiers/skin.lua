@@ -14,5 +14,7 @@ function MOD:Load(player, entity, data)
 end
 
 function MOD:LoadBetween(player, entity, data1, data2, percentage)
-    self:Load(player, entity, data1);
+
+	self:Load(player, entity, data1);
+	
 end

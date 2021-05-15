@@ -38,7 +38,7 @@ function MOD:Load(player, entity, data)
 end
 
 function MOD:LoadBetween(player, entity, data1, data2, percentage)
-
+	
 	local count = entity:GetFlexNum();
 	if count <= 0 then return; end --Shouldn't happen, but meh
 

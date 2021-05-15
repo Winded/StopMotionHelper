@@ -29,6 +29,10 @@ function SMH.GetPositionFrames(frames, framepos, ignoreCurrentFrame)
 
 	for _, frame in pairs(frames) do
 
+		if frame.Position == nil then
+			frame.Position = -1;
+		end
+
 		local diff = frame.Position - framepos;
 		local aDiff = math.abs(diff);
 		if diff < 0 and aDiff < closestPrevFramePos then
@@ -76,10 +80,12 @@ function SMH.PositionEntity(player, entity, framepos)
 		return;
 	end
 
-	for name, mod in pairs(SMH.Modifiers) do
-		local data1, data2 = frame1.EntityData[name], frame2.EntityData[name];
-		if data1 ~= nil and data2 ~= nil then
-			mod:LoadBetween(player, entity, data1, data2, perc);
+	if not player.SMHData.TweenDisable then
+		for name, mod in pairs(SMH.Modifiers) do
+			local data1, data2 = frame1.EntityData[name], frame2.EntityData[name];
+			if data1 ~= nil and data2 ~= nil then
+				mod:LoadBetween(player, entity, data1, data2, perc);
+			end
 		end
 	end
 

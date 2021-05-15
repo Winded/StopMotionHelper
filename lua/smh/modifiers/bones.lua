@@ -59,5 +59,4 @@ function MOD:LoadBetween(player, entity, data1, data2, percentage)
 		entity:ManipulateBoneScale(b, Scale);
 
 	end
-
 end

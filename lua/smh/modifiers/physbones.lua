@@ -91,7 +91,7 @@ function MOD:LoadGhost(player, entity, ghost, data)
 end
 
 function MOD:LoadBetween(player, entity, data1, data2, percentage)
-
+	
 	if player.SMHData.IgnorePhysBones then
 		return;
 	end
@@ -99,7 +99,7 @@ function MOD:LoadBetween(player, entity, data1, data2, percentage)
 	local count = entity:GetPhysicsObjectCount();
 
 	for i = 0, count - 1 do
-
+			
 		local pb = entity:GetPhysicsObjectNum(i);
 
 		local d1 = data1[i];
@@ -107,14 +107,14 @@ function MOD:LoadBetween(player, entity, data1, data2, percentage)
 
 		local Pos = SMH.LerpLinearVector(d1.Pos, d2.Pos, percentage);
 		local Ang = SMH.LerpLinearAngle(d1.Ang, d2.Ang, percentage);
-
+			
+			
 		pb:EnableMotion(false);
-
+			
 		pb:SetPos(Pos);
 		pb:SetAngles(Ang);
 
 		pb:Wake();
-
 	end
 
 end

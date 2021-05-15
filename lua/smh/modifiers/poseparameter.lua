@@ -24,6 +24,7 @@ function MOD:Load(player, entity, data)
 end
 
 function MOD:LoadBetween(player, entity, data1, data2, percentage)
+
 	for name, value1 in pairs(data1) do
 
 		local value2 = data2[name];
@@ -34,4 +35,5 @@ function MOD:LoadBetween(player, entity, data1, data2, percentage)
 		end
 
 	end
+
 end
