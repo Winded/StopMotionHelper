@@ -87,7 +87,15 @@ function SMH.PositionEntity(player, entity, framepos)
 				mod:LoadBetween(player, entity, data1, data2, perc);
 			end
 		end
+	else
+		for name, mod in pairs(SMH.Modifiers) do
+			local data1 = frame1.EntityData[name];
+			if data1 ~= nil then
+				mod:Load(player, entity, frame1.EntityData[name]);
+			end
+		end
 	end
+	
 
 end
 
