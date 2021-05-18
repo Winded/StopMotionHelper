@@ -20,7 +20,7 @@ local function RenderTick()
 		RunConsoleCommand(command);
 	end);
 
-	SMH.Data.Position = newPos; --put line down here
+	SMH.Data.Position = newPos;
 
 end
 
