@@ -30,7 +30,7 @@ function MOD:Load(player, entity, data)
 	entity:SetFOV(data.FOV);
 	entity:SetNearZ(data.Nearz);
 	entity:SetFarZ(data.Farz);
-	entity:GetRoll(data.Roll);
+	entity:SetRoll(data.Roll);
 
 end
 
