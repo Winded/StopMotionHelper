@@ -1,4 +1,3 @@
-
 SMH.Rendering = false;
 SMH.UseScreenshot = false;
 SMH.RenderTimerName = "SMHRender";
@@ -7,7 +6,7 @@ local function RenderTick()
 
 	local newPos = SMH.Data.Position + 1;
 	if newPos >= SMH.Data.PlaybackLength then
-		SMH.StopRender();
+		SMH.FinishRender();
 		return;
 	end
 
@@ -51,4 +50,11 @@ function SMH.StopRender()
 
 	SMH.Rendering = false;
 
+end
+
+function SMH.FinishRender()
+
+	SMH.StopRender();
+	SMH.Data.Rendering = false;
+	
 end
