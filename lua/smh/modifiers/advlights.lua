@@ -1,13 +1,21 @@
 
-MOD.Name = "Soft Lamps";
+MOD.Name = "Advanced Lights";
+
+local validClasses = {
+	projected_light = true,
+	projected_light_new = true,
+	cheap_light = true,
+	expensive_light = true,
+	expensive_light_new = true,
+	spot_light = true
+};
 
 function MOD:IsAdvLight(entity)
 	
 	local theclass = entity:GetClass();
 	
-	if theclass ~= "projected_light" and theclass ~= "projected_light_new" and theclass ~= "cheap_light" and theclass ~= "expensive_light" and theclass ~= "expensive_light_new" and theclass ~= "spot_light" then return false; end -- probably there must be a better way to do this. all advanced light entities share "base_light" as baseclass, just in case
-	return true;
-
+	return validClasses[theclass] or false;
+	
 end
 
 function MOD:IsProjectedLight(entity)
