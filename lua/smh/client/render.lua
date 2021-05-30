@@ -6,7 +6,7 @@ local function RenderTick()
 
 	local newPos = SMH.Data.Position + 1;
 	if newPos >= SMH.Data.PlaybackLength then
-		SMH.FinishRender();
+		SMH.StopRender();
 		return;
 	end
 
@@ -49,12 +49,8 @@ function SMH.StopRender()
 	LocalPlayer():EmitSound("buttons/button1.wav");
 
 	SMH.Rendering = false;
+	if SMH.Data.Rendering then
+		SMH.Data.Rendering = false;
+	end
 
-end
-
-function SMH.FinishRender()
-
-	SMH.StopRender();
-	SMH.Data.Rendering = false;
-	
 end
