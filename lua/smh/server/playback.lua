@@ -10,7 +10,7 @@ hook.Add("Think", "SMHPlaybackTick", function()
 		pb.Position = pb.Position + FrameTime() * pb.PlaybackRate;
 		local newPos = math.floor(pb.Position);
 
-		if newPos > pb.PlaybackLength then
+		if newPos > pb.PlaybackLength - 1 then
 			pb.Position = 0;
 			newPos = 0;
 		end
