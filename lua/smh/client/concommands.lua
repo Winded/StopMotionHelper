@@ -14,7 +14,7 @@ local function Setup()
 
 	concommand.Add("smh_next", function()
 		local pos = SMH.Data.Position + 1;
-		if pos > SMH.Data.PlaybackLength then
+		if pos >= SMH.Data.PlaybackLength then
 			pos = 0;
 		end
 		SMH.Data.Position = pos;
@@ -23,7 +23,7 @@ local function Setup()
 	concommand.Add("smh_previous", function()
 		local pos = SMH.Data.Position - 1;
 		if pos < 0 then
-			pos = SMH.Data.PlaybackLength;
+			pos = SMH.Data.PlaybackLength - 1;
 		end
 		SMH.Data.Position = pos;
 	end);

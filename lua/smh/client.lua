@@ -17,7 +17,7 @@ local function BindData(container, key)
     local output = Rx.Subject.create();
     local changing = false;
     
-    container:_Listen(key, function(contianer, _, value)
+    container:_Listen(key, function(container, _, value)
         if not changing then
             changing = true;
             output(value);

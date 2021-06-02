@@ -137,7 +137,7 @@ local function Create(parent, pointyBottom)
 		local width = endX - startX;
 
 		local targetPos = math.Round(scrollOffset + (targetX / width) * zoom);
-		targetPos = targetPos < 0 and 0 or (targetPos > totalFrames and totalFrames - 1 or targetPos);
+		targetPos = targetPos < 0 and 0 or (targetPos > totalFrames - 1 and totalFrames - 1 or targetPos);
 
 		distinctOutputPositionStream(targetPos);
 	

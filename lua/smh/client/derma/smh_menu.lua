@@ -227,7 +227,7 @@ local function Setup(parent)
 	local combinedPositionStream = Rx.BehaviorSubject.create(0);
 	inputPositionStream:merge(outputPositionStream):subscribe(combinedPositionStream);
 	Rx.Observable.combineLatest(combinedPositionStream, timelineLengthStream)
-		:map(function(position, timelineLength) return "Position: " .. position .. " / " .. timelineLength end)
+		:map(function(position, timelineLength) return "Position: " .. (position + 1) .. " / " .. timelineLength end)
 		:subscribe(function(text)
 			positionLabel:SetText(text);
 			positionLabel:SizeToContents();
