@@ -5,7 +5,7 @@ SMH.RenderTimerName = "SMHRender";
 local function RenderTick()
 
 	local newPos = SMH.Data.Position + 1;
-	if newPos >= SMH.Data.PlaybackLength then
+	if newPos > SMH.Data.PlaybackLength then
 		SMH.StopRender();
 		return;
 	end
@@ -15,11 +15,12 @@ local function RenderTick()
 		command = "screenshot";
 	end
 
-	timer.Create(SMH.RenderTimerName .. "Sub", 0.4, 1, function()
+	timer.Create(SMH.RenderTimerName .. "Sub", 0.2, 1, function()
 		RunConsoleCommand(command);
+		timer.Simple(0.4, function()
+			SMH.Data.Position = newPos;
+		end);
 	end);
-
-	SMH.Data.Position = newPos;
 
 end
 
@@ -29,7 +30,7 @@ function SMH.StartRender(useScreenshot)
 		useScreenshot = false;
 	end
 
-	SMH.Data.Position = -1;
+	SMH.Data.Position = 0;
 
 	LocalPlayer():EmitSound("buttons/blip1.wav");
 
