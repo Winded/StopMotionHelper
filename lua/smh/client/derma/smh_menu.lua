@@ -155,7 +155,7 @@ local function Setup(parent)
 
 			middleMouseReleaseStream
 				:with(newItemStreams.Output.Position)
-				:map(function(mousecode, position) return frame.ID, position end)
+				:map(function(mousecode, position) return frame.ID, position or frame.Position end)
 				:subscribe(function(...) outputFrameCloneStream(...) end);
 			
 			middleMouseReleaseStream:subscribe(function(mousecode)
