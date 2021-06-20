@@ -29,9 +29,6 @@ function SMH.GetPositionFrames(frames, framepos, ignoreCurrentFrame)
 
 	for _, frame in pairs(frames) do
 
-		if frame.Position == nil then
-			frame.Position = -1;
-		end
 
 		local diff = frame.Position - framepos;
 		local aDiff = math.abs(diff);

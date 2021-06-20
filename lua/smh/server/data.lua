@@ -102,7 +102,7 @@ local function FrameCopied(container, key, copiedFrame)
 	local player = container:_GetPlayer();
 	local entity = container.Entity;
 
-	if not copiedFrame or not IsValid(entity) then
+	if not copiedFrame or not IsValid(entity) or not copiedFrame.Position then
 		return;
 	end
 
