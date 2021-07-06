@@ -1,6 +1,7 @@
 
 include("shared.lua");
 
+include("server/modifiers.lua")
 include("server/data.lua");
 include("server/easing.lua");
 include("server/eyetarget.lua");

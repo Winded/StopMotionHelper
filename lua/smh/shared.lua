@@ -7,8 +7,6 @@ function SMH.Include(path)
     return include("smh/" .. path);
 end
 
-include("shared/modifiers.lua");
-
 SMH.GhostTypes = {
     PrevFrame = 1,
     NextFrame = 2,
