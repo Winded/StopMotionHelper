@@ -25,7 +25,7 @@ local INT_BITCOUNT = 32
 local function SetFrame(msgLength, player)
     local newFrame = net.ReadUInt(INT_BITCOUNT)
 
-    SMH.PlaybackManager.SetFrame(player, newFrame)
+    SMH.PlaybackManager.SetFrame(player, newFrame, true)
     
     net.Start(MessageTypes.SetFrameResponse)
     net.WriteUInt(newFrame, INT_BITCOUNT)
