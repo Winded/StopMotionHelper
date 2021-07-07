@@ -14,6 +14,9 @@ local MessageTypes = {
     "StartPlayback",
     "StopPlayback",
     "PlaybackResponse",
+
+    "SetGhostSettings",
+    "SetGhostSettingsResponse",
 }
 for key, val in pairs(MessageTypes) do
     local prefixVal = "SMH" .. val
@@ -26,6 +29,7 @@ local function SetFrame(msgLength, player)
     local newFrame = net.ReadUInt(INT_BITCOUNT)
 
     SMH.PlaybackManager.SetFrame(player, newFrame, true)
+    SMH.GhostsManager.UpdateState(player, newFrame)
     
     net.Start(MessageTypes.SetFrameResponse)
     net.WriteUInt(newFrame, INT_BITCOUNT)
@@ -102,9 +106,34 @@ local function StopPlayback(msgLength, player)
     net.Send(player)
 end
 
-local CTRL = {}
+local function SetGhostSettings(msgLength, player)
+    local prevKeyframe = net.ReadBool()
+    local nextKeyframe = net.ReadBool()
+    local onionSkin = net.ReadBool()
+    local ghostAll = net.ReadBool()
+    local targetEntity = net.ReadEntity()
+    local transparency = net.ReadFloat()
 
-function CTRL.Setup()
+    SMH.GhostsManager.UpdateSettings(player, {
+        PrevKeyframe = prevKeyframe,
+        NextKeyframe = nextKeyframe,
+        OnionSkin = onionSkin,
+        GhostAll = ghostAll,
+        TargetEntity = targetEntity,
+        Transparency = transparency,
+    })
+
+    net.Start(MessageTypes.SetGhostSettingsResponse)
+    net.WriteBool(prevKeyframe)
+    net.WriteBool(nextKeyframe)
+    net.WriteBool(onionSkin)
+    net.WriteBool(ghostAll)
+    net.WriteEntity(targetEntity)
+    net.WriteFloat(transparency)
+    net.Send(player)
+end
+
+local function Setup()
     for _, message in pairs(MessageTypes) do
         util.AddNetworkString(message)
     end
@@ -119,6 +148,8 @@ function CTRL.Setup()
 
     net.Receive(MessageTypes.StartPlayback, StartPlayback)
     net.Receive(MessageTypes.StopPlayback, StopPlayback)
+
+    net.Receive(MessageTypes.SetGhostSettings, SetGhostSettings)
 end
 
-SMH.Controller = CTRL
+Setup()
