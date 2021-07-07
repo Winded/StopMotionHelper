@@ -1,28 +1,3 @@
-local MessageTypes = {
-    "SetFrame",
-    "SetFrameResponse",
-
-    "GetKeyframes",
-    "GetKeyframesResponse",
-
-    "CreateKeyframe",
-    "UpdateKeyframe",
-    "UpdateKeyframeResponse",
-    "DeleteKeyframe",
-    "DeleteKeyframeResponse",
-
-    "StartPlayback",
-    "StopPlayback",
-    "PlaybackResponse",
-
-    "SetGhostSettings",
-    "SetGhostSettingsResponse",
-}
-for key, val in pairs(MessageTypes) do
-    local prefixVal = "SMH" .. val
-    MessageTypes[val] = prefixVal
-end
-
 local INT_BITCOUNT = 32
 
 local function SetFrame(msgLength, player)
@@ -31,7 +6,7 @@ local function SetFrame(msgLength, player)
     SMH.PlaybackManager.SetFrame(player, newFrame, true)
     SMH.GhostsManager.UpdateState(player, newFrame)
     
-    net.Start(MessageTypes.SetFrameResponse)
+    net.Start(SMH.MessageTypes.SetFrameResponse)
     net.WriteUInt(newFrame, INT_BITCOUNT)
     net.Send(player)
 end
@@ -39,14 +14,12 @@ end
 local function GetKeyframes(msgLength, player)
     local entity = net.ReadEntity()
 
-    local keyframes
-    if IsValid(entity) then
-        keyframes = SMH.KeyframeManager.GetAllForEntity(player, entity)
-    else
-        keyframes = SMH.KeyframeManager.GetAll(player)
+    local keyframes = SMH.KeyframeManager.GetAllForEntity(player, entity)
+    for _, keyframe in pairs(keyframes) do
+        keyframe.Modifiers = nil
     end
 
-    net.Start(MessageTypes.GetKeyframesResponse)
+    net.Start(SMH.MessageTypes.GetKeyframesResponse)
     net.WriteEntity(entity)
     net.WriteTable(keyframes)
     net.Send(player)
@@ -57,10 +30,13 @@ local function CreateKeyframe(msgLength, player)
     local frame = net.ReadUInt(INT_BITCOUNT)
 
     local keyframe = SMH.KeyframeManager.Create(player, entity, frame)
+    local clientKeyframe = table.Copy(keyframe)
+    clientKeyframe.ID = nil
+    clientKeyframe.Modifiers = nil
 
-    net.Start(MessageTypes.UpdateKeyframeResponse)
+    net.Start(SMH.MessageTypes.UpdateKeyframeResponse)
     net.WriteUInt(keyframe.ID, INT_BITCOUNT)
-    net.WriteTable(keyframe)
+    net.WriteTable(clientKeyframe)
     net.Send(player)
 end
 
@@ -69,10 +45,13 @@ local function UpdateKeyframe(msgLength, player)
     local updateData = net.ReadTable()
 
     local keyframe = SMH.KeyframeManager.Update(player, id, updateData)
+    local clientKeyframe = table.Copy(keyframe)
+    clientKeyframe.ID = nil
+    clientKeyframe.Modifiers = nil
 
-    net.Start(MessageTypes.UpdateKeyframeResponse)
+    net.Start(SMH.MessageTypes.UpdateKeyframeResponse)
     net.WriteUInt(keyframe.ID, INT_BITCOUNT)
-    net.WriteTable(keyframe)
+    net.WriteTable(clientKeyframe)
     net.Send(player)
 end
 
@@ -81,7 +60,7 @@ local function DeleteKeyframe(msgLength, player)
 
     SMH.KeyframeManager.Delete(player, id)
 
-    net.Start(MessageTypes.DeleteKeyframeResponse)
+    net.Start(SMH.MessageTypes.DeleteKeyframeResponse)
     net.WriteUInt(id, INT_BITCOUNT)
     net.Send(player)
 end
@@ -93,7 +72,7 @@ local function StartPlayback(msgLength, player)
 
     SMH.PlaybackManager.StartPlayback(player, startFrame, endFrame, playbackRate)
 
-    net.Start(MessageTypes.PlaybackResponse)
+    net.Start(SMH.MessageTypes.PlaybackResponse)
     net.WriteBool(true)
     net.Send(player)
 end
@@ -101,55 +80,93 @@ end
 local function StopPlayback(msgLength, player)
     SMH.PlaybackManager.StopPlayback(player)
 
-    net.Start(MessageTypes.PlaybackResponse)
+    net.Start(SMH.MessageTypes.PlaybackResponse)
     net.WriteBool(false)
     net.Send(player)
 end
 
-local function SetGhostSettings(msgLength, player)
-    local prevKeyframe = net.ReadBool()
-    local nextKeyframe = net.ReadBool()
-    local onionSkin = net.ReadBool()
-    local ghostAll = net.ReadBool()
-    local targetEntity = net.ReadEntity()
-    local transparency = net.ReadFloat()
+local function UpdateGhostState(msgLength, player)
+    local settings = net.ReadTable()
 
-    SMH.GhostsManager.UpdateSettings(player, {
-        PrevKeyframe = prevKeyframe,
-        NextKeyframe = nextKeyframe,
-        OnionSkin = onionSkin,
-        GhostAll = ghostAll,
-        TargetEntity = targetEntity,
-        Transparency = transparency,
-    })
+    SMH.GhostsManager.UpdateSettings(player, settings)
 
-    net.Start(MessageTypes.SetGhostSettingsResponse)
-    net.WriteBool(prevKeyframe)
-    net.WriteBool(nextKeyframe)
-    net.WriteBool(onionSkin)
-    net.WriteBool(ghostAll)
-    net.WriteEntity(targetEntity)
-    net.WriteFloat(transparency)
+    net.Start(SMH.MessageTypes.UpdateGhostStateResponse)
+    net.Send(player)
+end
+
+local function GetServerSaves(msgLength, player)
+    local saves = SMH.Saves.ListFiles()
+    net.Start(SMH.MessageTypes.GetServerSavesResponse)
+    net.WriteTable(saves)
+    net.Send(player)
+end
+
+local function Load(msgLength, player)
+    local entity = net.ReadEntity()
+    local loadFromClient = net.ReadBool()
+    
+    local serializedKeyframes
+    if loadFromClient then
+        serializedKeyframes = net.ReadTable()
+    else
+        local path = net.ReadString()
+        serializedKeyframes = SMH.Saves.LoadForEntity(path, entity)
+    end
+
+    SMH.KeyframeManager.ImportSave(player, entity, serializedKeyframes)
+
+    local keyframes = SMH.KeyframeManager.GetAllForEntity(player, entity)
+    for _, keyframe in pairs(keyframes) do
+        keyframe.Modifiers = nil
+    end
+
+    net.Start(SMH.MessageTypes.LoadResponse)
+    net.WriteEntity(entity)
+    net.WriteTable(keyframes)
+    net.Send(player)
+end
+
+local function Save(msgLength, player)
+    local saveToClient = net.ReadBool()
+    local path = net.ReadString()
+
+    local keyframes = SMH.KeyframeManager.GetAll(player)
+    local serializedKeyframes = SMH.Saves.Serialize(keyframes)
+
+    if not saveToClient then
+        SMH.Saves.Save(path, serializedKeyframes)
+    end
+
+    net.Start(SMH.MessageTypes.SaveResponse)
+    net.WriteBool(saveToClient)
+    net.WriteString(path)
+    if saveToClient then
+        net.WriteTable(serializedKeyframes)
+    end
     net.Send(player)
 end
 
 local function Setup()
-    for _, message in pairs(MessageTypes) do
+    for _, message in pairs(SMH.MessageTypes) do
         util.AddNetworkString(message)
     end
 
-    net.Receive(MessageTypes.SetFrame, SetFrame)
+    net.Receive(SMH.MessageTypes.SetFrame, SetFrame)
 
-    net.Receive(MessageTypes.GetKeyframes, GetKeyframes)
+    net.Receive(SMH.MessageTypes.GetKeyframes, GetKeyframes)
 
-    net.Receive(MessageTypes.CreateKeyframe, CreateKeyframe)
-    net.Receive(MessageTypes.UpdateKeyframe, UpdateKeyframe)
-    net.Receive(MessageTypes.DeleteKeyframe, DeleteKeyframe)
+    net.Receive(SMH.MessageTypes.CreateKeyframe, CreateKeyframe)
+    net.Receive(SMH.MessageTypes.UpdateKeyframe, UpdateKeyframe)
+    net.Receive(SMH.MessageTypes.DeleteKeyframe, DeleteKeyframe)
 
-    net.Receive(MessageTypes.StartPlayback, StartPlayback)
-    net.Receive(MessageTypes.StopPlayback, StopPlayback)
+    net.Receive(SMH.MessageTypes.StartPlayback, StartPlayback)
+    net.Receive(SMH.MessageTypes.StopPlayback, StopPlayback)
 
-    net.Receive(MessageTypes.SetGhostSettings, SetGhostSettings)
+    net.Receive(SMH.MessageTypes.UpdateGhostState, UpdateGhostState)
+
+    net.Receive(SMH.MessageTypes.GetServerSaves, GetServerSaves)
+    net.Receive(SMH.MessageTypes.Load, Load)
+    net.Receive(SMH.MessageTypes.Save, Save)
 end
 
 Setup()
