@@ -1,5 +1,4 @@
-
-include("shared.lua");
+include("shared.lua")
 
 include("client/data.lua");
 include("client/entity_selection.lua");
