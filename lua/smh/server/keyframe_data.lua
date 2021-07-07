@@ -1,3 +1,37 @@
+function SMH.GetClosestKeyframes(keyframes, frame)
+    local prevKeyframe = nil
+    local nextKeyframe = nil
+    for _, keyframe in pairs(keyframes) do
+        if keyframe.Frame == frame then
+            prevKeyframe = keyframe
+            nextKeyframe = keyframe
+            break
+        end
+
+        if keyframe.Frame < frame and (not prevKeyframe or prevKeyframe.Frame < keyframe.Frame) then
+            prevKeyframe = keyframe
+        elseif keyframe.Frame > frame and (not nextKeyframe or nextKeyframe.Frame > keyframe.Frame) then
+            nextKeyframe = keyframe
+        end
+    end
+
+    if not prevKeyframe and not nextKeyframe then
+        return nil, nil, 0
+    elseif not prevKeyframe then
+        prevKeyframe = nextKeyframe
+    elseif not nextKeyframe then
+        nextKeyframe = prevKeyframe
+    end
+
+    local lerpMultiplier = 0
+    if prevKeyframe.Frame ~= nextKeyframe.Frame then
+        lerpMultiplier = (frame - prevKeyframe.Frame) / (nextKeyframe.Frame - prevKeyframe.Frame)
+        lerpMultiplier = math.EaseInOut(lerpMultiplier, prevKeyframe.EaseOut, nextKeyframe.EaseIn);
+    end
+
+    return prevKeyframe, nextKeyframe, lerpMultiplier
+end
+
 local META = {}
 META.__index = META
 

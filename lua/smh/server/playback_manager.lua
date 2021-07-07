@@ -1,39 +1,5 @@
 local ActivePlaybacks = {}
 
-local function GetClosestKeyframes(player, entity, keyframes, frame)
-    local prevKeyframe = nil
-    local nextKeyframe = nil
-    for _, keyframe in pairs(keyframes) do
-        if keyframe.Frame == frame then
-            prevKeyframe = keyframe
-            nextKeyframe = keyframe
-            break
-        end
-
-        if keyframe.Frame < frame and (not prevKeyframe or prevKeyframe.Frame < keyframe.Frame) then
-            prevKeyframe = keyframe
-        elseif keyframe.Frame > frame and (not nextKeyframe or nextKeyframe.Frame > keyframe.Frame) then
-            nextKeyframe = keyframe
-        end
-    end
-
-    if not prevKeyframe and not nextKeyframe then
-        return nil, nil, 0
-    elseif not prevKeyframe then
-        prevKeyframe = nextKeyframe
-    elseif not nextKeyframe then
-        nextKeyframe = prevKeyframe
-    end
-
-    local lerpMultiplier = 0
-    if prevKeyframe.Frame ~= nextKeyframe.Frame then
-        lerpMultiplier = (frame - prevKeyframe.Frame) / (nextKeyframe.Frame - prevKeyframe.Frame)
-        lerpMultiplier = math.EaseInOut(lerpMultiplier, prevKeyframe.EaseOut, nextKeyframe.EaseIn);
-    end
-
-    return prevKeyframe, nextKeyframe, lerpMultiplier
-end
-
 local MGR = {}
 
 function MGR.SetFrame(player, newFrame, tween)
@@ -42,7 +8,7 @@ function MGR.SetFrame(player, newFrame, tween)
     end
 
     for entity, keyframes in pairs(SMH.KeyframeData.Players[player].Entities) do
-        local prevKeyframe, nextKeyframe, lerpMultiplier = GetClosestKeyframes(player, entity, keyframes, newFrame)
+        local prevKeyframe, nextKeyframe, lerpMultiplier = SMH.GetClosestKeyframes(keyframes, newFrame)
         if not prevKeyframe then
             continue
         end
