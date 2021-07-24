@@ -24,6 +24,8 @@ SMH.MessageTypes = {
 
     "GetServerSaves",
     "GetServerSavesResponse",
+    "GetModelList",
+    "GetModelListResponse",
     "Load",
     "LoadResponse",
     "Save",
@@ -33,3 +35,5 @@ for key, val in pairs(SMH.MessageTypes) do
     local prefixVal = "SMH" .. val
     SMH.MessageTypes[val] = prefixVal
 end
+
+include("shared/saves.lua")

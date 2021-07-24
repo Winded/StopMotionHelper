@@ -101,6 +101,15 @@ local function GetServerSaves(msgLength, player)
     net.Send(player)
 end
 
+local function GetModelList(msgLength, player)
+    local path = net.ReadString()
+    
+    local models = SMH.Saves.ListModels(path)
+    net.Start(SMH.MessageTypes.GetModelListResponse)
+    net.WriteTable(models)
+    net.Send(player)
+end
+
 local function Load(msgLength, player)
     local entity = net.ReadEntity()
     local loadFromClient = net.ReadBool()
@@ -110,7 +119,8 @@ local function Load(msgLength, player)
         serializedKeyframes = net.ReadTable()
     else
         local path = net.ReadString()
-        serializedKeyframes = SMH.Saves.LoadForEntity(path, entity)
+        local modelName = net.ReadString()
+        serializedKeyframes = SMH.Saves.LoadForEntity(path, modelName)
     end
 
     SMH.KeyframeManager.ImportSave(player, entity, serializedKeyframes)
@@ -165,6 +175,7 @@ local function Setup()
     net.Receive(SMH.MessageTypes.UpdateGhostState, UpdateGhostState)
 
     net.Receive(SMH.MessageTypes.GetServerSaves, GetServerSaves)
+    net.Receive(SMH.MessageTypes.GetModelList, GetModelList)
     net.Receive(SMH.MessageTypes.Load, Load)
     net.Receive(SMH.MessageTypes.Save, Save)
 end

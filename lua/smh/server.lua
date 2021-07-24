@@ -1,17 +1,16 @@
-include("shared.lua");
+include("shared.lua")
 
 include("server/modifiers.lua")
 include("server/keyframe_data.lua")
 include("server/keyframe_manager.lua")
 include("server/playback_manager.lua")
 include("server/ghosts_manager.lua")
-include("server/data.lua");
 include("server/easing.lua")
 include("server/eyetarget.lua")
 include("server/controller.lua")
 
-AddCSLuaFile("shared.lua");
-AddCSLuaFile("client.lua");
+AddCSLuaFile("shared.lua")
+AddCSLuaFile("client.lua")
 
 local function FindRecursive(name, path, func)
     local files, dirs = file.Find(name .. "/*", path);

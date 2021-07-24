@@ -56,7 +56,18 @@ function CTRL.GetServerSaves()
     net.SendToServer()
 end
 
-function CTRL.Load(path, loadFromClient)
+function CTRL.GetModelList(path, loadFromClient)
+    if loadFromClient then
+        local models = SMH.Saves.ListModels(path)
+        SMH.UI.SetModelList(models)
+    else
+        net.Start(SMH.MessageTypes.GetModelList)
+        net.WriteString(path)
+        net.SendToServer()
+    end
+end
+
+function CTRL.Load(path, modelName, loadFromClient)
     if not IsValid(SMH.State.Entity) then
         return
     end
@@ -67,10 +78,11 @@ function CTRL.Load(path, loadFromClient)
     net.WriteBool(loadFromClient)
 
     if loadFromClient then
-        local serializedKeyframes = SMH.Saves.LoadForEntity(path, SMH.State.Entity)
+        local serializedKeyframes = SMH.Saves.LoadForEntity(path, modelName)
         net.WriteTable(serializedKeyframes)
     else
         net.WriteString(path)
+        net.WriteString(modelName)
     end
 
     net.SendToServer()
@@ -120,6 +132,11 @@ local function GetServerSavesResponse(msgLength)
     SMH.UI.SetServerSaves(saves)
 end
 
+local function GetModelListResponse(msgLength)
+    local models = net.ReadTable()
+    SMH.UI.SetModelList(models)
+end
+
 local function LoadResponse(msgLength)
     local entity = net.ReadEntity()
     local keyframes = net.ReadTable()
@@ -150,6 +167,7 @@ local function Setup()
     net.Receive(SMH.MessageTypes.DeleteKeyframeResponse, DeleteKeyframeResponse)
 
     net.Receive(SMH.MessageTypes.GetServerSavesResponse, GetServerSavesResponse)
+    net.Receive(SMH.MessageTypes.GetModelListResponse, GetModelListResponse)
     net.Receive(SMH.MessageTypes.LoadResponse, LoadResponse)
     net.Receive(SMH.MessageTypes.SaveResponse, SaveResponse)
 end
