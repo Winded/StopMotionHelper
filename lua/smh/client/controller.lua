@@ -95,6 +95,18 @@ function CTRL.Save(path, saveToClient)
     net.SendToServer()
 end
 
+function CTRL.ShouldHighlight()
+    return SMH.UI.IsOpen()
+end
+
+function CTRL.ToggleRendering(useScreenshot)
+    if SMH.Renderer.IsRendering() then
+        SMH.Renderer.Stop()
+    else
+        SMH.Renderer.Start(useScreenshot)
+    end
+end
+
 SMH.Controller = CTRL
 
 local function SetFrameResponse(msgLength)
