@@ -95,6 +95,15 @@ function CTRL.Save(path, saveToClient)
     net.SendToServer()
 end
 
+function CTRL.QuickSave()
+	local nick = container:_GetPlayer():Nick()
+    local qs1 = "quicksave_" .. nick
+    local qs2 = "quicksave_" .. nick .. "_backup"
+
+    SMH.Saves.CopyIfExists(qs1, qs2)
+    CTRL.Save(qs1, true)
+end
+
 function CTRL.ShouldHighlight()
     return SMH.UI.IsOpen()
 end
@@ -105,6 +114,14 @@ function CTRL.ToggleRendering(useScreenshot)
     else
         SMH.Renderer.Start(useScreenshot)
     end
+end
+
+function CTRL.OpenMenu()
+    SMH.UI.Open()
+end
+
+function CTRL.CloseMenu()
+    SMH.UI.Close()
 end
 
 SMH.Controller = CTRL

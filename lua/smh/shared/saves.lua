@@ -107,4 +107,13 @@ function MGR.Save(path, serializedKeyframes)
 	file.Write(path, json);
 end
 
+function MGR.CopyIfExists(pathFrom, pathTo)
+    pathFrom = SaveDir .. pathFrom .. ".txt"
+    pathTo = SaveDir .. pathTo .. ".txt"
+
+	if file.Exists(pathFrom, "DATA") then
+		file.Write(pathTo, file.Read(pathFrom));
+	end
+end
+
 SMH.Saves = MGR
