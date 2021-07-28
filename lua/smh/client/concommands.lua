@@ -1,21 +1,3 @@
-
-local Rx = SMH.Include("rxlua/rx.lua")
-local RxUtils = SMH.Include("shared/rxutils.lua")
-
-local function Setup()
-
-    -- TODO move to SMH.Settings
-    local data = SMH.Data
-    data:_BindToConVar("FreezeAll", CreateClientConVar("smh_freezeall", "0"), {ValueType = "boolean"})
-    data:_BindToConVar("LocalizePhysBones", CreateClientConVar("smh_localizephysbones", "0"), {ValueType = "boolean"})
-    data:_BindToConVar("IgnorePhysBones", CreateClientConVar("smh_ignorephysbones", "0"), {ValueType = "boolean"})
-    data:_BindToConVar("GhostPrevFrame", CreateClientConVar("smh_ghostprevframe", "0"), {ValueType = "boolean"})
-    data:_BindToConVar("GhostNextFrame", CreateClientConVar("smh_ghostnextframe", "0"), {ValueType = "boolean"})
-    data:_BindToConVar("GhostAllEntities", CreateClientConVar("smh_ghostallentities", "0"), {ValueType = "boolean"})
-    data:_BindToConVar("GhostTransparency", CreateClientConVar("smh_ghosttransparency", "0.5"), {ValueType = "number"})
-
-end
-
 concommand.Add("+smh_menu", function()
     SMH.Controller.OpenMenu()
 end)
@@ -51,11 +33,6 @@ end)
 concommand.Add("-smh_playback", function()
     SMH.Controller.StopPlayback()
 end)
-
--- TODO move to SMH.Settings
--- concommand.Add("smh_onionskin", function()
---     SMH.Data.OnionSkin = not SMH.Data.OnionSkin
--- end)
 
 concommand.Add("smh_quicksave", function()
     SMH.Controller.QuickSave()
