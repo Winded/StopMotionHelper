@@ -135,4 +135,4 @@ function PANEL:OnFrameChanged(newFrame) end
 function PANEL:OnPointerReleased(frame) end
 function PANEL:OnCustomMousePressed(mousecode) end
 
-vgui.Register("SMHFramePointer", PANEL, "DFrame")
+vgui.Register("SMHFramePointer", PANEL, "DPanel")

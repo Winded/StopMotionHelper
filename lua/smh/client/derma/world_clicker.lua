@@ -36,4 +36,4 @@ end
 
 function PANEL:OnEntitySelected(entity) end
 
-vgui.Register("SMHWorldClicker", PANEL, "DFrame")
+vgui.Register("SMHWorldClicker", PANEL, "EditablePanel")
