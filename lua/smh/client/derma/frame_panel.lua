@@ -193,4 +193,4 @@ end
 function PANEL:OnRequestZoomChange(newZoom) end
 function PANEL:OnFramePressed(frame) end
 
-vgui.Register("SMHFramePointer", PANEL, "DPanel")
+vgui.Register("SMHFramePanel", PANEL, "DPanel")
