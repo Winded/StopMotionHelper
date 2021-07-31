@@ -55,6 +55,21 @@ local function UpdateKeyframe(msgLength, player)
     net.Send(player)
 end
 
+local function CopyKeyframe(msgLength, player)
+    local id = net.ReadUInt(INT_BITCOUNT)
+    local frame = net.ReadUInt(INT_BITCOUNT)
+
+    local keyframe = SMH.KeyframeManager.Copy(player, id, frame)
+    local clientKeyframe = table.Copy(keyframe)
+    clientKeyframe.ID = nil
+    clientKeyframe.Modifiers = nil
+
+    net.Start(SMH.MessageTypes.UpdateKeyframeResponse)
+    net.WriteUInt(keyframe.ID, INT_BITCOUNT)
+    net.WriteTable(clientKeyframe)
+    net.Send(player)
+end
+
 local function DeleteKeyframe(msgLength, player)
     local id = net.ReadUInt(INT_BITCOUNT)
 
@@ -156,28 +171,25 @@ local function Save(msgLength, player)
     net.Send(player)
 end
 
-local function Setup()
-    for _, message in pairs(SMH.MessageTypes) do
-        util.AddNetworkString(message)
-    end
-
-    net.Receive(SMH.MessageTypes.SetFrame, SetFrame)
-
-    net.Receive(SMH.MessageTypes.GetKeyframes, GetKeyframes)
-
-    net.Receive(SMH.MessageTypes.CreateKeyframe, CreateKeyframe)
-    net.Receive(SMH.MessageTypes.UpdateKeyframe, UpdateKeyframe)
-    net.Receive(SMH.MessageTypes.DeleteKeyframe, DeleteKeyframe)
-
-    net.Receive(SMH.MessageTypes.StartPlayback, StartPlayback)
-    net.Receive(SMH.MessageTypes.StopPlayback, StopPlayback)
-
-    net.Receive(SMH.MessageTypes.UpdateGhostState, UpdateGhostState)
-
-    net.Receive(SMH.MessageTypes.GetServerSaves, GetServerSaves)
-    net.Receive(SMH.MessageTypes.GetModelList, GetModelList)
-    net.Receive(SMH.MessageTypes.Load, Load)
-    net.Receive(SMH.MessageTypes.Save, Save)
+for _, message in pairs(SMH.MessageTypes) do
+    util.AddNetworkString(message)
 end
 
-Setup()
+net.Receive(SMH.MessageTypes.SetFrame, SetFrame)
+
+net.Receive(SMH.MessageTypes.GetKeyframes, GetKeyframes)
+
+net.Receive(SMH.MessageTypes.CreateKeyframe, CreateKeyframe)
+net.Receive(SMH.MessageTypes.UpdateKeyframe, UpdateKeyframe)
+net.Receive(SMH.MessageTypes.CopyKeyframe, CopyKeyframe)
+net.Receive(SMH.MessageTypes.DeleteKeyframe, DeleteKeyframe)
+
+net.Receive(SMH.MessageTypes.StartPlayback, StartPlayback)
+net.Receive(SMH.MessageTypes.StopPlayback, StopPlayback)
+
+net.Receive(SMH.MessageTypes.UpdateGhostState, UpdateGhostState)
+
+net.Receive(SMH.MessageTypes.GetServerSaves, GetServerSaves)
+net.Receive(SMH.MessageTypes.GetModelList, GetModelList)
+net.Receive(SMH.MessageTypes.Load, Load)
+net.Receive(SMH.MessageTypes.Save, Save)

@@ -11,6 +11,7 @@ SMH.MessageTypes = {
 
     "CreateKeyframe",
     "UpdateKeyframe",
+    "CopyKeyframe",
     "UpdateKeyframeResponse",
     "DeleteKeyframe",
     "DeleteKeyframeResponse",

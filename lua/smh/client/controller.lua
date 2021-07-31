@@ -32,6 +32,13 @@ function CTRL.UpdateKeyframe(keyframeId, updateData)
     net.SendToServer()
 end
 
+function CTRL.CopyKeyframe(keyframeId, frame)
+    net.Start(SMH.MessageTypes.CopyKeyframe)
+    net.WriteUInt(keyframeId, INT_BITCOUNT)
+    net.WriteUInt(frame, INT_BITCOUNT)
+    net.SendToServer()
+end
+
 function CTRL.DeleteKeyframe(keyframeId)
     net.Start(SMH.MessageTypes.DeleteKeyframe)
     net.WriteUInt(keyframeId, INT_BITCOUNT)
@@ -104,6 +111,10 @@ function CTRL.QuickSave()
     CTRL.Save(qs1, true)
 end
 
+function CTRL.DeleteSave(path)
+    SMH.Saves.Delete(path)
+end
+
 function CTRL.ShouldHighlight()
     return SMH.UI.IsOpen()
 end
@@ -122,6 +133,25 @@ end
 
 function CTRL.CloseMenu()
     SMH.UI.Close()
+end
+
+function CTRL.UpdateState(newState)
+    local allowedKeys = {
+        Frame = true,
+        PlaybackRate = true,
+        PlaybackLength = true,
+    }
+
+    for k, v in pairs(newState) do
+        if not allowedKeys[k] then
+            error("Key not allowed: " .. k)
+        end
+        SMH.State[k] = v
+    end
+end
+
+function CTRL.UpdateSettings(newSettings)
+    SMH.Settings.Update(newSettings)
 end
 
 SMH.Controller = CTRL
@@ -185,6 +215,7 @@ local function SaveResponse(msgLength)
 
     local serializedKeyframes = net.ReadTable()
     SMH.Saves.Save(path, serializedKeyframes)
+    SMH.UI.AddSaveFile(path)
 end
 
 local function Setup()

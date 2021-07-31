@@ -89,6 +89,10 @@ function PANEL:RefreshFrame()
 	self:SetFrame(self._frame)
 end
 
+function PANEL:IsDragging()
+	return self._dragging
+end
+
 function PANEL:OnMousePressed(mousecode)
 	if mousecode ~= MOUSE_LEFT then
 		self:OnCustomMousePressed(mousecode)
@@ -100,7 +104,7 @@ function PANEL:OnMousePressed(mousecode)
 end
 
 function PANEL:OnMouseReleased(mousecode)
-	if mousecode ~= MOUSE_LEFT then
+	if not self._dragging then
 		return
 	end
 

@@ -147,7 +147,16 @@ end
 
 function PANEL:OnMouseWheeled(scrollDelta)
     scrollDelta = -scrollDelta
-    self:OnRequestZoomChange(self.Zoom + scrollDelta)
+    local newZoom = self.Zoom + scrollDelta
+    if newZoom > 500  then
+        newZoom = 500
+    elseif newZoom < 30 then
+        newZoom = 30
+    end
+
+    self.Zoom = newZoom
+    self:RefreshFrames()
+    self:RefreshScrollBar()
 end
 
 function PANEL:OnScrollBarPressed(mousecode)
@@ -190,7 +199,6 @@ function PANEL:OnScrollBarCursorMoved(x, y)
     end
 end
 
-function PANEL:OnRequestZoomChange(newZoom) end
 function PANEL:OnFramePressed(frame) end
 
 vgui.Register("SMHFramePanel", PANEL, "DPanel")

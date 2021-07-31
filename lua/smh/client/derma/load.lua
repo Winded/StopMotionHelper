@@ -40,11 +40,11 @@ function PANEL:PerformLayout(width, height)
 end
 
 function PANEL:SetSaves(saves)
-	self.FileList:UpdateFiles(saves)
+	self.FileList:UpdateLines(saves)
 end
 
 function PANEL:SetEntities(entities)
-	self.EntityList:UpdateFiles(saves)
+	self.EntityList:UpdateLines(saves)
 end
 
 function PANEL:LoadSelected()

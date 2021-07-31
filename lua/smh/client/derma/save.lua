@@ -60,6 +60,10 @@ function PANEL:SetSaves(saves)
 	self.FileList:UpdateFiles(saves)
 end
 
+function PANEL:AddSave(path)
+	self.FileList:AddLine(path)
+end
+
 function PANEL:DoSave()
 	local path = self.FileName:GetValue()
 	if not fileName or fileName == "" then

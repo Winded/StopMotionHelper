@@ -55,12 +55,12 @@ function MGR.Create(player, entity, frame)
     return keyframe
 end
 
-function MGR.Update(player, frameId, updateData)
-    if not SMH.KeyframeData.Players[player] or not SMH.KeyframeData.Players[player].Keyframes[frameId] then
+function MGR.Update(player, keyframeId, updateData)
+    if not SMH.KeyframeData.Players[player] or not SMH.KeyframeData.Players[player].Keyframes[keyframeId] then
         error("Invalid keyframe ID")
     end
 
-    local keyframe = SMH.KeyframeData.Players[player].Keyframes[frameId]
+    local keyframe = SMH.KeyframeData.Players[player].Keyframes[keyframeId]
     local updateableFields = {
         "Frame",
         "EaseIn",
@@ -75,12 +75,28 @@ function MGR.Update(player, frameId, updateData)
     return keyframe
 end
 
-function MGR.Delete(player, frameId)
-    if not SMH.KeyframeData.Players[player] or not SMH.KeyframeData.Players[player].Keyframes[frameId] then
+function MGR.Copy(player, keyframeId, frame)
+    if not SMH.KeyframeData.Players[player] or not SMH.KeyframeData.Players[player].Keyframes[keyframeId] then
+        error("Invalid keyframe ID")
+    end
+
+    local keyframe = SMH.KeyframeData.Players[player].Keyframes[keyframeId]
+
+    local copiedKeyframe = SMH.KeyframeData:New(player, keyframe.Entity)
+    copiedKeyframe.Frame = frame
+    copiedKeyframe.EaseIn = keyframe.EaseIn
+    copiedKeyframe.EaseOut = keyframe.EaseOut
+    copiedKeyframe.Modifiers = table.Copy(keyframe.Modifiers)
+
+    return copiedKeyframe
+end
+
+function MGR.Delete(player, keyframeId)
+    if not SMH.KeyframeData.Players[player] or not SMH.KeyframeData.Players[player].Keyframes[keyframeId] then
         error("Invalid keyframe ID")
     end
     
-    SMH.KeyframeData:Delete(player, frameId)
+    SMH.KeyframeData:Delete(player, keyframeId)
 end
 
 SMH.KeyframeManager = MGR

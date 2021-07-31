@@ -102,9 +102,9 @@ function MGR.Save(path, serializedKeyframes)
 		file.CreateDir(SaveDir);
 	end
 
-	local path = SaveDir .. fileName .. ".txt";
-	local json = util.TableToJSON(serializedKeyframes);
-	file.Write(path, json);
+	local path = SaveDir .. fileName .. ".txt"
+	local json = util.TableToJSON(serializedKeyframes)
+	file.Write(path, json)
 end
 
 function MGR.CopyIfExists(pathFrom, pathTo)
@@ -113,6 +113,13 @@ function MGR.CopyIfExists(pathFrom, pathTo)
 
 	if file.Exists(pathFrom, "DATA") then
 		file.Write(pathTo, file.Read(pathFrom));
+	end
+end
+
+function MGR.Delete(path)
+    path = SaveDir .. path .. ".txt"
+	if file.Exists(path, "DATA") then
+		file.Delete(path)
 	end
 end
 
