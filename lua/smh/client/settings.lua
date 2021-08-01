@@ -70,11 +70,11 @@ end
 
 function MGR.Update(newSettings)
     for name, value in pairs(newSettings) do
-        if not settings[name] then
+        if not ConVars[name] then
             continue
         end
         
-        settings[name]:SetValue(value)
+        ConVars[name]:SetValue(value)
     end
 end
 

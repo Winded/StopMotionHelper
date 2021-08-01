@@ -1,3 +1,4 @@
+local BaseClass = baseclass.Get("EditablePanel")
 local PANEL = {}
 
 function PANEL:Init()
@@ -17,7 +18,7 @@ function PANEL:SetVisible(visible)
 	if not visible then
 		RememberCursorPosition()
 	end
-	self.BaseClass.SetVisible(self, visible)
+	BaseClass.SetVisible(self, visible)
 	if visible then
 		RestoreCursorPosition()
 	end

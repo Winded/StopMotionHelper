@@ -146,7 +146,7 @@ function CTRL.UpdateState(newState)
         if not allowedKeys[k] then
             error("Key not allowed: " .. k)
         end
-        SMH.State[k] = v
+        SMH.State[k] = v
     end
 end
 

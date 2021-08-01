@@ -111,6 +111,8 @@ hook.Add("InitPostEntity", "SMHMenuSetup", function()
 	LoadMenu:SetVisible(false)
 
     AddCallbacks()
+	
+	WorldClicker.MainMenu:UpdateState(SMH.State)
     
 end)
 
@@ -132,6 +134,7 @@ function MGR.SetFrame(frame)
     if not WorldClicker.MainMenu.FramePointer:IsDragging() then
         WorldClicker.MainMenu.FramePointer:SetFrame(frame)
     end
+	WorldClicker.MainMenu:UpdatePositionLabel(frame, SMH.State.PlaybackLength)
 end
 
 function MGR.SetKeyframes(keyframes)

@@ -13,9 +13,9 @@ local function GetExistingKeyframe(player, entity, frame)
     return nil
 end
 
-local function Record(keyframe, entity)
+local function Record(keyframe, player, entity)
 	for name, mod in pairs(SMH.Modifiers) do
-		keyframe.Modifiers[name] = mod:Save(self.Player, self.Entity)
+		keyframe.Modifiers[name] = mod:Save(player, entity)
 	end
 end
 
@@ -61,13 +61,13 @@ function MGR.Create(player, entity, frame)
     local keyframe = GetExistingKeyframe(player, entity, frame)
 
     if keyframe ~= nil then
-        Record(keyframe, entity)
+        Record(keyframe, player, entity)
         return keyframe
     end
 
     keyframe = SMH.KeyframeData:New(player, entity)
     keyframe.Frame = frame
-    Record(keyframe, entity)
+    Record(keyframe, player, entity)
     return keyframe
 end
 

@@ -47,7 +47,7 @@ function PANEL:PerformLayout(width, height)
     self.ScrollButtonLeft:SetPos(scrollPadding - 12, scrollPosY)
     self.ScrollButtonLeft:SetSize(12, scrollHeight)
 
-    self.ScrollButtonRight:SetPos(scrollPadding + scrollBarAreaWidth, scrollPosY)
+    self.ScrollButtonRight:SetPos(scrollPadding + self.ScrollBarRect.Width, scrollPosY)
     self.ScrollButtonRight:SetSize(12, scrollHeight)
 
     local startPoint = frameAreaPadding
