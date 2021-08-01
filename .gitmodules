@@ -1,6 +1,0 @@
-[submodule "lua/smh/bivalues"]
-	path = lua/smh/bivalues
-	url = https://Winded@github.com/Winded/BiValues.git
-[submodule "lua/smh/rxlua"]
-	path = lua/smh/rxlua
-	url = git@github.com:Winded/RxLua.git
