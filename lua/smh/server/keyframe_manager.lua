@@ -19,6 +19,22 @@ local function Record(keyframe, entity)
 	end
 end
 
+hook.Add("EntityRemoved", "SMHKeyframesEntityRemoved", function(entity)
+
+	for _, player in pairs(player.GetAll()) do
+		if SMH.KeyframeData.Players[player] and SMH.KeyframeData.Players[player].Entities[entity] then
+            local keyframesToDelete = {}
+            for _, keyframe in pairs(SMH.KeyframeData.Players[player].Entities[entity]) do
+                table.insert(keyframesToDelete, keyframe.ID)
+            end
+            for _, keyframeId in pairs(keyframesToDelete) do
+                SMH.KeyframeData:Delete(player, keyframeId)
+            end
+		end
+	end
+
+end)
+
 local MGR = {}
 
 function MGR.GetAll(player)
