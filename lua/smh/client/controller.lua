@@ -51,6 +51,7 @@ function CTRL.StartPlayback()
     net.WriteUInt(0, INT_BITCOUNT)
     net.WriteUInt(SMH.State.PlaybackLength - 1, INT_BITCOUNT)
     net.WriteUInt(SMH.State.PlaybackRate, INT_BITCOUNT)
+    net.WriteTable(SMH.Settings.GetAll())
     net.SendToServer()
 end
 

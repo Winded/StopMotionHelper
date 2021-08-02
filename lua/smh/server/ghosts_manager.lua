@@ -46,7 +46,6 @@ function MGR.SelectEntity(player, entity)
     end
 
     GhostData[player].Entity = entity
-    MGR.UpdateState(player)
 end
 
 function MGR.UpdateState(player, frame, settings)

@@ -5,7 +5,7 @@ local function SetFrame(msgLength, player)
     local settings = net.ReadTable()
 
     SMH.PlaybackManager.SetFrame(player, newFrame, settings)
-    SMH.GhostsManager.UpdateState(player, newFrame)
+    SMH.GhostsManager.UpdateState(player, newFrame, settings)
     
     net.Start(SMH.MessageTypes.SetFrameResponse)
     net.WriteUInt(newFrame, INT_BITCOUNT)
@@ -87,8 +87,9 @@ local function StartPlayback(msgLength, player)
     local startFrame = net.ReadUInt(INT_BITCOUNT)
     local endFrame = net.ReadUInt(INT_BITCOUNT)
     local playbackRate = net.ReadUInt(INT_BITCOUNT)
+    local settings = net.ReadTable()
 
-    SMH.PlaybackManager.StartPlayback(player, startFrame, endFrame, playbackRate)
+    SMH.PlaybackManager.StartPlayback(player, startFrame, endFrame, playbackRate, settings)
 
     net.Start(SMH.MessageTypes.PlaybackResponse)
     net.WriteBool(true)

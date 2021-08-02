@@ -35,15 +35,16 @@ function MGR.SetFrame(player, newFrame, settings)
     end
 end
 
-function MGR.StartPlayback(player, startFrame, endFrame, playbackRate)
+function MGR.StartPlayback(player, startFrame, endFrame, playbackRate, settings)
     ActivePlaybacks[player] = {
         StartFrame = startFrame,
         EndFrame = endFrame,
         PlaybackRate = playbackRate,
         CurrentFrame = startFrame,
         Timer = 0,
+        Settings = settings,
     }
-    MGR.SetFrame(player, startFrame)
+    MGR.SetFrame(player, startFrame, settings)
 end
 
 function MGR.StopPlayback(player)
@@ -60,7 +61,7 @@ hook.Add("Think", "SMHPlaybackManagerThink", function()
                 playback.CurrentFrame = playback.StartFrame
             end
             playback.Timer = 0
-            MGR.SetFrame(player, playback.CurrentFrame)
+            MGR.SetFrame(player, playback.CurrentFrame, playback.Settings)
         end
     end
 end)

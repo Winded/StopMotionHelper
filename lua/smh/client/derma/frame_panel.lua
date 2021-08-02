@@ -25,6 +25,7 @@ function PANEL:Init()
     self.ScrollOffset = 0
     self.FrameArea = {0, 1}
     self._draggingScrollBar = false
+    self._scrollCursorOffset = 0
     
     self.FramePointers = {}
 
@@ -140,7 +141,7 @@ function PANEL:OnMousePressed(mousecode)
     local targetX = posX - startX
     local width = endX - startX
     local framePosition = math.Round(self.ScrollOffset + (targetX / width) * self.Zoom)
-    framePosition = framePosition < 0 and 0 or (framePosition >= timelineLength and timelineLength - 1 or framePosition)
+    framePosition = framePosition < 0 and 0 or (framePosition >= self.TotalFrames and self.TotalFrames - 1 or framePosition)
 
     self:OnFramePressed(framePosition)
 end
@@ -166,6 +167,9 @@ function PANEL:OnScrollBarPressed(mousecode)
 
     self.ScrollBar:MouseCapture(true)
     self._draggingScrollBar = true
+    
+    local cursorXOffset, _ = self.ScrollBar:CursorPos()
+    self._scrollCursorOffset = cursorXOffset
 end
 
 function PANEL:OnScrollBarReleased(mousecode)
@@ -183,10 +187,10 @@ function PANEL:OnScrollBarCursorMoved(x, y)
     end
 
     local cursorX, _ = self:CursorPos()
-    local cursorXOffset, _ = self.ScrollBar:CursorPos()
-    local movePos = (cursorX - cursorXOffset) - self.ScrollBarRect.X
+    local movePos = cursorX - self._scrollCursorOffset - self.ScrollBarRect.X
+    print(movePos)
 
-    local movableWidth = scrollBarAreaWidth - self.ScrollBar:GetWide()
+    local movableWidth = self.ScrollBarRect.Width - self.ScrollBar:GetWide()
     if movableWidth ~= 0 then
         local numSteps = self.TotalFrames - self.Zoom
         local targetScrollOffset = math.Round((movePos / movableWidth) * numSteps)

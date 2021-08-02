@@ -19,7 +19,7 @@ concommand.Add("smh_next", function()
 end)
 
 concommand.Add("smh_previous", function()
-    local pos = SMH.State.Frame + 1
+    local pos = SMH.State.Frame - 1
     if pos < 0 then
         pos = SMH.State.PlaybackLength - 1
     end
