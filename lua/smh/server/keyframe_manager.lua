@@ -15,7 +15,7 @@ end
 
 local function Record(keyframe, player, entity)
 	for name, mod in pairs(SMH.Modifiers) do
-		keyframe.Modifiers[name] = mod:Save(player, entity)
+		keyframe.Modifiers[name] = mod:Save(entity)
 	end
 end
 

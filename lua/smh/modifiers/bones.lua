@@ -1,7 +1,7 @@
 
 MOD.Name = "Bones";
 
-function MOD:Save(player, entity)
+function MOD:Save(entity)
 
 	local count = entity:GetBoneCount();
 
@@ -22,11 +22,11 @@ function MOD:Save(player, entity)
 
 end
 
-function MOD:LoadGhost(player, entity, ghost, data)
-	self:Load(player, ghost, data);
+function MOD:LoadGhost(entity, ghost, data)
+	self:Load(ghost, data);
 end
 
-function MOD:Load(player, entity, data)
+function MOD:Load(entity, data)
 
 	local count = entity:GetBoneCount();
 
@@ -41,7 +41,7 @@ function MOD:Load(player, entity, data)
 
 end
 
-function MOD:LoadBetween(player, entity, data1, data2, percentage)
+function MOD:LoadBetween(entity, data1, data2, percentage)
 
 	local count = entity:GetBoneCount();
 

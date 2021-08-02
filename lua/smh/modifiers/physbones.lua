@@ -1,120 +1,119 @@
 
 MOD.Name = "Physical Bones";
 
-function MOD:Save(player, entity)
+function MOD:Save(entity)
 
-	local count = entity:GetPhysicsObjectCount();
-	if count <= 0 then return nil; end
+    local count = entity:GetPhysicsObjectCount();
+    if count <= 0 then return nil; end
 
-	local data = {};
+    local data = {};
 
-	for i = 0, count - 1 do
+    for i = 0, count - 1 do
 
-		local pb = entity:GetPhysicsObjectNum(i);
-		local parent = entity:GetPhysicsObjectNum(GetPhysBoneParent(entity, i));
+        local pb = entity:GetPhysicsObjectNum(i);
+        local parent = entity:GetPhysicsObjectNum(GetPhysBoneParent(entity, i));
 
-		local d = {};
+        local d = {};
 
-		d.Pos = pb:GetPos();
-		d.Ang = pb:GetAngles();
+        d.Pos = pb:GetPos();
+        d.Ang = pb:GetAngles();
 
-		if parent then
-			d.LocalPos, d.LocalAng = WorldToLocal(pb:GetPos(), pb:GetAngles(), parent:GetPos(), parent:GetAngles());
-		end
+        if parent then
+            d.LocalPos, d.LocalAng = WorldToLocal(pb:GetPos(), pb:GetAngles(), parent:GetPos(), parent:GetAngles());
+        end
 
-		d.Moveable = pb:IsMoveable();
+        d.Moveable = pb:IsMoveable();
 
-		data[i] = d;
+        data[i] = d;
 
-	end
+    end
 
-	return data;
-
-end
-
-function MOD:Load(player, entity, data)
-
-	if player.SMHData.IgnorePhysBones then
-		return;
-	end
-
-	local count = entity:GetPhysicsObjectCount();
-
-	for i = 0, count - 1 do
-
-		local pb = entity:GetPhysicsObjectNum(i);
-		local parent = entity:GetPhysicsObjectNum(GetPhysBoneParent(entity, i));
-
-		local d = data[i];
-
-		if parent and player.SMHData.LocalizePhysBones and d.LocalPos and d.LocalAng then
-			local pos, ang = LocalToWorld(d.LocalPos, d.LocalAng, parent:GetPos(), parent:GetAngles());
-			pb:SetPos(pos);
-			pb:SetAngles(ang);
-		else
-			pb:SetPos(d.Pos);
-			pb:SetAngles(d.Ang);
-		end
-
-		if player.SMHData.FreezeAll then
-			pb:EnableMotion(false);
-		else
-			pb:EnableMotion(d.Moveable);
-		end
-
-		pb:Wake();
-
-	end
+    return data;
 
 end
 
-function MOD:LoadGhost(player, entity, ghost, data)
+function MOD:Load(entity, data, settings)
 
-	local count = ghost:GetPhysicsObjectCount();
+    if settings.IgnorePhysBones then
+        return;
+    end
 
-	for i = 0, count - 1 do
+    local count = entity:GetPhysicsObjectCount();
 
-		local pb = ghost:GetPhysicsObjectNum(i);
+    for i = 0, count - 1 do
 
-		pb:EnableMotion(true);
-		pb:Wake();
+        local pb = entity:GetPhysicsObjectNum(i);
+        local parent = entity:GetPhysicsObjectNum(GetPhysBoneParent(entity, i));
 
-		local d = data[i];
-		pb:SetPos(d.Pos);
-		pb:SetAngles(d.Ang);
+        local d = data[i];
 
-		pb:EnableMotion(false);
-		pb:Wake();
+        if parent and settings.LocalizePhysBones and d.LocalPos and d.LocalAng then
+            local pos, ang = LocalToWorld(d.LocalPos, d.LocalAng, parent:GetPos(), parent:GetAngles());
+            pb:SetPos(pos);
+            pb:SetAngles(ang);
+        else
+            pb:SetPos(d.Pos);
+            pb:SetAngles(d.Ang);
+        end
 
-	end
+        if settings.FreezeAll then
+            pb:EnableMotion(false);
+        else
+            pb:EnableMotion(d.Moveable);
+        end
+
+        pb:Wake();
+
+    end
 
 end
 
-function MOD:LoadBetween(player, entity, data1, data2, percentage)
-	
-	if player.SMHData.IgnorePhysBones then
-		return;
-	end
+function MOD:LoadGhost(entity, ghost, data)
 
-	local count = entity:GetPhysicsObjectCount();
+    local count = ghost:GetPhysicsObjectCount();
 
-	for i = 0, count - 1 do
-			
-		local pb = entity:GetPhysicsObjectNum(i);
+    for i = 0, count - 1 do
 
-		local d1 = data1[i];
-		local d2 = data2[i];
+        local pb = ghost:GetPhysicsObjectNum(i);
 
-		local Pos = SMH.LerpLinearVector(d1.Pos, d2.Pos, percentage);
-		local Ang = SMH.LerpLinearAngle(d1.Ang, d2.Ang, percentage);
-			
-			
-		pb:EnableMotion(false);
-			
-		pb:SetPos(Pos);
-		pb:SetAngles(Ang);
+        pb:EnableMotion(true);
+        pb:Wake();
 
-		pb:Wake();
-	end
+        local d = data[i];
+        pb:SetPos(d.Pos);
+        pb:SetAngles(d.Ang);
+
+        pb:EnableMotion(false);
+        pb:Wake();
+
+    end
+
+end
+
+function MOD:LoadBetween(entity, data1, data2, percentage, settings)
+    
+    if settings.IgnorePhysBones then
+        return;
+    end
+
+    local count = entity:GetPhysicsObjectCount();
+
+    for i = 0, count - 1 do
+            
+        local pb = entity:GetPhysicsObjectNum(i);
+
+        local d1 = data1[i];
+        local d2 = data2[i];
+
+        local Pos = SMH.LerpLinearVector(d1.Pos, d2.Pos, percentage);
+        local Ang = SMH.LerpLinearAngle(d1.Ang, d2.Ang, percentage);
+
+        pb:EnableMotion(false);
+            
+        pb:SetPos(Pos);
+        pb:SetAngles(Ang);
+
+        pb:Wake();
+    end
 
 end

@@ -8,7 +8,7 @@ function MOD:IsSoftLamp(entity)
 
 end
 
-function MOD:Save(player, entity)
+function MOD:Save(entity)
 
 	if not self:IsSoftLamp(entity) then return nil; end
 
@@ -26,7 +26,7 @@ function MOD:Save(player, entity)
 
 end
 
-function MOD:Load(player, entity, data)
+function MOD:Load(entity, data)
 
 	if not self:IsSoftLamp(entity) then return; end -- can never be too sure?
 
@@ -40,7 +40,7 @@ function MOD:Load(player, entity, data)
 
 end
 
-function MOD:LoadBetween(player, entity, data1, data2, percentage)
+function MOD:LoadBetween(entity, data1, data2, percentage)
 	
 	if not self:IsSoftLamp(entity) then return; end -- can never be too sure?
 	

@@ -2,8 +2,9 @@ local INT_BITCOUNT = 32
 
 local function SetFrame(msgLength, player)
     local newFrame = net.ReadUInt(INT_BITCOUNT)
+    local settings = net.ReadTable()
 
-    SMH.PlaybackManager.SetFrame(player, newFrame, true)
+    SMH.PlaybackManager.SetFrame(player, newFrame, settings)
     SMH.GhostsManager.UpdateState(player, newFrame)
     
     net.Start(SMH.MessageTypes.SetFrameResponse)
@@ -11,15 +12,17 @@ local function SetFrame(msgLength, player)
     net.Send(player)
 end
 
-local function GetKeyframes(msgLength, player)
+local function SelectEntity(msgLength, player)
     local entity = net.ReadEntity()
+
+    SMH.GhostsManager.SelectEntity(entity)
 
     local keyframes = SMH.KeyframeManager.GetAllForEntity(player, entity)
     for _, keyframe in pairs(keyframes) do
         keyframe.Modifiers = nil
     end
 
-    net.Start(SMH.MessageTypes.GetKeyframesResponse)
+    net.Start(SMH.MessageTypes.SelectEntityResponse)
     net.WriteEntity(entity)
     net.WriteTable(keyframes)
     net.Send(player)
@@ -177,7 +180,7 @@ end
 
 net.Receive(SMH.MessageTypes.SetFrame, SetFrame)
 
-net.Receive(SMH.MessageTypes.GetKeyframes, GetKeyframes)
+net.Receive(SMH.MessageTypes.SelectEntity, SelectEntity)
 
 net.Receive(SMH.MessageTypes.CreateKeyframe, CreateKeyframe)
 net.Receive(SMH.MessageTypes.UpdateKeyframe, UpdateKeyframe)

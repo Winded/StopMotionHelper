@@ -6,8 +6,8 @@ SMH.MessageTypes = {
     "SetFrame",
     "SetFrameResponse",
 
-    "GetKeyframes",
-    "GetKeyframesResponse",
+    "SelectEntity",
+    "SelectEntityResponse",
 
     "CreateKeyframe",
     "UpdateKeyframe",

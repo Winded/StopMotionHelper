@@ -2,10 +2,10 @@ local MODBASE = {}
 MODBASE.__index = MODBASE
 MODBASE.Name = "Unnamed"
 
-function MODBASE:Save(player, entity) end
-function MODBASE:Load(player, entity, data) end
-function MODBASE:LoadGhost(player, entity, ghost, data) end
-function MODBASE:LoadBetween(player, entity, data1, data2, percentage) end
+function MODBASE:Save(entity) end
+function MODBASE:Load(entity, data, settings) end
+function MODBASE:LoadGhost(entity, ghost, data, settings) end
+function MODBASE:LoadBetween(entity, data1, data2, percentage, settings) end
 
 SMH.Modifiers = {}
 

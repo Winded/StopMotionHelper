@@ -27,44 +27,43 @@ local function CreateGhost(entity, color)
     return g
 end
 
-local function SetGhostFrame(player, entity, ghost, modifiers)
+local function SetGhostFrame(entity, ghost, modifiers)
     for name, mod in pairs(SMH.Modifiers) do
         if data[name] ~= nil then
-            mod:LoadGhost(player, entity, ghost, modifiers[name]);
+            mod:LoadGhost(entity, ghost, modifiers[name]);
         end
     end
 end
 
 local MGR = {}
 
-function MGR.UpdateSettings(player, settings)
+function MGR.SelectEntity(player, entity)
     if not GhostData[player] then
         GhostData[player] = {
-            Settings = {},
+            Entity = nil,
             Ghosts = {},
         }
     end
 
-    GhostData[player].Settings = settings
+    GhostData[player].Entity = entity
     MGR.UpdateState(player)
 end
 
-function MGR.UpdateState(player, frame)
+function MGR.UpdateState(player, frame, settings)
     if not GhostData[player] then
         return
     end
 
     local ghosts = GhostData[player].Ghosts
-    local settings = GhostData[player].Settings
 
     for _, ghost in pairs(ghosts) do
         if IsValid(ghost) then
-            ghost:Remove();
+            ghost:Remove()
         end
     end
     table.Empty(ghosts)
 
-    if not settings.PrevKeyframe and not settings.NextKeyframe and not settings.OnionSkin then
+    if not settings.GhostPrevFrame and not settings.GhostNextFrame and not settings.OnionSkin then
         return
     end
 
@@ -73,15 +72,15 @@ function MGR.UpdateState(player, frame)
     end
 
     local entities = SMH.KeyframeData.Players[player].Entities
-    if not settings.GhostAll and IsValid(settings.TargetEntity) and entities[settings.TargetEntity] then
+    if not settings.GhostAllEntities and IsValid(GhostData[player].Entity) and entities[GhostData[player].Entity] then
         entities = {
-			[settings.TargetEntity] = entities[settings.TargetEntity]
+			[GhostData[player].Entity] = entities[GhostData[player].Entity]
 		}
-    elseif not settings.GhostAll then
+    elseif not settings.GhostAllEntities then
         return
     end
 
-    local alpha = settings.Transparency * 255
+    local alpha = settings.GhostTransparency * 255
 
     for entity, keyframes in pairs(entities) do
         
@@ -91,25 +90,25 @@ function MGR.UpdateState(player, frame)
         end
 
         if lerpMultiplier == 0 then
-            if settings.PrevKeyframe and prevKeyframe.Frame < frame then
+            if settings.GhostPrevFrame and prevKeyframe.Frame < frame then
                 local g = CreateGhost(entity, Color(200, 0, 0, alpha))
                 table.insert(ghosts, g)
-                SetGhostFrame(player, entity, g, prevKeyframe.Modifiers)
-            elseif settings.NextKeyframe and prevKeyframe.Frame > frame then
+                SetGhostFrame(entity, g, prevKeyframe.Modifiers)
+            elseif settings.GhostNextFrame and prevKeyframe.Frame > frame then
                 local g = CreateGhost(entity, Color(0, 200, 0, alpha))
                 table.insert(ghosts, g)
-                SetGhostFrame(player, entity, g, prevKeyframe.Modifiers)
+                SetGhostFrame(entity, g, prevKeyframe.Modifiers)
             end
         else
-            if settings.PrevKeyframe then
+            if settings.GhostPrevFrame then
                 local g = CreateGhost(entity, Color(200, 0, 0, alpha))
                 table.insert(ghosts, g)
-                SetGhostFrame(player, entity, g, prevKeyframe.Modifiers)
+                SetGhostFrame(entity, g, prevKeyframe.Modifiers)
             end
-            if settings.NextKeyframe then
+            if settings.GhostNextFrame then
                 local g = CreateGhost(entity, Color(0, 200, 0, alpha))
                 table.insert(ghosts, g)
-                SetGhostFrame(player, entity, g, nextKeyframe.Modifiers)
+                SetGhostFrame(entity, g, nextKeyframe.Modifiers)
             end
         end
 
@@ -117,7 +116,7 @@ function MGR.UpdateState(player, frame)
             for _, keyframe in pairs(keyframes) do
                 local g = CreateGhost(entity, Color(255, 255, 255, alpha))
                 table.insert(ghosts, g)
-                SetGhostFrame(player, entity, g, keyframe.Modifiers)
+                SetGhostFrame(entity, g, keyframe.Modifiers)
             end
         end
 

@@ -5,11 +5,12 @@ local CTRL = {}
 function CTRL.SetFrame(frame)
     net.Start(SMH.MessageTypes.SetFrame)
     net.WriteUInt(frame, INT_BITCOUNT)
+    net.WriteTable(SMH.Settings.GetAll())
     net.SendToServer()
 end
 
 function CTRL.SelectEntity(entity)
-    net.Start(SMH.MessageTypes.GetKeyframes)
+    net.Start(SMH.MessageTypes.SelectEntity)
     net.WriteEntity(entity)
     net.SendToServer()
 end
@@ -162,7 +163,7 @@ local function SetFrameResponse(msgLength)
     SMH.UI.SetFrame(frame)
 end
 
-local function GetKeyframesResponse(msgLength)
+local function SelectEntityResponse(msgLength)
     local entity = net.ReadEntity()
     local keyframes = net.ReadTable()
 
@@ -221,7 +222,7 @@ end
 local function Setup()
     net.Receive(SMH.MessageTypes.SetFrameResponse, SetFrameResponse)
 
-    net.Receive(SMH.MessageTypes.GetKeyframesResponse, GetKeyframesResponse)
+    net.Receive(SMH.MessageTypes.SelectEntityResponse, SelectEntityResponse)
 
     net.Receive(SMH.MessageTypes.UpdateKeyframeResponse, UpdateKeyframeResponse)
     net.Receive(SMH.MessageTypes.DeleteKeyframeResponse, DeleteKeyframeResponse)

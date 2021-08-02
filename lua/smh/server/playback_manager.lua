@@ -2,7 +2,7 @@ local ActivePlaybacks = {}
 
 local MGR = {}
 
-function MGR.SetFrame(player, newFrame, tween)
+function MGR.SetFrame(player, newFrame, settings)
     if not SMH.KeyframeData.Players[player] then
         return
     end
@@ -13,22 +13,22 @@ function MGR.SetFrame(player, newFrame, tween)
             continue
         end
 
-        if lerpMultiplier <= 0 or not tween then
+        if lerpMultiplier <= 0 or settings.TweeningDisabled then
             for name, mod in pairs(SMH.Modifiers) do
                 if prevKeyframe.Modifiers[name] then
-                    mod:Load(player, entity, prevKeyframe.Modifiers[name]);
+                    mod:Load(entity, prevKeyframe.Modifiers[name], settings);
                 end
             end
         elseif lerpMultiplier >= 1 then
             for name, mod in pairs(SMH.Modifiers) do
                 if nextKeyframe.Modifiers[name] then
-                    mod:Load(player, entity, nextKeyframe.Modifiers[name]);
+                    mod:Load(entity, nextKeyframe.Modifiers[name], settings);
                 end
             end
         else
             for name, mod in pairs(SMH.Modifiers) do
                 if prevKeyframe.Modifiers[name] and nextKeyframe.Modifiers[name] then
-                    mod:LoadBetween(player, entity, prevKeyframe.Modifiers[name], nextKeyframe.Modifiers[name], lerpMultiplier);
+                    mod:LoadBetween(entity, prevKeyframe.Modifiers[name], nextKeyframe.Modifiers[name], lerpMultiplier, settings);
                 end
             end
         end
