@@ -59,9 +59,11 @@ local function AddCallbacks()
     end
     WorldClicker.MainMenu.OnRequestOpenSaveMenu = function()
         SaveMenu:SetVisible(true)
+        SMH.Controller.GetServerSaves()
     end
     WorldClicker.MainMenu.OnRequestOpenLoadMenu = function()
         LoadMenu:SetVisible(true)
+        SMH.Controller.GetServerSaves()
     end
     WorldClicker.MainMenu.OnRequestOpenSettings = function()
         WorldClicker.Settings:SetVisible(true)
@@ -112,7 +114,7 @@ hook.Add("InitPostEntity", "SMHMenuSetup", function()
 
     AddCallbacks()
 	
-	WorldClicker.MainMenu:UpdateState(SMH.State)
+	WorldClicker.MainMenu:SetInitialState(SMH.State)
     
 end)
 
@@ -212,6 +214,11 @@ end
 
 function MGR.AddSaveFile(path)
     SaveMenu:AddSave(path)
+end
+
+function MGR.UpdateState(newState)
+    WorldClicker.MainMenu:UpdatePositionLabel(newState.Frame, newState.PlaybackLength)
+    WorldClicker.MainMenu.FramePanel.TotalFrames = newState.PlaybackLength
 end
 
 SMH.UI = MGR

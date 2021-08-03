@@ -29,8 +29,8 @@ function MGR.Load(path)
 		error("SMH file does not exist: " .. path)
 	end
 
-	local json = file.Read(path);
-	local serializedKeyframes = util.JSONToTable(json);
+	local json = file.Read(path)
+	local serializedKeyframes = util.JSONToTable(json)
 	if not serializedKeyframes then
 		error("SMH file load failure")
 	end
@@ -99,10 +99,10 @@ end
 
 function MGR.Save(path, serializedKeyframes)
 	if not file.Exists(SaveDir, "DATA") or not file.IsDir(SaveDir, "DATA") then
-		file.CreateDir(SaveDir);
+		file.CreateDir(SaveDir)
 	end
 
-	local path = SaveDir .. fileName .. ".txt"
+	path = SaveDir .. path .. ".txt"
 	local json = util.TableToJSON(serializedKeyframes)
 	file.Write(path, json)
 end

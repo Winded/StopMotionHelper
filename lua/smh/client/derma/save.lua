@@ -28,7 +28,7 @@ function PANEL:Init()
 
 	self.Delete = vgui.Create("DButton", self)
 	self.Delete:SetText("Delete")
-	self.Save.DoClick = function()
+	self.Delete.DoClick = function()
 		self:DoDelete()
 	end
 
@@ -57,7 +57,7 @@ function PANEL:PerformLayout(width, height)
 end
 
 function PANEL:SetSaves(saves)
-	self.FileList:UpdateFiles(saves)
+	self.FileList:UpdateLines(saves)
 end
 
 function PANEL:AddSave(path)
@@ -66,7 +66,7 @@ end
 
 function PANEL:DoSave()
 	local path = self.FileName:GetValue()
-	if not fileName or fileName == "" then
+	if not path or path == "" then
 		return
 	end
 

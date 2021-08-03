@@ -188,7 +188,6 @@ function PANEL:OnScrollBarCursorMoved(x, y)
 
     local cursorX, _ = self:CursorPos()
     local movePos = cursorX - self._scrollCursorOffset - self.ScrollBarRect.X
-    print(movePos)
 
     local movableWidth = self.ScrollBarRect.Width - self.ScrollBar:GetWide()
     if movableWidth ~= 0 then

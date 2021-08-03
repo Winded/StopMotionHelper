@@ -136,10 +136,10 @@ function PANEL:PerformLayout(width, height)
 
 end
 
-function PANEL:UpdateState(newState)
-    self.PlaybackRateControl:SetValue(newState.PlaybackRate)
-    self.PlaybackLengthControl:SetValue(newState.PlaybackLength)
-    self:UpdatePositionLabel(newState.Frame, newState.PlaybackLength)
+function PANEL:SetInitialState(state)
+    self.PlaybackRateControl:SetValue(state.PlaybackRate)
+    self.PlaybackLengthControl:SetValue(state.PlaybackLength)
+    self:UpdatePositionLabel(state.Frame, state.PlaybackLength)
 end
 
 function PANEL:UpdatePositionLabel(frame, totalFrames)

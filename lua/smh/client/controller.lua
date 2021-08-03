@@ -150,6 +150,8 @@ function CTRL.UpdateState(newState)
         end
         SMH.State[k] = v
     end
+    
+    SMH.UI.UpdateState(SMH.State)
 end
 
 function CTRL.UpdateSettings(newSettings)
