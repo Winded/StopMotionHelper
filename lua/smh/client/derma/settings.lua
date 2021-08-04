@@ -48,6 +48,9 @@ function PANEL:Init()
 
     self.HelpButton = vgui.Create("DButton", self)
     self.HelpButton:SetText("Help")
+    self.HelpButton.DoClick = function()
+        self:OnRequestOpenHelp()
+    end
 
     self:SetSize(160, 245)
 
@@ -109,5 +112,6 @@ function PANEL:ApplySettings(settings)
 end
 
 function PANEL:OnSettingsUpdated(settings) end
+function PANEL:OnRequestOpenHelp() end
 
 vgui.Register("SMHSettings", PANEL, "DFrame")

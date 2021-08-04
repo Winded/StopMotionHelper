@@ -64,6 +64,15 @@ function PANEL:AddSave(path)
 	self.FileList:AddLine(path)
 end
 
+function PANEL:RemoveSave(path)
+    for idx, line in pairs(self.FileList:GetLines()) do
+        if line:GetValue(1) == path then
+            self.FileList:RemoveLine(idx)
+            break
+        end
+    end
+end
+
 function PANEL:DoSave()
 	local path = self.FileName:GetValue()
 	if not path or path == "" then
@@ -76,7 +85,7 @@ end
 
 function PANEL:DoDelete()
 	local path = self.FileName:GetValue()
-	if not fileName or fileName == "" then
+	if not path or path == "" then
 		return
 	end
 
@@ -84,6 +93,6 @@ function PANEL:DoDelete()
 end
 
 function PANEL:OnSaveRequested(path, saveToClient) end
-function PANEL:OnDeleteRequested(path) end
+function PANEL:OnDeleteRequested(path, deleteFromClient) end
 
 vgui.Register("SMHSave", PANEL, "DFrame")

@@ -80,14 +80,20 @@ local function AddCallbacks()
     WorldClicker.Settings.OnSettingsUpdated = function(_, newSettings)
         SMH.Controller.UpdateSettings(newSettings)
     end
+    WorldClicker.Settings.OnRequestOpenHelp = function()
+        SMH.Controller.OpenHelp()
+    end
 
     SaveMenu.OnSaveRequested = function(_, path, saveToClient)
         SMH.Controller.Save(path, saveToClient)
     end
-    SaveMenu.OnDeleteRequested = function(_, path)
-        SMH.Controller.DeleteSave(path)
+    SaveMenu.OnDeleteRequested = function(_, path, deleteFromClient)
+        SMH.Controller.DeleteSave(path, deleteFromClient)
     end
 
+    LoadMenu.OnModelListRequested = function(_, path, loadFromClient)
+        SMH.Controller.GetModelList(path, loadFromClient)
+    end
     LoadMenu.OnLoadRequested = function(_, path, modelName, loadFromClient)
         SMH.Controller.Load(path, modelName, loadFromClient)
     end
@@ -214,6 +220,10 @@ end
 
 function MGR.AddSaveFile(path)
     SaveMenu:AddSave(path)
+end
+
+function MGR.RemoveSaveFile(path)
+    SaveMenu:RemoveSave(path)
 end
 
 function MGR.UpdateState(newState)

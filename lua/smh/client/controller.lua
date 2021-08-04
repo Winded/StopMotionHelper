@@ -113,8 +113,14 @@ function CTRL.QuickSave()
     CTRL.Save(qs1, true)
 end
 
-function CTRL.DeleteSave(path)
-    SMH.Saves.Delete(path)
+function CTRL.DeleteSave(path, deleteFromClient)
+    if deleteFromClient then
+        SMH.Saves.Delete(path)
+    else
+        net.Start(SMH.MessageTypes.DeleteSave)
+        net.WriteString(path)
+        net.SendToServer()
+    end
 end
 
 function CTRL.ShouldHighlight()
@@ -156,6 +162,10 @@ end
 
 function CTRL.UpdateSettings(newSettings)
     SMH.Settings.Update(newSettings)
+end
+
+function CTRL.OpenHelp()
+    gui.OpenURL("https://github.com/Winded/StopMotionHelper/blob/master/TUTORIAL.md")
 end
 
 SMH.Controller = CTRL
@@ -222,6 +232,12 @@ local function SaveResponse(msgLength)
     SMH.UI.AddSaveFile(path)
 end
 
+local function DeleteSaveResponse(msgLength)
+    local path = net.ReadString()
+
+    SMH.UI.RemoveSaveFile(path)
+end
+
 local function Setup()
     net.Receive(SMH.MessageTypes.SetFrameResponse, SetFrameResponse)
 
@@ -234,6 +250,7 @@ local function Setup()
     net.Receive(SMH.MessageTypes.GetModelListResponse, GetModelListResponse)
     net.Receive(SMH.MessageTypes.LoadResponse, LoadResponse)
     net.Receive(SMH.MessageTypes.SaveResponse, SaveResponse)
+    net.Receive(SMH.MessageTypes.DeleteSaveResponse, DeleteSaveResponse)
 end
 
 Setup()

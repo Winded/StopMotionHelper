@@ -31,6 +31,8 @@ SMH.MessageTypes = {
     "LoadResponse",
     "Save",
     "SaveResponse",
+    "DeleteSave",
+    "DeleteSaveResponse",
 }
 for key, val in pairs(SMH.MessageTypes) do
     local prefixVal = "SMH" .. val

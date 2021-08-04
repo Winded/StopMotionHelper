@@ -8,6 +8,9 @@ function PANEL:Init()
 	self.FileList = vgui.Create("DListView", self)
 	self.FileList:AddColumn("Saved scenes")
 	self.FileList:SetMultiSelect(false)
+    self.FileList.OnRowSelected = function(_, rowIndex, row)
+       self:OnModelListRequested(row:GetValue(1), false)
+    end
 
 	self.EntityList = vgui.Create("DListView", self)
 	self.EntityList:AddColumn("Entities")
@@ -44,7 +47,7 @@ function PANEL:SetSaves(saves)
 end
 
 function PANEL:SetEntities(entities)
-	self.EntityList:UpdateLines(saves)
+	self.EntityList:UpdateLines(entities)
 end
 
 function PANEL:LoadSelected()
@@ -59,6 +62,7 @@ function PANEL:LoadSelected()
 	self:OnLoadRequested(selectedSave:GetValue(1), selectedEntity:GetValue(1), false)
 end
 
+function PANEL:OnModelListRequested(path, loadFromClient) end
 function PANEL:OnLoadRequested(path, modelName, loadFromClient) end
 
 vgui.Register("SMHLoad", PANEL, "DFrame")

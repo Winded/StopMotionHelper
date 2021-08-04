@@ -175,6 +175,15 @@ local function Save(msgLength, player)
     net.Send(player)
 end
 
+local function DeleteSave(msgLength, player)
+    local path = net.ReadString()
+    SMH.Saves.Delete(path)
+    
+    net.Start(SMH.MessageTypes.DeleteSaveResponse)
+    net.WriteString(path)
+    net.Send(player)
+end
+
 for _, message in pairs(SMH.MessageTypes) do
     util.AddNetworkString(message)
 end
@@ -197,3 +206,4 @@ net.Receive(SMH.MessageTypes.GetServerSaves, GetServerSaves)
 net.Receive(SMH.MessageTypes.GetModelList, GetModelList)
 net.Receive(SMH.MessageTypes.Load, Load)
 net.Receive(SMH.MessageTypes.Save, Save)
+net.Receive(SMH.MessageTypes.DeleteSave, DeleteSave)
