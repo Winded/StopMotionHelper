@@ -24,13 +24,11 @@ function PANEL:Init()
     end
 
     local function CreateSlider(name, label, min, max, decimals)
-        local slider = vgui.Create("Slider", self)
+        local slider = vgui.Create("DNumSlider", self)
         slider:SetMinMax(min, max)
         slider:SetDecimals(decimals)
+        slider:SetText(label)
         slider.OnValueChanged = CreateSettingChanger(name)
-        slider.Label = vgui.Create("DLabel", self)
-        slider.Label:SetText(label)
-        slider.Label:SizeToContents()
         return slider
     end
 
@@ -52,7 +50,7 @@ function PANEL:Init()
         self:OnRequestOpenHelp()
     end
 
-    self:SetSize(160, 245)
+    self:SetSize(250, 225)
 
     self._changingSettings = false
 
@@ -74,14 +72,11 @@ function PANEL:PerformLayout(width, height)
 
     self.TweenDisable:SetPos(5, 145)
 
-    self.GhostTransparency.Label:SizeToContents()
-    local LW, LH = self.GhostTransparency.Label:GetSize()
-    self.GhostTransparency:SetPos(5, 165 + LH - 5)
+    self.GhostTransparency:SetPos(5, 165)
     self.GhostTransparency:SetSize(self:GetWide() - 5 - 5, 25)
-    self.GhostTransparency.Label:SetPos(10, 165)
 
-    self.HelpButton:SetPos(5, 210)
-    self.HelpButton:SetSize(150, 20)
+    self.HelpButton:SetPos(5, 200)
+    self.HelpButton:SetSize(self:GetWide() - 5 - 5, 20)
 
 end
 

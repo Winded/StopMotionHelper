@@ -13,7 +13,7 @@ function MGR.SetFrame(player, newFrame, settings)
             continue
         end
 
-        if lerpMultiplier <= 0 or settings.TweeningDisabled then
+        if lerpMultiplier <= 0 or settings.TweenDisable then
             for name, mod in pairs(SMH.Modifiers) do
                 if prevKeyframe.Modifiers[name] then
                     mod:Load(entity, prevKeyframe.Modifiers[name], settings);

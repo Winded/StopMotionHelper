@@ -66,6 +66,7 @@ local function AddCallbacks()
         SMH.Controller.GetServerSaves()
     end
     WorldClicker.MainMenu.OnRequestOpenSettings = function()
+        WorldClicker.Settings:ApplySettings(SMH.Settings.GetAll())
         WorldClicker.Settings:SetVisible(true)
     end
 
