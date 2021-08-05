@@ -1,8 +1,12 @@
-function SMH.GetClosestKeyframes(keyframes, frame)
+function SMH.GetClosestKeyframes(keyframes, frame, ignoreCurrentFrame)
+    if ignoreCurrentFrame == nil then
+        ignoreCurrentFrame = false
+    end
+
     local prevKeyframe = nil
     local nextKeyframe = nil
     for _, keyframe in pairs(keyframes) do
-        if keyframe.Frame == frame then
+        if keyframe.Frame == frame and not ignoreCurrentFrame then
             prevKeyframe = keyframe
             nextKeyframe = keyframe
             break

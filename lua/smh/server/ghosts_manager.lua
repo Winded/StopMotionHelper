@@ -29,7 +29,7 @@ end
 
 local function SetGhostFrame(entity, ghost, modifiers)
     for name, mod in pairs(SMH.Modifiers) do
-        if data[name] ~= nil then
+        if modifiers[name] ~= nil then
             mod:LoadGhost(entity, ghost, modifiers[name]);
         end
     end
@@ -83,7 +83,7 @@ function MGR.UpdateState(player, frame, settings)
 
     for entity, keyframes in pairs(entities) do
         
-        local prevKeyframe, nextKeyframe, lerpMultiplier = SMH.GetClosestKeyframes(keyframes, frame)
+        local prevKeyframe, nextKeyframe, lerpMultiplier = SMH.GetClosestKeyframes(keyframes, frame, true)
         if not prevKeyframe and not nextKeyframe then
             continue
         end
