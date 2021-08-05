@@ -46,7 +46,7 @@ function PANEL:Init()
     self.EaseInControl:SetDecimals(1)
     self.EaseInControl.OnValueChanged = function(_, value)
         if self._sendKeyframeChanges then
-            self:OnRequestKeyframeUpdate({ EaseIn = value })
+            self:OnRequestKeyframeUpdate({ EaseIn = tonumber(value) })
         end
     end
     self.EaseInControl.Label = vgui.Create("DLabel", self.Easing)
@@ -59,7 +59,7 @@ function PANEL:Init()
     self.EaseOutControl:SetDecimals(1)
     self.EaseOutControl.OnValueChanged = function(_, value)
         if self._sendKeyframeChanges then
-            self:OnRequestKeyframeUpdate({ EaseOut = value })
+            self:OnRequestKeyframeUpdate({ EaseOut = tonumber(value) })
         end
     end
     self.EaseOutControl.Label = vgui.Create("DLabel", self.Easing)
@@ -81,6 +81,8 @@ function PANEL:Init()
     self.SettingsButton = vgui.Create("DButton", self)
     self.SettingsButton:SetText("Settings")
     self.SettingsButton.DoClick = function() self:OnRequestOpenSettings() end
+    
+    self.Easing:SetVisible(false)
 
 end
 
@@ -119,8 +121,6 @@ function PANEL:PerformLayout(width, height)
     self.EaseOutControl:SetSize(50, 20)
     sizeX, sizeY = self.EaseOutControl.Label:GetSize()
     self.EaseOutControl.Label:SetRelativePos(self.EaseOutControl, -(sizeX) - 5, 3)
-    
-    self.Easing:SetVisible(false)
 
     self.RecordButton:SetPos(width - 60 * 4 - 5 * 4, 2)
     self.RecordButton:SetSize(60, 20)

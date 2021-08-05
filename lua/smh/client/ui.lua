@@ -142,7 +142,19 @@ function MGR.SetFrame(frame)
     if not WorldClicker.MainMenu.FramePointer:IsDragging() then
         WorldClicker.MainMenu.FramePointer:SetFrame(frame)
     end
+    
 	WorldClicker.MainMenu:UpdatePositionLabel(frame, SMH.State.PlaybackLength)
+    
+    if FrameToKeyframe[frame] ~= nil then
+        local data = KeyframeEasingData[FrameToKeyframe[frame]]
+        if data then
+            WorldClicker.MainMenu:ShowEasingControls(data.EaseIn, data.EaseOut)
+        else
+            WorldClicker.MainMenu:ShowEasingControls(0, 0)
+        end
+    else
+        WorldClicker.MainMenu:HideEasingControls()
+    end
 end
 
 function MGR.SetKeyframes(keyframes)
