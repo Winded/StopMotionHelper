@@ -77,7 +77,6 @@ local function DeleteKeyframe(msgLength, player)
     local id = net.ReadUInt(INT_BITCOUNT)
 
     SMH.KeyframeManager.Delete(player, id)
-
     net.Start(SMH.MessageTypes.DeleteKeyframeResponse)
     net.WriteUInt(id, INT_BITCOUNT)
     net.Send(player)

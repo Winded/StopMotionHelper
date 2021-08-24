@@ -18,6 +18,7 @@ function MOD:Save(entity)
 	data.Nearz = entity:GetNearZ();
 	data.Farz = entity:GetFarZ();
 	data.Roll = entity:GetRoll();
+	data.Offset = entity:GetViewOffset();
 
 	return data;
 
@@ -31,6 +32,7 @@ function MOD:Load(entity, data)
 	entity:SetNearZ(data.Nearz);
 	entity:SetFarZ(data.Farz);
 	entity:SetRoll(data.Roll);
+	entity:SetViewOffset(data.Offset);
 
 end
 
@@ -42,5 +44,6 @@ function MOD:LoadBetween(entity, data1, data2, percentage)
 	entity:SetNearZ(SMH.LerpLinear(data1.Nearz, data2.Nearz, percentage));
 	entity:SetFarZ(SMH.LerpLinear(data1.Farz, data2.Farz, percentage));
 	entity:SetRoll(SMH.LerpLinear(data1.Roll, data2.Roll, percentage));
+	entity:SetViewOffset(SMH.LerpLinearVector(data1.Offset, data2.Offset, percentage));
 	
 end

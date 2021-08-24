@@ -16,6 +16,13 @@ local function CreateCopyPointer(keyframeId)
     pointer.OnPointerReleased = function(_, frame)
         SMH.Controller.CopyKeyframe(keyframeId, frame)
         WorldClicker.MainMenu.FramePanel:DeleteFramePointer(pointer)
+		
+		for id, pointer in pairs(KeyframePointers) do
+			if id == keyframeId + 1 then continue end
+			if pointer:GetFrame() == frame then
+				SMH.Controller.DeleteKeyframe(id)
+			end
+		end
     end
 end
 
@@ -28,6 +35,13 @@ local function NewKeyframePointer(keyframeId)
 
     pointer.OnPointerReleased = function(_, frame)
         SMH.Controller.UpdateKeyframe(keyframeId, { Frame = frame })
+		
+		for id, pointer in pairs(KeyframePointers) do
+			if id == keyframeId then continue end
+			if pointer:GetFrame() == frame then
+				SMH.Controller.DeleteKeyframe(id)
+			end
+		end
     end
     pointer.OnCustomMousePressed = function(_, mousecode)
         if mousecode == MOUSE_RIGHT and not input.IsKeyDown(KEY_LCONTROL) then
@@ -108,7 +122,7 @@ hook.Add("InitPostEntity", "SMHMenuSetup", function()
     WorldClicker.MainMenu = vgui.Create("SMHMenu", WorldClicker)
 
     WorldClicker.Settings = vgui.Create("SMHSettings", WorldClicker)
-	WorldClicker.Settings:SetPos(ScrW() - 165, ScrH() - 275)
+	WorldClicker.Settings:SetPos(ScrW() - 250, ScrH() - 75 - 225)
 	WorldClicker.Settings:SetVisible(false)
 
     SaveMenu = vgui.Create("SMHSave")

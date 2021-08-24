@@ -21,6 +21,7 @@ function MOD:Save(entity)
 	data.Color = entity:GetLightColor();
 	data.ShapeRadius = entity:GetShapeRadius();
 	data.FocalPoint = entity:GetFocalDistance();
+	data.Offset = entity:GetLightOffset();
 
 	return data;
 
@@ -37,6 +38,7 @@ function MOD:Load(entity, data)
 	entity:SetLightColor(data.Color);
 	entity:SetShapeRadius(data.ShapeRadius);
 	entity:SetFocalDistance(data.FocalPoint);
+	entity:SetLightOffset(data.Offset);
 
 end
 
@@ -51,5 +53,6 @@ function MOD:LoadBetween(entity, data1, data2, percentage)
 	entity:SetLightColor(SMH.LerpLinearVector(data1.Color, data2.Color, percentage));
 	entity:SetShapeRadius(SMH.LerpLinear(data1.ShapeRadius, data2.ShapeRadius, percentage));
 	entity:SetFocalDistance(SMH.LerpLinear(data1.FocalPoint, data2.FocalPoint, percentage));
+	entity:SetLightOffset(SMH.LerpLinearVector(data1.Offset, data2.Offset, percentage));
 	
 end

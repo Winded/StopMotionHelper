@@ -56,11 +56,11 @@ hook.Add("Think", "SMHPlaybackManagerThink", function()
         playback.Timer = playback.Timer + FrameTime()
         local timePerFrame = 1 / playback.PlaybackRate
         if playback.Timer >= timePerFrame then
-            playback.CurrentFrame = playback.CurrentFrame + 1
+            playback.CurrentFrame = math.floor(playback.Timer / timePerFrame)
             if playback.CurrentFrame > playback.EndFrame then
                 playback.CurrentFrame = playback.StartFrame
+				playback.Timer = 0
             end
-            playback.Timer = 0
             MGR.SetFrame(player, playback.CurrentFrame, playback.Settings)
         end
     end

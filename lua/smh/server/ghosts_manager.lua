@@ -93,7 +93,7 @@ function MGR.UpdateState(player, frame, settings)
                 local g = CreateGhost(entity, Color(200, 0, 0, alpha))
                 table.insert(ghosts, g)
                 SetGhostFrame(entity, g, prevKeyframe.Modifiers)
-            elseif settings.GhostNextFrame and prevKeyframe.Frame > frame then
+            elseif settings.GhostNextFrame and nextKeyframe.Frame > frame then
                 local g = CreateGhost(entity, Color(0, 200, 0, alpha))
                 table.insert(ghosts, g)
                 SetGhostFrame(entity, g, prevKeyframe.Modifiers)

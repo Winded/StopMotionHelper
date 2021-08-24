@@ -101,6 +101,21 @@ function PANEL:OnMousePressed(mousecode)
 
 	self:MouseCapture(true)
 	self._dragging = true
+	
+	local parent = self:GetParent() -- this is the part from OnCursorMoved(), mostly needed to the cases when we copy and paste a frame on top of itself, as by default it seems to go back to frame 0
+
+	local cursorX, cursorY = parent:CursorPos()
+	local startX, endX = unpack(parent.FrameArea)
+	
+	local targetX = cursorX - startX
+	local width = endX - startX
+
+	local targetPos = math.Round(parent.ScrollOffset + (targetX / width) * parent.Zoom)
+	targetPos = targetPos < 0 and 0 or (targetPos >= parent.TotalFrames and parent.TotalFrames - 1 or targetPos)
+
+	if targetPos ~= self._frame then
+		self:SetFrame(targetPos)
+	end
 end
 
 function PANEL:OnMouseReleased(mousecode)
