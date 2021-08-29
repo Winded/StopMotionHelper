@@ -14,7 +14,6 @@ end
 
 local function SelectEntity(msgLength, player)
     local entity = net.ReadEntity()
-
     SMH.GhostsManager.SelectEntity(player, entity)
 
     local keyframes = SMH.KeyframeManager.GetAllForEntity(player, entity)

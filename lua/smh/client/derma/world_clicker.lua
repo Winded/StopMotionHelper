@@ -1,5 +1,14 @@
 local BaseClass = baseclass.Get("EditablePanel")
 local PANEL = {}
+local ClickerEntity = nil;
+
+hook.Add("EntityRemoved", "SMHWorldClickerEntityRemoved", function(entity)
+
+	if entity == ClickerEntity then
+		SMH.Controller.SelectEntity(nil)
+	end
+
+end)
 
 function PANEL:Init()
 
@@ -32,6 +41,7 @@ function PANEL:OnMousePressed(mousecode)
 	local trace = util.TraceLine(util.GetPlayerTrace(LocalPlayer()))
 	if IsValid(trace.Entity) then
 		self:OnEntitySelected(trace.Entity)
+		ClickerEntity = trace.Entity
 	end
 end
 
