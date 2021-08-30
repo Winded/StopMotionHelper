@@ -20,6 +20,7 @@ SMH.MessageTypes = {
     "StopPlayback",
     "PlaybackResponse",
 
+	"IsRendering",
     "UpdateGhostState",
     "UpdateGhostStateResponse",
 

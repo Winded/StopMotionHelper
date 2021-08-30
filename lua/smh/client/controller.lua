@@ -168,6 +168,18 @@ function CTRL.OpenHelp()
     gui.OpenURL("https://github.com/Winded/StopMotionHelper/blob/master/TUTORIAL.md")
 end
 
+function CTRL.IsRendering(rendering)
+	net.Start(SMH.MessageTypes.IsRendering)
+    net.WriteBool(rendering)
+    net.SendToServer()
+end
+
+function CTRL.UpdateGhostState()
+	net.Start(SMH.MessageTypes.UpdateGhostState)
+	net.WriteTable(SMH.Settings.GetAll())
+	net.SendToServer()
+end
+
 SMH.Controller = CTRL
 
 local function SetFrameResponse(msgLength)

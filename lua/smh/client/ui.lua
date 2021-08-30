@@ -94,6 +94,19 @@ local function AddCallbacks()
 
     WorldClicker.Settings.OnSettingsUpdated = function(_, newSettings)
         SMH.Controller.UpdateSettings(newSettings)
+		local ghoststuff = {
+			GhostPrevFrame = true,
+			GhostNextFrame = true,
+			OnionSkin = true,
+			GhostAllEntities = true,
+			GhostTransparency = true,
+		}
+		for name, value in pairs(newSettings) do
+			if ghoststuff[name] then
+				SMH.Controller.UpdateGhostState()
+				break
+			end
+		end
     end
     WorldClicker.Settings.OnRequestOpenHelp = function()
         SMH.Controller.OpenHelp()

@@ -182,6 +182,11 @@ local function DeleteSave(msgLength, player)
     net.Send(player)
 end
 
+local function IsRendering(msgLength, player)
+	local rendering = net.ReadBool()
+	SMH.GhostsManager.IsRendering = rendering
+end
+
 for _, message in pairs(SMH.MessageTypes) do
     util.AddNetworkString(message)
 end
@@ -198,6 +203,7 @@ net.Receive(SMH.MessageTypes.DeleteKeyframe, DeleteKeyframe)
 net.Receive(SMH.MessageTypes.StartPlayback, StartPlayback)
 net.Receive(SMH.MessageTypes.StopPlayback, StopPlayback)
 
+net.Receive(SMH.MessageTypes.IsRendering, IsRendering)
 net.Receive(SMH.MessageTypes.UpdateGhostState, UpdateGhostState)
 
 net.Receive(SMH.MessageTypes.GetServerSaves, GetServerSaves)

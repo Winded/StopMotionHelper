@@ -1,4 +1,5 @@
 local PANEL = {}
+local LastSelectedSave
 
 function PANEL:Init()
 
@@ -54,12 +55,21 @@ function PANEL:LoadSelected()
 	local _, selectedSave = self.FileList:GetSelectedLine()
 	local _, selectedEntity = self.EntityList:GetSelectedLine()
 
-	if not IsValid(selectedSave) or not IsValid(selectedEntity) then
-		return
+	if not IsValid(selectedSave) then
+		selectedSave = LastSelectedSave
 	end
-
+	
+	if IsValid(selectedSave) and IsValid(selectedEntity) then
+		self:OnLoadRequested(selectedSave:GetValue(1), selectedEntity:GetValue(1), false)
+		LastSelectedSave = selectedSave:GetValue(1)
+	elseif IsValid(selectedSave) then
+		LastSelectedSave = selectedSave:GetValue(1)
+	elseif IsValid(selectedEntity) and LastSelectedSave then
+		self:OnLoadRequested(LastSelectedSave, selectedEntity:GetValue(1), false)
+	end
+	
 	-- TODO clientside support for loading and saving
-	self:OnLoadRequested(selectedSave:GetValue(1), selectedEntity:GetValue(1), false)
+	
 end
 
 function PANEL:OnModelListRequested(path, loadFromClient) end

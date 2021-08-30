@@ -1,4 +1,5 @@
 local GhostData = {}
+local LastFrame = 0
 
 local function CreateGhost(entity, color)
     local class = entity:GetClass()
@@ -37,6 +38,8 @@ end
 
 local MGR = {}
 
+MGR.IsRendering = false
+
 function MGR.SelectEntity(player, entity)
     if not GhostData[player] then
         GhostData[player] = {
@@ -49,6 +52,8 @@ function MGR.SelectEntity(player, entity)
 end
 
 function MGR.UpdateState(player, frame, settings)
+	LastFrame = frame
+	
     if not GhostData[player] then
         return
     end
@@ -61,8 +66,8 @@ function MGR.UpdateState(player, frame, settings)
         end
     end
     table.Empty(ghosts)
-
-    if not settings.GhostPrevFrame and not settings.GhostNextFrame and not settings.OnionSkin then
+	
+    if not settings.GhostPrevFrame and not settings.GhostNextFrame and not settings.OnionSkin or MGR.IsRendering then
         return
     end
 
@@ -120,6 +125,10 @@ function MGR.UpdateState(player, frame, settings)
         end
 
     end
+end
+
+function MGR.UpdateSettings(player, settings)
+	MGR.UpdateState(player, LastFrame, settings)
 end
 
 SMH.GhostsManager = MGR
