@@ -54,10 +54,6 @@ end
 function PANEL:LoadSelected()
 	local _, selectedSave = self.FileList:GetSelectedLine()
 	local _, selectedEntity = self.EntityList:GetSelectedLine()
-
-	if not IsValid(selectedSave) then
-		selectedSave = LastSelectedSave
-	end
 	
 	if IsValid(selectedSave) and IsValid(selectedEntity) then
 		self:OnLoadRequested(selectedSave:GetValue(1), selectedEntity:GetValue(1), false)
