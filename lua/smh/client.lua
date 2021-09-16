@@ -1,5 +1,7 @@
 include("shared.lua")
 
+include("client/state.lua")
+
 include("client/derma/frame_panel.lua")
 include("client/derma/frame_pointer.lua")
 include("client/derma/load.lua")
@@ -13,5 +15,4 @@ include("client/controller.lua")
 include("client/highlighter.lua")
 include("client/renderer.lua")
 include("client/settings.lua")
-include("client/state.lua")
 include("client/ui.lua")

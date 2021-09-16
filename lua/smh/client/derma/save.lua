@@ -4,6 +4,12 @@ function PANEL:Init()
 
 	self:SetTitle("Save")
 	self:SetDeleteOnClose(false)
+	self:SetSizable(true)
+	
+	self:SetSize(250, 250)
+	self:SetMinWidth(250)
+	self:SetMinHeight(250)
+	self:SetPos(ScrW() / 2 - self:GetWide() / 2, ScrH() / 2 - self:GetTall() / 2)
 
 	self.FileName = vgui.Create("DTextEntry", self)
 	self.FileName.Label = vgui.Create("DLabel", self)
@@ -38,20 +44,17 @@ function PANEL:PerformLayout(width, height)
 	
 	self.BaseClass.PerformLayout(self, width, height)
 
-	self:SetSize(250, 250)
-	self:SetPos(ScrW() / 2 - self:GetWide() / 2, ScrH() / 2 - self:GetTall() / 2)
-
 	self.FileName:SetPos(5, 45)
 	self.FileName:SetSize(self:GetWide() - 5 - 5, 20)
 	self.FileName.Label:SetPos(5, 30)
 
 	self.FileList:SetPos(5, 67)
-	self.FileList:SetSize(self:GetWide() - 5 - 5, 150)
+	self.FileList:SetSize(self:GetWide() - 5 - 5, 150 * (self:GetTall() / 250))
 
-	self.Save:SetPos(self:GetWide() - 60 - 5, 219)
+	self.Save:SetPos(self:GetWide() - 60 - 5, self:GetTall() - 31)
 	self.Save:SetSize(60, 20)
 
-	self.Delete:SetPos(self:GetWide() - 60 - 5 - 60 - 5, 219)
+	self.Delete:SetPos(self:GetWide() - 60 - 5 - 60 - 5, self:GetTall() - 31)
 	self.Delete:SetSize(60, 20)
 
 end

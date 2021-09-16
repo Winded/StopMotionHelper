@@ -5,6 +5,7 @@ local LoadMenu = nil
 local FrameToKeyframe = {}
 local KeyframePointers = {}
 local KeyframeEasingData = {}
+local ClickerEntity = nil
 
 local function CreateCopyPointer(keyframeId)
     local pointer = WorldClicker.MainMenu.FramePanel:CreateFramePointer(
@@ -58,6 +59,8 @@ local function AddCallbacks()
 
     WorldClicker.OnEntitySelected = function(_, entity)
         SMH.Controller.SelectEntity(entity)
+		LoadMenu:UpdateSelectedEnt(entity)
+		ClickerEntity = entity
     end
 
     WorldClicker.MainMenu.OnRequestStateUpdate = function(_, newState)
@@ -127,6 +130,14 @@ local function AddCallbacks()
     end
 
 end
+
+hook.Add("EntityRemoved", "SMHWorldClickerEntityRemoved", function(entity)
+
+	if entity == ClickerEntity then
+		WorldClicker:OnEntitySelected(nil)
+	end
+
+end)
 
 hook.Add("InitPostEntity", "SMHMenuSetup", function()
 
