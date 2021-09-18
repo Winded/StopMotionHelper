@@ -198,7 +198,7 @@ end
 
 local function SetRendering(msgLength, player)
 	local rendering = net.ReadBool()
-	SMH.GhostsManager.IsRendering = rendering
+	SMH.GhostsManager.SetRendering = rendering
 end
 
 local function ApplyEntityName(msgLength, player)
