@@ -16,7 +16,7 @@ function MGR.Stop()
 	LocalPlayer():EmitSound("buttons/button1.wav");
 
     IsRendering = false
-	SMH.Controller.IsRendering(IsRendering)
+	SMH.Controller.SetRendering(IsRendering)
 end
 
 local function RenderTick()
@@ -44,7 +44,7 @@ function MGR.Start(useScreenshot)
     UseScreenshot = useScreenshot
 	
 	IsRendering = true
-	SMH.Controller.IsRendering(IsRendering)
+	SMH.Controller.SetRendering(IsRendering)
 	
     SMH.Controller.SetFrame(0)
 	

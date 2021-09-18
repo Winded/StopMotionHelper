@@ -8,6 +8,7 @@ include("server/keyframe_data.lua")
 include("server/keyframe_manager.lua")
 include("server/modifiers.lua")
 include("server/playback_manager.lua")
+include("server/properties_manager.lua")
 
 AddCSLuaFile("shared.lua")
 AddCSLuaFile("client.lua")
