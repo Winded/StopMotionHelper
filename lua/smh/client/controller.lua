@@ -102,6 +102,13 @@ function CTRL.Load(path, modelName, loadFromClient)
     net.SendToServer()
 end
 
+function CTRL.GetModelInfo(path, modelName, loadFromClient)
+	net.Start(SMH.MessageTypes.GetModelInfo)
+	net.WriteString(path)
+	net.WriteString(modelName)
+	net.SendToServer()
+end
+
 function CTRL.Save(path, saveToClient)
     net.Start(SMH.MessageTypes.Save)
     net.WriteBool(saveToClient)
@@ -231,7 +238,8 @@ end
 
 local function GetModelListResponse(msgLength)
     local models = net.ReadTable()
-    SMH.UI.SetModelList(models)
+	local map = net.ReadString()
+    SMH.UI.SetModelList(models, map)
 end
 
 local function GetServerEntitiesResponse(msgLength)
@@ -246,6 +254,11 @@ local function LoadResponse(msgLength)
     if entity == SMH.State.Entity then
         SMH.UI.SetKeyframes(keyframes)
     end
+end
+
+local function GetModelInfoResponse(msgLength)
+	local name = net.ReadString()
+	SMH.UI.SetModelName(name)
 end
 
 local function SaveResponse(msgLength)
@@ -268,7 +281,9 @@ local function DeleteSaveResponse(msgLength)
 end
 
 local function ApplyEntityNameResponse(msgLength)
+	local name = net.ReadString()
 	
+	SMH.UI.UpdateName(name)
 end
 
 local function Setup()
@@ -283,6 +298,7 @@ local function Setup()
     net.Receive(SMH.MessageTypes.GetModelListResponse, GetModelListResponse)
 	net.Receive(SMH.MessageTypes.GetServerEntitiesResponse, GetServerEntitiesResponse)
     net.Receive(SMH.MessageTypes.LoadResponse, LoadResponse)
+	net.Receive(SMH.MessageTypes.GetModelInfoResponse, GetModelInfoResponse)
     net.Receive(SMH.MessageTypes.SaveResponse, SaveResponse)
     net.Receive(SMH.MessageTypes.DeleteSaveResponse, DeleteSaveResponse)
 	

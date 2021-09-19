@@ -134,6 +134,9 @@ local function AddCallbacks()
     LoadMenu.OnLoadRequested = function(_, path, modelName, loadFromClient)
         SMH.Controller.Load(path, modelName, loadFromClient)
     end
+	LoadMenu.OnModelInfoRequested = function(_, path, modelName, loadFromClient)
+		SMH.Controller.GetModelInfo(path, modelName, loadFromClient)
+	end
 	
 	PropertiesMenu.ApplyName = function(_, ent, name)
 		SMH.Controller.ApplyEntityName(ent, name)
@@ -279,12 +282,20 @@ function MGR.SetServerSaves(saves)
     SaveMenu:SetSaves(saves)
 end
 
-function MGR.SetModelList(models)
-    LoadMenu:SetEntities(models)
+function MGR.SetModelList(models, map)
+    LoadMenu:SetEntities(models, map)
 end
 
 function MGR.SetEntityList(entities)
 	PropertiesMenu:SetEntities(entities)
+end
+
+function MGR.SetModelName(name)
+	LoadMenu:SetModelName(name)
+end
+
+function MGR.UpdateName(name)
+	PropertiesMenu:SetName(name)
 end
 
 function MGR.AddSaveFile(path)

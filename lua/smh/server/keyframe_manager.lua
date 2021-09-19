@@ -115,7 +115,7 @@ function MGR.Delete(player, keyframeId)
     SMH.KeyframeData:Delete(player, keyframeId)
 end
 
-function MGR.ImportSave(player, entity, serializedKeyframes)
+function MGR.ImportSave(player, entity, serializedKeyframes, entityProperties)
     if SMH.KeyframeData.Players[player] and SMH.KeyframeData.Players[player].Entities[entity] then
 		local deletethis = table.Copy(SMH.KeyframeData.Players[player].Entities[entity])
         for _, keyframe in pairs(deletethis) do
@@ -123,6 +123,8 @@ function MGR.ImportSave(player, entity, serializedKeyframes)
         end
     end
     
+	SMH.PropertiesManager.SetName(player, entity, entityProperties.Name)
+	
     for _, skf in pairs(serializedKeyframes) do
         local keyframe = SMH.KeyframeData:New(player, entity)
         keyframe.Frame = skf.Position

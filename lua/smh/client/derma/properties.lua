@@ -3,20 +3,18 @@ local EntsTable = {}
 local Fallback = "none"
 local selectedEntity = nil
 
-local function GetModelName(entity, usedModelNames)
+local function GetModelName(entity)
 	local mdl = string.Split(entity:GetModel(), "/");
 	mdl = mdl[#mdl];
---	while usedModelNames[mdl] do
---		mdl = mdl .. "I"
---	end
---	usedModelNames[mdl] = true
 	return mdl
 end
 
 local function FindEntity(entity)
-	for key, value in pairs(EntsTable) do
-		if value.Entity == entity then
-			return value
+	if EntsTable then
+		for kentity, value in pairs(EntsTable) do
+			if kentity == entity then
+				return value
+			end
 		end
 	end
 	
@@ -42,6 +40,7 @@ function PANEL:Init()
 		if sel:GetValue() == "" then
 			sel:SetText(Fallback)
 		end
+		
 		self:ApplyName(selectedEntity, sel:GetValue())
 	end
 		self.EntityNameEnter.Label = vgui.Create("DLabel", self)
@@ -61,6 +60,10 @@ end
 
 function PANEL:UpdateSelectedEnt(ent)
 	selectedEntity = ent
+end
+
+function PANEL:SetName(name)
+	self.EntityNameEnter:SetText(name)
 end
 
 function PANEL:SetEntities(entities)

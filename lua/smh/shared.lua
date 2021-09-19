@@ -28,6 +28,8 @@ SMH.MessageTypes = {
     "GetServerSavesResponse",
     "GetModelList",
     "GetModelListResponse",
+	"GetModelInfo",
+	"GetModelInfoResponse",
 	"GetServerEntities",
 	"GetServerEntitiesResponse",
     "Load",
