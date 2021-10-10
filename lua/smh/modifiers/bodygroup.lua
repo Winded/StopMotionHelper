@@ -1,11 +1,6 @@
 
 MOD.Name = "Bodygroup";
 
-function MOD:IsEffect(entity) -- checking if the entity is an effect prop
-	if entity:GetClass() == "prop_effect" and IsValid(entity.AttachedEntity) then return true; end
-	return false;
-end
-
 function MOD:Save(entity)
 	
 	if self:IsEffect(entity) then
