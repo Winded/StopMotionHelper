@@ -2,7 +2,11 @@
 MOD.Name = "Bones";
 
 function MOD:Save(entity)
-
+	
+	if self:IsEffect(entity) then
+		entity = entity.AttachedEntity;
+	end
+	
 	local count = entity:GetBoneCount();
 
 	local data = {};
@@ -27,7 +31,11 @@ function MOD:LoadGhost(entity, ghost, data)
 end
 
 function MOD:Load(entity, data)
-
+	
+	if self:IsEffect(entity) then
+		entity = entity.AttachedEntity;
+	end
+	
 	local count = entity:GetBoneCount();
 
 	for b = 0, count - 1 do
@@ -42,7 +50,11 @@ function MOD:Load(entity, data)
 end
 
 function MOD:LoadBetween(entity, data1, data2, percentage)
-
+	
+	if self:IsEffect(entity) then
+		entity = entity.AttachedEntity;
+	end
+	
 	local count = entity:GetBoneCount();
 
 	for b = 0, count - 1 do

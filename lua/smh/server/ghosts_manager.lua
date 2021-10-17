@@ -10,6 +10,10 @@ local function CreateGhost(entity, color)
         g = ents.Create("prop_ragdoll")
     else
         g = ents.Create("prop_dynamic")
+		
+		if class == "prop_effect" and IsValid(entity.AttachedEntity) then
+			model = entity.AttachedEntity:GetModel()
+		end
     end
 
     g:SetModel(model)
