@@ -75,6 +75,13 @@ function PANEL:Paint(width, height)
 
 end
 
+function PANEL:UpdateFrameCount(totalframes)
+    self.TotalFrames = totalframes
+
+    if not self.ScrollBarRect then return end --check if we actually initialized the panel
+    self:RefreshScrollBar()
+end
+
 function PANEL:RefreshScrollBar()
     if self.TotalFrames == self.Zoom then
         self.ScrollBar:SetPos(self.ScrollBarRect.X, self.ScrollBarRect.Y)
