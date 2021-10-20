@@ -279,7 +279,7 @@ end
 
 function MGR.UpdateState(newState)
     WorldClicker.MainMenu:UpdatePositionLabel(newState.Frame, newState.PlaybackLength)
-	WorldClicker.MainMenu.FramePanel:UpdateFrameCount(newState.PlaybackLength)
+    WorldClicker.MainMenu.FramePanel:UpdateFrameCount(newState.PlaybackLength)
 end
 
 SMH.UI = MGR
