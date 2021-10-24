@@ -15,7 +15,7 @@ function PANEL:Init()
     self.FramePanel = vgui.Create("SMHFramePanel", self)
 
     self.FramePointer = self.FramePanel:CreateFramePointer(Color(255, 255, 255), self.FramePanel:GetTall() / 4, true)
-    
+
     self.PositionLabel = vgui.Create("DLabel", self)
 
     self.PlaybackRateControl = vgui.Create("DNumberWang", self)
@@ -27,7 +27,7 @@ function PANEL:Init()
     self.PlaybackRateControl.Label = vgui.Create("DLabel", self)
     self.PlaybackRateControl.Label:SetText("Framerate")
     self.PlaybackRateControl.Label:SizeToContents()
-    
+
     self.PlaybackLengthControl = vgui.Create("DNumberWang", self)
     self.PlaybackLengthControl:SetMinMax(1, 999)
     self.PlaybackLengthControl:SetDecimals(0)
@@ -37,9 +37,9 @@ function PANEL:Init()
     self.PlaybackLengthControl.Label = vgui.Create("DLabel", self)
     self.PlaybackLengthControl.Label:SetText("Frame count")
     self.PlaybackLengthControl.Label:SizeToContents()
-    
+
     self.Easing = vgui.Create("Panel", self)
-    
+
     self.EaseInControl = vgui.Create("DNumberWang", self.Easing)
     self.EaseInControl:SetNumberStep(0.1)
     self.EaseInControl:SetMinMax(0, 1)
@@ -52,7 +52,7 @@ function PANEL:Init()
     self.EaseInControl.Label = vgui.Create("DLabel", self.Easing)
     self.EaseInControl.Label:SetText("Ease in")
     self.EaseInControl.Label:SizeToContents()
-    
+
     self.EaseOutControl = vgui.Create("DNumberWang", self.Easing)
     self.EaseOutControl:SetNumberStep(0.1)
     self.EaseOutControl:SetMinMax(0, 1)
@@ -69,7 +69,7 @@ function PANEL:Init()
     self.RecordButton = vgui.Create("DButton", self)
     self.RecordButton:SetText("Record")
     self.RecordButton.DoClick = function() self:OnRequestRecord() end
-    
+
     self.PropertiesButton = vgui.Create("DButton", self)
     self.PropertiesButton:SetText("Properties")
     self.PropertiesButton.DoClick = function() self:OnRequestOpenPropertiesMenu() end
@@ -77,15 +77,15 @@ function PANEL:Init()
     self.SaveButton = vgui.Create("DButton", self)
     self.SaveButton:SetText("Save")
     self.SaveButton.DoClick = function() self:OnRequestOpenSaveMenu() end
-    
+
     self.LoadButton = vgui.Create("DButton", self)
     self.LoadButton:SetText("Load")
     self.LoadButton.DoClick = function() self:OnRequestOpenLoadMenu() end
-    
+
     self.SettingsButton = vgui.Create("DButton", self)
     self.SettingsButton:SetText("Settings")
     self.SettingsButton.DoClick = function() self:OnRequestOpenSettings() end
-    
+
     self.Easing:SetVisible(false)
 
 end
@@ -125,10 +125,10 @@ function PANEL:PerformLayout(width, height)
     self.EaseOutControl:SetSize(50, 20)
     sizeX, sizeY = self.EaseOutControl.Label:GetSize()
     self.EaseOutControl.Label:SetRelativePos(self.EaseOutControl, -(sizeX) - 5, 3)
-	
-	self.RecordButton:SetPos(width - 60 * 5 - 5 * 5, 2)
+
+    self.RecordButton:SetPos(width - 60 * 5 - 5 * 5, 2)
     self.RecordButton:SetSize(60, 20)
-	
+
     self.PropertiesButton:SetPos(width - 60 * 4 - 5 * 4, 2)
     self.PropertiesButton:SetSize(60, 20)
 

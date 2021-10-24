@@ -7,7 +7,7 @@ function PANEL:Init()
             if self._changingSettings then
                 return
             end
-    
+
             local updatedSettings = {
                 [name] = value
             }
@@ -100,7 +100,7 @@ function PANEL:ApplySettings(settings)
     end
 
     if settings.GhostTransparency ~= nil then
-        self.GhostTransparency:SetValue(settings.GhostTransparency)    
+        self.GhostTransparency:SetValue(settings.GhostTransparency)
     end
 
     self._changingSettings = false

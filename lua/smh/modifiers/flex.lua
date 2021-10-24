@@ -2,69 +2,69 @@
 MOD.Name = "Facial flexes";
 
 function MOD:Save(entity)
-	
-	if self:IsEffect(entity) then
-		entity = entity.AttachedEntity;
-	end
-	
-	local count = entity:GetFlexNum();
-	if count <= 0 then return nil; end
 
-	local data = {};
+    if self:IsEffect(entity) then
+        entity = entity.AttachedEntity;
+    end
 
-	data.Scale = entity:GetFlexScale();
+    local count = entity:GetFlexNum();
+    if count <= 0 then return nil; end
 
-	data.Weights = {};
+    local data = {};
 
-	for i = 0, count - 1 do
-		data.Weights[i] = entity:GetFlexWeight(i);
-	end
+    data.Scale = entity:GetFlexScale();
 
-	return data;
+    data.Weights = {};
+
+    for i = 0, count - 1 do
+        data.Weights[i] = entity:GetFlexWeight(i);
+    end
+
+    return data;
 
 end
 
 function MOD:LoadGhost(entity, ghost, data)
-	self:Load(ghost, data);
+    self:Load(ghost, data);
 end
 
 function MOD:Load(entity, data)
-	
-	if self:IsEffect(entity) then
-		entity = entity.AttachedEntity;
-	end
-	
-	local count = entity:GetFlexNum();
-	if count <= 0 then return; end --Shouldn't happen, but meh
 
-	entity:SetFlexScale(data.Scale);
+    if self:IsEffect(entity) then
+        entity = entity.AttachedEntity;
+    end
 
-	for i, f in pairs(data.Weights) do
-		entity:SetFlexWeight(i, f);
-	end
+    local count = entity:GetFlexNum();
+    if count <= 0 then return; end --Shouldn't happen, but meh
+
+    entity:SetFlexScale(data.Scale);
+
+    for i, f in pairs(data.Weights) do
+        entity:SetFlexWeight(i, f);
+    end
 
 end
 
 function MOD:LoadBetween(entity, data1, data2, percentage)
-	
-	if self:IsEffect(entity) then
-		entity = entity.AttachedEntity;
-	end
-	
-	local count = entity:GetFlexNum();
-	if count <= 0 then return; end --Shouldn't happen, but meh
 
-	local scale = SMH.LerpLinear(data1.Scale, data2.Scale, percentage);
-	entity:SetFlexScale(scale);
+    if self:IsEffect(entity) then
+        entity = entity.AttachedEntity;
+    end
 
-	for i = 0, count - 1 do
+    local count = entity:GetFlexNum();
+    if count <= 0 then return; end --Shouldn't happen, but meh
 
-		local w1 = data1.Weights[i];
-		local w2 = data2.Weights[i];
-		local w = SMH.LerpLinear(w1, w2, percentage);
+    local scale = SMH.LerpLinear(data1.Scale, data2.Scale, percentage);
+    entity:SetFlexScale(scale);
 
-		entity:SetFlexWeight(i, w);
+    for i = 0, count - 1 do
 
-	end
+        local w1 = data1.Weights[i];
+        local w2 = data2.Weights[i];
+        local w = SMH.LerpLinear(w1, w2, percentage);
+
+        entity:SetFlexWeight(i, w);
+
+    end
 
 end

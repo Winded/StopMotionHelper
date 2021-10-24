@@ -74,7 +74,6 @@ function MGR.Update(newSettings)
         if not ConVars[name] then
             continue
         end
-        
         ConVars[name]:SetValue(value)
     end
 end

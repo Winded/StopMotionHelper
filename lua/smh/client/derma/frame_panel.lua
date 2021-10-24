@@ -26,7 +26,7 @@ function PANEL:Init()
     self.FrameArea = {0, 1}
     self._draggingScrollBar = false
     self._scrollCursorOffset = 0
-    
+
     self.FramePointers = {}
 
 end
@@ -124,9 +124,9 @@ end
 
 function PANEL:CreateFramePointer(color, verticalPosition, pointyBottom)
     local pointer = vgui.Create("SMHFramePointer", self)
-	pointer.Color = color
-	pointer.VerticalPosition = verticalPosition
-	pointer.PointyBottom = pointyBottom
+    pointer.Color = color
+    pointer.VerticalPosition = verticalPosition
+    pointer.PointyBottom = pointyBottom
     table.insert(self.FramePointers, pointer)
 
     return pointer
@@ -174,7 +174,7 @@ function PANEL:OnScrollBarPressed(mousecode)
 
     self.ScrollBar:MouseCapture(true)
     self._draggingScrollBar = true
-    
+
     local cursorXOffset, _ = self.ScrollBar:CursorPos()
     self._scrollCursorOffset = cursorXOffset
 end

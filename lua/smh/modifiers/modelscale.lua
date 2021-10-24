@@ -7,7 +7,7 @@ function MOD:Save(entity)
 end
 
 function MOD:LoadGhost(entity, ghost, data)
-	self:Load(ghost, data);
+    self:Load(ghost, data);
 end
 
 function MOD:Load(entity, data)
@@ -15,8 +15,8 @@ function MOD:Load(entity, data)
 end
 
 function MOD:LoadBetween(entity, data1, data2, percentage)
-	
-	local lerpedModelScale = SMH.LerpLinear(data1.ModelScale, data2.ModelScale, percentage);
-	entity:SetModelScale(lerpedModelScale);
-	
+
+    local lerpedModelScale = SMH.LerpLinear(data1.ModelScale, data2.ModelScale, percentage);
+    entity:SetModelScale(lerpedModelScale);
+
 end
