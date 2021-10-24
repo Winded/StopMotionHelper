@@ -1,6 +1,7 @@
 local WorldClicker = nil
 local SaveMenu = nil
 local LoadMenu = nil
+local PropertiesMenu = nil
 
 local FrameToKeyframe = {}
 local KeyframePointers = {}
@@ -60,6 +61,7 @@ local function AddCallbacks()
     WorldClicker.OnEntitySelected = function(_, entity)
         SMH.Controller.SelectEntity(entity)
 		LoadMenu:UpdateSelectedEnt(entity)
+		PropertiesMenu:UpdateSelectedEnt(entity)
 		ClickerEntity = entity
     end
 
@@ -71,6 +73,10 @@ local function AddCallbacks()
             SMH.Controller.UpdateKeyframe(FrameToKeyframe[SMH.State.Frame], newKeyframeData)
         end
     end
+	WorldClicker.MainMenu.OnRequestOpenPropertiesMenu = function()
+		PropertiesMenu:SetVisible(true)
+		SMH.Controller.GetServerEntities()
+	end
     WorldClicker.MainMenu.OnRequestRecord = function()
         SMH.Controller.Record()
     end
@@ -128,6 +134,13 @@ local function AddCallbacks()
     LoadMenu.OnLoadRequested = function(_, path, modelName, loadFromClient)
         SMH.Controller.Load(path, modelName, loadFromClient)
     end
+	LoadMenu.OnModelInfoRequested = function(_, path, modelName, loadFromClient)
+		SMH.Controller.GetModelInfo(path, modelName, loadFromClient)
+	end
+	
+	PropertiesMenu.ApplyName = function(_, ent, name)
+		SMH.Controller.ApplyEntityName(ent, name)
+	end
 
 end
 
@@ -156,6 +169,10 @@ hook.Add("InitPostEntity", "SMHMenuSetup", function()
     LoadMenu = vgui.Create("SMHLoad")
 	LoadMenu:MakePopup()
 	LoadMenu:SetVisible(false)
+	
+	PropertiesMenu = vgui.Create("SMHProperties")
+	PropertiesMenu:MakePopup()
+	PropertiesMenu:SetVisible(false)
 
     AddCallbacks()
 	
@@ -265,8 +282,20 @@ function MGR.SetServerSaves(saves)
     SaveMenu:SetSaves(saves)
 end
 
-function MGR.SetModelList(models)
-    LoadMenu:SetEntities(models)
+function MGR.SetModelList(models, map)
+    LoadMenu:SetEntities(models, map)
+end
+
+function MGR.SetEntityList(entities)
+	PropertiesMenu:SetEntities(entities)
+end
+
+function MGR.SetModelName(name)
+	LoadMenu:SetModelName(name)
+end
+
+function MGR.UpdateName(name)
+	PropertiesMenu:SetName(name)
 end
 
 function MGR.AddSaveFile(path)

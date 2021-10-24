@@ -17,7 +17,7 @@ function PANEL:UpdateLines(lines)
 	end
 	
 	for k, line in pairs(self:GetLines()) do -- first we remove lines that are missing from the sorting table
-		if !set[line:GetValue(1)] then
+		if not set[line:GetValue(1)] then
 			local _, selected = self:GetSelectedLine()
 			if selected == line then self:ClearSelection() end -- clear selection if the removed line was selected
 			self:RemoveLine(line:GetID())

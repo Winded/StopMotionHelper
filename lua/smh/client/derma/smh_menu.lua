@@ -65,11 +65,15 @@ function PANEL:Init()
     self.EaseOutControl.Label = vgui.Create("DLabel", self.Easing)
     self.EaseOutControl.Label:SetText("Ease out")
     self.EaseOutControl.Label:SizeToContents()
-    
+
     self.RecordButton = vgui.Create("DButton", self)
     self.RecordButton:SetText("Record")
     self.RecordButton.DoClick = function() self:OnRequestRecord() end
     
+    self.PropertiesButton = vgui.Create("DButton", self)
+    self.PropertiesButton:SetText("Properties")
+    self.PropertiesButton.DoClick = function() self:OnRequestOpenPropertiesMenu() end
+
     self.SaveButton = vgui.Create("DButton", self)
     self.SaveButton:SetText("Save")
     self.SaveButton.DoClick = function() self:OnRequestOpenSaveMenu() end
@@ -121,9 +125,12 @@ function PANEL:PerformLayout(width, height)
     self.EaseOutControl:SetSize(50, 20)
     sizeX, sizeY = self.EaseOutControl.Label:GetSize()
     self.EaseOutControl.Label:SetRelativePos(self.EaseOutControl, -(sizeX) - 5, 3)
-
-    self.RecordButton:SetPos(width - 60 * 4 - 5 * 4, 2)
+	
+	self.RecordButton:SetPos(width - 60 * 5 - 5 * 5, 2)
     self.RecordButton:SetSize(60, 20)
+	
+    self.PropertiesButton:SetPos(width - 60 * 4 - 5 * 4, 2)
+    self.PropertiesButton:SetSize(60, 20)
 
     self.SaveButton:SetPos(width - 60 * 3 - 5 * 3, 2)
     self.SaveButton:SetSize(60, 20)
@@ -161,6 +168,7 @@ end
 
 function PANEL:OnRequestStateUpdate(newState) end
 function PANEL:OnRequestKeyframeUpdate(newKeyframeData) end
+function PANEL:OnRequestOpenPropertiesMenu() end
 function PANEL:OnRequestRecord() end
 function PANEL:OnRequestOpenSaveMenu() end
 function PANEL:OnRequestOpenLoadMenu() end
