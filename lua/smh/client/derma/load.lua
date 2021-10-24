@@ -1,80 +1,107 @@
+local PANEL = {}
 
-local Rx = SMH.Include("rxlua/rx.lua");
-local RxUtils = SMH.Include("shared/rxutils.lua");
+function PANEL:Init()
 
-local function Create(parent)
-
-	local panel = vgui.Create("DFrame", parent);
-
-	panel:SetTitle("Load");
-	panel:SetDeleteOnClose(false);
-
-	panel.FileList = vgui.Create("DListView", panel);
-	panel.FileList:AddColumn("Saved scenes");
-	panel.FileList:SetMultiSelect(false);
-
-	panel.EntityList = vgui.Create("DListView", panel);
-	panel.EntityList:AddColumn("Entities");
-	panel.EntityList:SetMultiSelect(false);
-
-	panel.Load = vgui.Create("DButton", panel);
-	panel.Load:SetText("Load");
-
-	local basePerformLayout = panel.PerformLayout;
-	panel.PerformLayout = function(panel, w, h)
-
-		basePerformLayout(panel, w, h);
-
-		panel:SetSize(250, 210);
-		panel:SetPos(ScrW() / 2 - panel:GetWide() / 2, ScrH() / 2 - panel:GetTall() / 2);
+	self:SetTitle("Load")
+	self:SetDeleteOnClose(false)
+	self:SetSizable(true)
 	
-		panel.FileList:SetPos(5, 30);
-		panel.FileList:SetSize(panel:GetWide() / 2 - 5 - 5, 150);
+	self:SetSize(250, 210)
+	self:SetMinWidth(250)
+	self:SetMinHeight(210)
+	self:SetPos(ScrW() / 2 - self:GetWide() / 2, ScrH() / 2 - self:GetTall() / 2)
 	
-		panel.EntityList:SetPos(panel:GetWide() / 2 + 5, 30);
-		panel.EntityList:SetSize(panel:GetWide() / 2 - 5 - 5, 150);
-	
-		panel.Load:SetPos(panel:GetWide() - 60 - 5, 182);
-		panel.Load:SetSize(60, 20);
+	self.FileList = vgui.Create("DListView", self)
+	self.FileList:AddColumn("Saved scenes")
+	self.FileList:SetMultiSelect(false)
+    self.FileList.OnRowSelected = function(_, rowIndex, row)
+       self:OnModelListRequested(row:GetValue(1), false)
+    end
 
+	self.EntityList = vgui.Create("DListView", self)
+	self.EntityList:AddColumn("Entities")
+	self.EntityList:SetMultiSelect(false)
+	self.EntityList.OnRowSelected = function(_, rowIndex, row)
+		local _, selectedSave = self.FileList:GetSelectedLine()
+		if not IsValid(selectedSave) then return end
+		self:OnModelInfoRequested(selectedSave:GetValue(1),row:GetValue(1), false)
 	end
 
-	local function addLines(item, lines)
-		item:ClearSelection();
-		item:Clear();
-		for _, line in pairs(lines) do
-			item:AddLine(line);
-		end
+	self.Load = vgui.Create("DButton", self)
+	self.Load:SetText("Load")
+	self.Load.DoClick = function()
+		self:LoadSelected()
 	end
 	
-	local fileListStream = Rx.Subject.create();
-	fileListStream:map(function(files) return panel.FileList, files end)
-		:subscribe(addLines);
+	self.SaveEntity = vgui.Create("DLabel", self)
+	self.SaveEntity:SetText("Save's model: " .. "nil")
 	
-	local entitiesStream = Rx.Subject.create();
-	entitiesStream:map(function(entities) return panel.EntityList, entities end)
-		:subscribe(addLines);
+	self.SaveMap = vgui.Create("DLabel", self)
+	self.SaveMap:SetText("Save's map: " .. "nil")
+	
+	self.SelectedEnt = vgui.Create("DLabel", self)
+	self.SelectedEnt:SetText("Selected model: " .. "nil")
+	
+end
 
-	local fileSelectStream = Rx.Subject.create();
-	panel.FileList.OnRowSelected = function(self, rowID, row) fileSelectStream(row:GetValue(1)) end
+function PANEL:PerformLayout(width, height)
+	
+	self.BaseClass.PerformLayout(self, width, height)
 
-	local entitySelectStream = Rx.Subject.create();
-	panel.EntityList.OnRowSelected = function(self, rowID, row) entitySelectStream(row:GetValue(1)) end
+	self.FileList:SetPos(5, 30)
+	self.FileList:SetSize(self:GetWide() / 2 - 5 - 5, 150 * (self:GetTall() / 210))
 
-	local _, loadStream = RxUtils.bindDPanel(panel.Load, nil, "DoClick");
-
-	return panel, {
-		Input = {
-			FileList = fileListStream,
-			Entities = entitiesStream,
-		},
-		Output = {
-			File = fileSelectStream,
-			Entity = entitySelectStream,
-			Load = loadStream,
-		}
-	};
+	self.EntityList:SetPos(self:GetWide() / 2 + 5, 30)
+	self.EntityList:SetSize(self:GetWide() / 2 - 5 - 5, 150 * (self:GetTall() / 210))
+	
+	self.SaveEntity:SetPos(5, 30 + self.FileList:GetTall() + 5 )
+	self.SaveEntity:SetSize(self:GetWide() * 2 / 3, 15)
+	
+	self.SaveMap:SetPos(5, 30 + self.FileList:GetTall() + 25 )
+	self.SaveMap:SetSize(self:GetWide() * 2 / 3, 15)
+	
+	self.SelectedEnt:SetPos(5, 30 + self.FileList:GetTall() + 45 )
+	self.SelectedEnt:SetSize(self:GetWide() * 2 / 3, 15)
+	
+	self.Load:SetPos(self:GetWide() - 60 - 5, self:GetTall() - 28)
+	self.Load:SetSize(60, 20)
 
 end
 
-return Create;
+function PANEL:UpdateSelectedEnt(ent)
+	local SelectedName = IsValid(ent) and ent:GetModel() or "nil"
+	self.SelectedEnt:SetText("Selected model: " .. SelectedName)
+end
+
+function PANEL:SetSaves(saves)
+	self.FileList:UpdateLines(saves)
+end
+
+function PANEL:SetEntities(entities, map)
+	self.EntityList:UpdateLines(entities)
+	self.SaveMap:SetText("Selected map: " .. map)
+end
+
+function PANEL:SetModelName(name)
+	self.SaveEntity:SetText("Save's model: " .. name)
+end
+
+function PANEL:LoadSelected()
+	local _, selectedSave = self.FileList:GetSelectedLine()
+	local _, selectedEntity = self.EntityList:GetSelectedLine()
+	
+	-- TODO clientside support for loading and saving
+	
+	if not IsValid(selectedSave) or not IsValid(selectedEntity) then
+		return
+	end
+
+	-- TODO clientside support for loading and saving
+	self:OnLoadRequested(selectedSave:GetValue(1), selectedEntity:GetValue(1), false)
+end
+
+function PANEL:OnModelListRequested(path, loadFromClient) end
+function PANEL:OnLoadRequested(path, modelName, loadFromClient) end
+function PANEL:OnModelInfoRequested(path, modelname, loadFromClient) end
+
+vgui.Register("SMHLoad", PANEL, "DFrame")

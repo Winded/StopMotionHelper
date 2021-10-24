@@ -1,8 +1,12 @@
 
 MOD.Name = "Facial flexes";
 
-function MOD:Save(player, entity)
-
+function MOD:Save(entity)
+	
+	if self:IsEffect(entity) then
+		entity = entity.AttachedEntity;
+	end
+	
 	local count = entity:GetFlexNum();
 	if count <= 0 then return nil; end
 
@@ -20,12 +24,16 @@ function MOD:Save(player, entity)
 
 end
 
-function MOD:LoadGhost(player, entity, ghost, data)
-	self:Load(player, ghost, data);
+function MOD:LoadGhost(entity, ghost, data)
+	self:Load(ghost, data);
 end
 
-function MOD:Load(player, entity, data)
-
+function MOD:Load(entity, data)
+	
+	if self:IsEffect(entity) then
+		entity = entity.AttachedEntity;
+	end
+	
 	local count = entity:GetFlexNum();
 	if count <= 0 then return; end --Shouldn't happen, but meh
 
@@ -37,7 +45,11 @@ function MOD:Load(player, entity, data)
 
 end
 
-function MOD:LoadBetween(player, entity, data1, data2, percentage)
+function MOD:LoadBetween(entity, data1, data2, percentage)
+	
+	if self:IsEffect(entity) then
+		entity = entity.AttachedEntity;
+	end
 	
 	local count = entity:GetFlexNum();
 	if count <= 0 then return; end --Shouldn't happen, but meh

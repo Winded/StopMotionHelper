@@ -1,20 +1,34 @@
 
 MOD.Name = "Skin";
 
-function MOD:Save(player, entity)
+function MOD:Save(entity)
+
+	if self:IsEffect(entity) then
+		entity = entity.AttachedEntity;
+	end
+
     return entity:GetSkin();
 end
 
-function MOD:LoadGhost(player, entity, ghost, data)
-    self:Load(player, ghost, data);
+function MOD:LoadGhost(entity, ghost, data)
+    self:Load(ghost, data);
 end
 
-function MOD:Load(player, entity, data)
+function MOD:Load(entity, data)
+
+	if self:IsEffect(entity) then
+		entity = entity.AttachedEntity;
+	end
+
     entity:SetSkin(data);
 end
 
-function MOD:LoadBetween(player, entity, data1, data2, percentage)
+function MOD:LoadBetween(entity, data1, data2, percentage)
 
-	self:Load(player, entity, data1);
+	if self:IsEffect(entity) then
+		entity = entity.AttachedEntity;
+	end
+
+	self:Load(entity, data1);
 	
 end

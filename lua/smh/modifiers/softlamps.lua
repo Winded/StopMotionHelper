@@ -8,7 +8,7 @@ function MOD:IsSoftLamp(entity)
 
 end
 
-function MOD:Save(player, entity)
+function MOD:Save(entity)
 
 	if not self:IsSoftLamp(entity) then return nil; end
 
@@ -21,12 +21,13 @@ function MOD:Save(player, entity)
 	data.Color = entity:GetLightColor();
 	data.ShapeRadius = entity:GetShapeRadius();
 	data.FocalPoint = entity:GetFocalDistance();
+	data.Offset = entity:GetLightOffset();
 
 	return data;
 
 end
 
-function MOD:Load(player, entity, data)
+function MOD:Load(entity, data)
 
 	if not self:IsSoftLamp(entity) then return; end -- can never be too sure?
 
@@ -37,10 +38,11 @@ function MOD:Load(player, entity, data)
 	entity:SetLightColor(data.Color);
 	entity:SetShapeRadius(data.ShapeRadius);
 	entity:SetFocalDistance(data.FocalPoint);
+	entity:SetLightOffset(data.Offset);
 
 end
 
-function MOD:LoadBetween(player, entity, data1, data2, percentage)
+function MOD:LoadBetween(entity, data1, data2, percentage)
 	
 	if not self:IsSoftLamp(entity) then return; end -- can never be too sure?
 	
@@ -51,5 +53,6 @@ function MOD:LoadBetween(player, entity, data1, data2, percentage)
 	entity:SetLightColor(SMH.LerpLinearVector(data1.Color, data2.Color, percentage));
 	entity:SetShapeRadius(SMH.LerpLinear(data1.ShapeRadius, data2.ShapeRadius, percentage));
 	entity:SetFocalDistance(SMH.LerpLinear(data1.FocalPoint, data2.FocalPoint, percentage));
+	entity:SetLightOffset(SMH.LerpLinearVector(data1.Offset, data2.Offset, percentage));
 	
 end

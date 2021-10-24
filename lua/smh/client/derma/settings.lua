@@ -1,101 +1,112 @@
-local Rx = SMH.Include("rxlua/rx.lua");
-local RxUtils = SMH.Include("shared/rxutils.lua");
+local PANEL = {}
 
-local function Create(parent)
+function PANEL:Init()
 
-	local panel = vgui.Create("DFrame", parent);
+    local function CreateSettingChanger(name)
+        return function(_self, value)
+            if self._changingSettings then
+                return
+            end
+    
+            local updatedSettings = {
+                [name] = value
+            }
+            self:OnSettingsUpdated(updatedSettings)
+        end
+    end
 
-	panel:SetTitle("SMH Settings");
-	panel:SetDeleteOnClose(false);
+    local function CreateCheckBox(name, label)
+        local cb = vgui.Create("DCheckBoxLabel", self)
+        cb:SetText(label)
+        cb:SizeToContents()
+        cb.OnChange = CreateSettingChanger(name)
+        return cb
+    end
 
-	panel.FreezeAll = vgui.Create("DCheckBoxLabel", panel);
-	panel.FreezeAll:SetText("Freeze all");
-	panel.FreezeAll:SizeToContents();
+    local function CreateSlider(name, label, min, max, decimals)
+        local slider = vgui.Create("DNumSlider", self)
+        slider:SetMinMax(min, max)
+        slider:SetDecimals(decimals)
+        slider:SetText(label)
+        slider.OnValueChanged = CreateSettingChanger(name)
+        return slider
+    end
 
-	panel.LocalizePhysBones = vgui.Create("DCheckBoxLabel", panel);
-	panel.LocalizePhysBones:SetText("Localize phys bones");
-	panel.LocalizePhysBones:SizeToContents();
+    self:SetTitle("SMH Settings")
+    self:SetDeleteOnClose(false)
 
-	panel.IgnorePhysBones = vgui.Create("DCheckBoxLabel", panel);
-	panel.IgnorePhysBones:SetText("Don't animate phys bones");
-	panel.IgnorePhysBones:SizeToContents();
+    self.FreezeAll = CreateCheckBox("FreezeAll", "Freeze all")
+    self.LocalizePhysBones = CreateCheckBox("LocalizePhysBones", "Localize phys bones")
+    self.IgnorePhysBones = CreateCheckBox("IgnorePhysBones", "Don't animate phys bones")
+    self.GhostPrevFrame = CreateCheckBox("GhostPrevFrame", "Ghost previous frame")
+    self.GhostNextFrame = CreateCheckBox("GhostNextFrame", "Ghost next frame")
+    self.GhostAllEntities = CreateCheckBox("GhostAllEntities", "Ghost all entities")
+    self.TweenDisable = CreateCheckBox("TweenDisable", "Disable tweening")
+    self.GhostTransparency = CreateSlider("GhostTransparency", "Ghost transparency", 0, 1, 2)
 
-	panel.GhostPrevFrame = vgui.Create("DCheckBoxLabel", panel);
-	panel.GhostPrevFrame:SetText("Ghost previous frame");
-	panel.GhostPrevFrame:SizeToContents();
+    self.HelpButton = vgui.Create("DButton", self)
+    self.HelpButton:SetText("Help")
+    self.HelpButton.DoClick = function()
+        self:OnRequestOpenHelp()
+    end
 
-	panel.GhostNextFrame = vgui.Create("DCheckBoxLabel", panel);
-	panel.GhostNextFrame:SetText("Ghost next frame");
-	panel.GhostNextFrame:SizeToContents();
+    self:SetSize(250, 225)
 
-	panel.GhostAllEntities = vgui.Create("DCheckBoxLabel", panel);
-	panel.GhostAllEntities:SetText("Ghost all entities");
-	panel.GhostAllEntities:SizeToContents();
-	
-	panel.TweenDisable = vgui.Create("DCheckBoxLabel", panel);
-	panel.TweenDisable:SetText("Disable tweening");
-	panel.TweenDisable:SizeToContents();
-
-	panel.GhostTransparency = vgui.Create("Slider", panel);
-	panel.GhostTransparency:SetMinMax(0, 1);
-	panel.GhostTransparency:SetDecimals(2);
-	panel.GhostTransparencyLabel = vgui.Create("DLabel", panel);
-	panel.GhostTransparencyLabel:SetText("Ghost transparency");
-	panel.GhostTransparencyLabel:SizeToContents();
-
-	panel.HelpButton = vgui.Create("DButton", panel);
-	panel.HelpButton:SetText("Help");
-
-	panel:SetSize(160, 245);
-
-	local basePerformLayout = panel.PerformLayout;
-	panel.PerformLayout = function()
-
-		basePerformLayout(panel);
-
-		panel.FreezeAll:SetPos(5, 25);
-	
-		panel.LocalizePhysBones:SetPos(5, 45);
-	
-		panel.IgnorePhysBones:SetPos(5, 65);
-	
-		panel.GhostPrevFrame:SetPos(5, 85);
-		panel.GhostNextFrame:SetPos(5, 105);
-		panel.GhostAllEntities:SetPos(5, 125);
-	
-		panel.TweenDisable:SetPos(5, 145);
-	
-		local gt = panel.GhostTransparency;
-		local label = panel.GhostTransparencyLabel;
-		label:SizeToContents();
-		local LW, LH = label:GetSize();
-		gt:SetPos(5, 165 + LH - 5);
-		gt:SetSize(panel:GetWide() - 5 - 5, 25);
-		label:SetPos(10, 165);
-	
-		panel.HelpButton:SetPos(5, 210);
-		panel.HelpButton:SetSize(150, 20);
-
-	end
-
-	local input = {};
-	local output = {};
-
-	input.FreezeAll, output.FreezeAll = RxUtils.bindDPanel(panel.FreezeAll, "SetValue", "OnChange");
-	input.LocalizePhysBones, output.LocalizePhysBones = RxUtils.bindDPanel(panel.LocalizePhysBones, "SetValue", "OnChange");
-	input.IgnorePhysBones, output.IgnorePhysBones = RxUtils.bindDPanel(panel.IgnorePhysBones, "SetValue", "OnChange");
-	input.GhostPrevFrame, output.GhostPrevFrame = RxUtils.bindDPanel(panel.GhostPrevFrame, "SetValue", "OnChange");
-	input.GhostNextFrame, output.GhostNextFrame = RxUtils.bindDPanel(panel.GhostNextFrame, "SetValue", "OnChange");
-	input.GhostAllEntities, output.GhostAllEntities = RxUtils.bindDPanel(panel.GhostAllEntities, "SetValue", "OnChange");
-	input.TweenDisable, output.TweenDisable = RxUtils.bindDPanel(panel.TweenDisable, "SetValue", "OnChange");
-	input.GhostTransparency, output.GhostTransparency = RxUtils.bindDPanel(panel.GhostTransparency, "SetValue", "OnValueChanged");
-	input.ShowHelp, output.ShowHelp = RxUtils.bindDPanel(panel.HelpButton, nil, "DoClick");
-
-	return panel, {
-		Input = input,
-		Output = output,
-	};
+    self._changingSettings = false
 
 end
 
-return Create;
+function PANEL:PerformLayout(width, height)
+
+    self.BaseClass.PerformLayout(self, width, height)
+
+    self.FreezeAll:SetPos(5, 25)
+
+    self.LocalizePhysBones:SetPos(5, 45)
+
+    self.IgnorePhysBones:SetPos(5, 65)
+
+    self.GhostPrevFrame:SetPos(5, 85)
+    self.GhostNextFrame:SetPos(5, 105)
+    self.GhostAllEntities:SetPos(5, 125)
+
+    self.TweenDisable:SetPos(5, 145)
+
+    self.GhostTransparency:SetPos(5, 165)
+    self.GhostTransparency:SetSize(self:GetWide() - 5 - 5, 25)
+
+    self.HelpButton:SetPos(5, 200)
+    self.HelpButton:SetSize(self:GetWide() - 5 - 5, 20)
+
+end
+
+function PANEL:ApplySettings(settings)
+    self._changingSettings = true
+
+    local checkBoxes = {
+        "FreezeAll",
+        "LocalizePhysBones",
+        "IgnorePhysBones",
+        "GhostPrevFrame",
+        "GhostNextFrame",
+        "GhostAllEntities",
+        "TweenDisable",
+    }
+
+    for _, key in pairs(checkBoxes) do
+        if settings[key] ~= nil then
+            self[key]:SetChecked(settings[key])
+        end
+    end
+
+    if settings.GhostTransparency ~= nil then
+        self.GhostTransparency:SetValue(settings.GhostTransparency)    
+    end
+
+    self._changingSettings = false
+end
+
+function PANEL:OnSettingsUpdated(settings) end
+function PANEL:OnRequestOpenHelp() end
+
+vgui.Register("SMHSettings", PANEL, "DFrame")

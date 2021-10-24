@@ -1,59 +1,50 @@
-
 if not SMH then
-    SMH = {};
+    SMH = {}
 end
 
-function SMH.Include(path)
-    return include("smh/" .. path);
-end
+SMH.MessageTypes = {
+    "SetFrame",
+    "SetFrameResponse",
 
-include("shared/modifiers.lua");
+    "SelectEntity",
+    "SelectEntityResponse",
 
-SMH.GhostTypes = {
-    PrevFrame = 1,
-    NextFrame = 2,
-    OnionSkin = 3
-};
+    "CreateKeyframe",
+    "UpdateKeyframe",
+    "CopyKeyframe",
+    "UpdateKeyframeResponse",
+    "DeleteKeyframe",
+    "DeleteKeyframeResponse",
 
-SMH.BiValues = BiValuesV022;
+    "StartPlayback",
+    "StopPlayback",
+    "PlaybackResponse",
 
-SMH.DefaultData = {
+	"SetRendering",
+    "UpdateGhostState",
+    "UpdateGhostStateResponse",
 
-    Entity = nil, -- Our currently selected entity
-
-    Position = 0, -- Our current position in the frame timeline
-
-    PlaybackRate = 30,
-    PlaybackLength = 100,
-
-    ActiveFrames = {}, -- Client needs this to populate the frame timeline with frames
-    EditedFrame = nil, -- Used when we want to edit a frame
-
-    EaseIn = 0,
-    EaseOut = 0,
-
-    ShowEaseOptions = false,
-    
-    ShowSettings = false,
-
-    FreezeAll = false,
-    LocalizePhysBones = false,
-    IgnorePhysBones = false,
+    "GetServerSaves",
+    "GetServerSavesResponse",
+    "GetModelList",
+    "GetModelListResponse",
+	"GetModelInfo",
+	"GetModelInfoResponse",
+	"GetServerEntities",
+	"GetServerEntitiesResponse",
+    "Load",
+    "LoadResponse",
+    "Save",
+    "SaveResponse",
+    "DeleteSave",
+    "DeleteSaveResponse",
 	
-    TweenDisable = false,
+	"ApplyEntityName",
+	"ApplyEntityNameResponse",
+}
+for key, val in pairs(SMH.MessageTypes) do
+    local prefixVal = "SMH" .. val
+    SMH.MessageTypes[val] = prefixVal
+end
 
-    ShowHelp = false,
-    ShowSave = false,
-    ShowLoad = false,
-
-    GhostPrevFrame = false,
-    GhostNextFrame = false,
-    GhostAllEntities = false,
-    GhostTransparency = 0.5,
-    
-    OnionSkin = false,
-
-    Rendering = false,
-    UseScreenshot = false,
-
-};
+include("shared/saves.lua")

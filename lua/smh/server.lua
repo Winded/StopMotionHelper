@@ -1,16 +1,17 @@
+include("shared.lua")
 
-include("shared.lua");
+include("server/controller.lua")
+include("server/easing.lua")
+include("server/eyetarget.lua")
+include("server/ghosts_manager.lua")
+include("server/keyframe_data.lua")
+include("server/keyframe_manager.lua")
+include("server/modifiers.lua")
+include("server/playback_manager.lua")
+include("server/properties_manager.lua")
 
-include("server/data.lua");
-include("server/easing.lua");
-include("server/eyetarget.lua");
-include("server/frames.lua");
-include("server/ghosts.lua");
-include("server/playback.lua");
-include("server/positioning.lua");
-
-AddCSLuaFile("shared.lua");
-AddCSLuaFile("client.lua");
+AddCSLuaFile("shared.lua")
+AddCSLuaFile("client.lua")
 
 local function FindRecursive(name, path, func)
     local files, dirs = file.Find(name .. "/*", path);
@@ -28,13 +29,7 @@ local function AddCSPath(path)
     end
 end
 
-FindRecursive("smh/shared", "LUA", AddCSPath);
-FindRecursive("smh/client", "LUA", AddCSPath);
-FindRecursive("smh/rxlua", "LUA", AddCSPath);
-FindRecursive("smh/bivalues", "LUA", AddCSPath);
+FindRecursive("smh/shared", "LUA", AddCSPath)
+FindRecursive("smh/client", "LUA", AddCSPath)
 
-hook.Add("PlayerInitialSpawn", "SMHSetup", function(player)
-    SMH.SetupData(player);
-end);
-
-Msg("SMH server initialized.\n");
+Msg("SMH server initialized.\n")

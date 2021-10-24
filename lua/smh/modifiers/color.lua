@@ -1,20 +1,32 @@
 
 MOD.Name = "Color";
 
-function MOD:Save(player, entity)
+function MOD:Save(entity)
+
+	if self:IsEffect(entity) then
+		entity = entity.AttachedEntity;
+	end
 
 	local color = entity:GetColor();
 	return { Color = color };
 
 end
 
-function MOD:Load(player, entity, data)
+function MOD:Load(entity, data)
+
+	if self:IsEffect(entity) then
+		entity = entity.AttachedEntity;
+	end
 
 	entity:SetColor(data.Color);
 
 end
 
-function MOD:LoadBetween(player, entity, data1, data2, percentage)
+function MOD:LoadBetween(entity, data1, data2, percentage)
+
+	if self:IsEffect(entity) then
+		entity = entity.AttachedEntity;
+	end
 
 	local c1 = data1.Color;
 	local c2 = data2.Color;

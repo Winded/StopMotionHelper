@@ -2,7 +2,7 @@
 MOD.Name = "Eye target";
 
 function MOD:HasEyes(entity)
-
+	
 	local Eyes = entity:LookupAttachment("eyes");
 
 	if Eyes == 0 then return false; end
@@ -10,7 +10,11 @@ function MOD:HasEyes(entity)
 
 end
 
-function MOD:Save(player, entity)
+function MOD:Save(entity)
+
+	if self:IsEffect(entity) then
+		entity = entity.AttachedEntity;
+	end
 
 	if not self:HasEyes(entity) then return nil; end
 
@@ -22,7 +26,11 @@ function MOD:Save(player, entity)
 
 end
 
-function MOD:Load(player, entity, data)
+function MOD:Load(entity, data)
+
+	if self:IsEffect(entity) then
+		entity = entity.AttachedEntity;
+	end
 
 	if not self:HasEyes(entity) then return; end --Shouldn't happen, but meh
 
@@ -30,7 +38,11 @@ function MOD:Load(player, entity, data)
 
 end
 
-function MOD:LoadBetween(player, entity, data1, data2, percentage)
+function MOD:LoadBetween(entity, data1, data2, percentage)
+
+	if self:IsEffect(entity) then
+		entity = entity.AttachedEntity;
+	end
 
 	if not self:HasEyes(entity) then return; end --Shouldn't happen, but meh
 

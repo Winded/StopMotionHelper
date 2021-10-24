@@ -1,7 +1,3 @@
-
-local Rx = SMH.Include("rxlua/rx.lua");
-local RxUtils = SMH.Include("shared/rxutils.lua");
-
 -- Most taken from lua/includes/modules/halo.lua
 local matColor	= Material( "model_color" )
 local mat_Copy	= Material( "pp/copy" )
@@ -118,23 +114,10 @@ local function RenderHalo(entity)
 
 end
 
-local function Setup()
-	
-	local highlightStream = Rx.BehaviorSubject.create(false);
-	local entityStream = Rx.BehaviorSubject.create(nil);
+hook.Add("PostDrawEffects", "smh_highlighter", function()
+    if not IsValid(SMH.State.Entity) or not SMH.Controller.ShouldHighlight() then
+        return
+    end
 
-	RxUtils.fromHook("PostDrawEffects"):with(highlightStream, entityStream)
-		:map(function(_, highlight, entity) return highlight, entity end)
-		:filter(function(highlight, entity) return highlight and IsValid(entity) end)
-		:map(function(highlight, entity) return entity end)
-		:subscribe(RenderHalo);
-
-	return {
-		Input = {
-			Highlight = highlightStream,
-			Entity = entityStream,
-		}
-	}
-end
-
-return Setup;
+    RenderHalo(SMH.State.Entity)
+end)
