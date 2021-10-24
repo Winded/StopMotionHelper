@@ -125,10 +125,10 @@ function PANEL:PerformLayout(width, height)
     self.EaseOutControl:SetSize(50, 20)
     sizeX, sizeY = self.EaseOutControl.Label:GetSize()
     self.EaseOutControl.Label:SetRelativePos(self.EaseOutControl, -(sizeX) - 5, 3)
-	
-	self.RecordButton:SetPos(width - 60 * 5 - 5 * 5, 2)
+    
+    self.RecordButton:SetPos(width - 60 * 5 - 5 * 5, 2)
     self.RecordButton:SetSize(60, 20)
-	
+    
     self.PropertiesButton:SetPos(width - 60 * 4 - 5 * 4, 2)
     self.PropertiesButton:SetSize(60, 20)
 

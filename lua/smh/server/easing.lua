@@ -4,18 +4,18 @@
 
 function SMH.LerpLinear(s, e, p)
 
-	return Lerp(p, s, e);
+    return Lerp(p, s, e);
 
 end
 
 function SMH.LerpLinearVector(s, e, p)
 
-	return LerpVector(p, s, e);
+    return LerpVector(p, s, e);
 
 end
 
 function SMH.LerpLinearAngle(s, e, p)
 
-	return LerpAngle(p, s, e);
+    return LerpAngle(p, s, e);
 
 end

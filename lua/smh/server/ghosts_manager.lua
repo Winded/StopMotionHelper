@@ -10,10 +10,10 @@ local function CreateGhost(entity, color)
         g = ents.Create("prop_ragdoll")
     else
         g = ents.Create("prop_dynamic")
-		
-		if class == "prop_effect" and IsValid(entity.AttachedEntity) then
-			model = entity.AttachedEntity:GetModel()
-		end
+        
+        if class == "prop_effect" and IsValid(entity.AttachedEntity) then
+            model = entity.AttachedEntity:GetModel()
+        end
     end
 
     g:SetModel(model)
@@ -56,8 +56,8 @@ function MGR.SelectEntity(player, entity)
 end
 
 function MGR.UpdateState(player, frame, settings)
-	LastFrame = frame
-	
+    LastFrame = frame
+    
     if not GhostData[player] then
         return
     end
@@ -70,7 +70,7 @@ function MGR.UpdateState(player, frame, settings)
         end
     end
     table.Empty(ghosts)
-	
+    
     if not settings.GhostPrevFrame and not settings.GhostNextFrame and not settings.OnionSkin or MGR.IsRendering then
         return
     end
@@ -82,8 +82,8 @@ function MGR.UpdateState(player, frame, settings)
     local entities = SMH.KeyframeData.Players[player].Entities
     if not settings.GhostAllEntities and IsValid(GhostData[player].Entity) and entities[GhostData[player].Entity] then
         entities = {
-			[GhostData[player].Entity] = entities[GhostData[player].Entity]
-		}
+            [GhostData[player].Entity] = entities[GhostData[player].Entity]
+        }
     elseif not settings.GhostAllEntities then
         return
     end
@@ -132,7 +132,7 @@ function MGR.UpdateState(player, frame, settings)
 end
 
 function MGR.UpdateSettings(player, settings)
-	MGR.UpdateState(player, LastFrame, settings)
+    MGR.UpdateState(player, LastFrame, settings)
 end
 
 SMH.GhostsManager = MGR
