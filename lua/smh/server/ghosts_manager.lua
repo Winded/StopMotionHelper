@@ -42,7 +42,7 @@ end
 
 local MGR = {}
 
-MGR.SetRendering = false
+MGR.IsRendering = false
 
 function MGR.SelectEntity(player, entity)
     if not GhostData[player] then
@@ -71,7 +71,7 @@ function MGR.UpdateState(player, frame, settings)
     end
     table.Empty(ghosts)
 	
-    if not settings.GhostPrevFrame and not settings.GhostNextFrame and not settings.OnionSkin or MGR.SetRendering then
+    if not settings.GhostPrevFrame and not settings.GhostNextFrame and not settings.OnionSkin or MGR.IsRendering then
         return
     end
 

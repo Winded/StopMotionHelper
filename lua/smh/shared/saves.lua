@@ -1,10 +1,7 @@
 local function GetModelName(entity, usedModelNames)
     local mdl = string.Split(entity:GetModel(), "/");
     mdl = mdl[#mdl];
---    while usedModelNames[mdl] do
---        mdl = mdl .. "I"
---    end
---    usedModelNames[mdl] = true
+
     return mdl
 end
 
@@ -44,7 +41,7 @@ function MGR.ListModels(path)
 	local map = serializedKeyframes.Map
 	local listname = " "
     for _, sEntity in pairs(serializedKeyframes.Entities) do
-		if !sEntity.Properties then -- in case if we load an old save without properties entities
+		if not sEntity.Properties then -- in case if we load an old save without properties entities
 			listname = sEntity.Model
 		else
 			listname = sEntity.Properties.Name
@@ -74,7 +71,7 @@ end
 function MGR.LoadForEntity(path, modelName)
     local serializedKeyframes = MGR.Load(path)
     for _, sEntity in pairs(serializedKeyframes.Entities) do
-		if !sEntity.Properties then
+		if not sEntity.Properties then
 			if sEntity.Model == modelName then
 
 				sEntity.Properties = {

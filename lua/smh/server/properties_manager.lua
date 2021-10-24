@@ -7,10 +7,7 @@ local usednames = {}
 local function GetModelName(entity, usedModelNames)
 	local mdl = string.Split(entity:GetModel(), "/")
 	mdl = mdl[#mdl]
---	while usedModelNames[mdl] do
---		mdl = mdl .. "I"
---	end
---	usedModelNames[mdl] = true
+
 	return mdl
 end
 
@@ -48,7 +45,7 @@ local function FindEntity(player) -- I use this to find entity that doesn't have
 	end
 	
 	for entity, _ in pairs(SMH.Properties.Players[player].Entities) do
-		if !sorting[entity] then return entity end
+		if not sorting[entity] then return entity end
 	end
 	
 	return nil
@@ -85,7 +82,7 @@ function MGR.GetAllEntityProperties(player)
 end
 
 function MGR.UpdateEntity(player, entity)
-	if not entity then
+	if not IsValid(entity) then
 		if not SMH.KeyframeData.Players[player] or not SMH.KeyframeData.Players[player].Entities or not SMH.Properties.Players[player] or not SMH.Properties.Players[player].Entities then return end
 		entity = FindEntity(player)
 		if entity then

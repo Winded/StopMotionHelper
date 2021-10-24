@@ -69,13 +69,13 @@ end
 function PANEL:SetEntities(entities)
 	EntsTable = table.Copy(entities)
 	
-	if !IsValid(selectedEntity) then
+	if not IsValid(selectedEntity) then
 		self.EntityNameEnter:SetText("none")
 		self.EntityNameEnter:SetEditable(false)
 	else
 		local entityinfo = FindEntity(selectedEntity)
 		
-		if !entityinfo then
+		if not entityinfo then
 			Fallback = GetModelName(selectedEntity)
 			self.EntityNameEnter:SetText(Fallback)
 			self.EntityNameEnter:SetEditable(false)

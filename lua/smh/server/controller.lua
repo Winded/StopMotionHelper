@@ -135,7 +135,7 @@ end
 
 local function GetServerEntities(msgLength, player)
 	local entities = SMH.PropertiesManager.GetAllEntityProperties(player)
-	if !entities then entities = {} end
+	if not entities then entities = {} end
 	
 	net.Start(SMH.MessageTypes.GetServerEntitiesResponse)
 	net.WriteTable(entities)
@@ -212,13 +212,13 @@ end
 
 local function SetRendering(msgLength, player)
 	local rendering = net.ReadBool()
-	SMH.GhostsManager.SetRendering = rendering
+	SMH.GhostsManager.IsRendering = rendering
 end
 
 local function ApplyEntityName(msgLength, player)
 	local ent = net.ReadEntity()
 	local name = net.ReadString()
-	if !IsValid(ent) or !name then return end
+	if not IsValid(ent) or not name then return end
 	name = SMH.PropertiesManager.SetName(player, ent, name)
 	
 	net.Start(SMH.MessageTypes.ApplyEntityNameResponse)

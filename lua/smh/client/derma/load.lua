@@ -23,7 +23,7 @@ function PANEL:Init()
 	self.EntityList:SetMultiSelect(false)
 	self.EntityList.OnRowSelected = function(_, rowIndex, row)
 		local _, selectedSave = self.FileList:GetSelectedLine()
-		if !IsValid(selectedSave) then return end
+		if not IsValid(selectedSave) then return end
 		self:OnModelInfoRequested(selectedSave:GetValue(1),row:GetValue(1), false)
 	end
 
