@@ -111,7 +111,7 @@ function MGR.Delete(player, keyframeId)
     if not SMH.KeyframeData.Players[player] or not SMH.KeyframeData.Players[player].Keyframes[keyframeId] then
         error("Invalid keyframe ID")
     end
-    
+
     SMH.KeyframeData:Delete(player, keyframeId)
 end
 
@@ -122,9 +122,9 @@ function MGR.ImportSave(player, entity, serializedKeyframes, entityProperties)
             SMH.KeyframeData:Delete(player, keyframe.ID)
         end
     end
-    
+
     SMH.PropertiesManager.SetName(player, entity, entityProperties.Name)
-    
+
     for _, skf in pairs(serializedKeyframes) do
         local keyframe = SMH.KeyframeData:New(player, entity)
         keyframe.Frame = skf.Position

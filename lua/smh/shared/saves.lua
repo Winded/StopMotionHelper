@@ -53,7 +53,7 @@ end
 
 function MGR.GetModelName(path, modelName)
     local serializedKeyframes = MGR.Load(path)
-    
+
     for _, sEntity in pairs(serializedKeyframes.Entities) do
         if sEntity.Properties then
             if sEntity.Properties.Name == modelName then

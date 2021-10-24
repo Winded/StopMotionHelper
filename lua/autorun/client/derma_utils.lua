@@ -11,11 +11,11 @@ function PANEL:UpdateLines(lines)
 
     local set = {}
     local existing = {}
-    
+
     for k, line in pairs(lines) do -- turn lines stuff into a "sorting" table
         set[line] = true
     end
-    
+
     for k, line in pairs(self:GetLines()) do -- first we remove lines that are missing from the sorting table
         if not set[line:GetValue(1)] then
             local _, selected = self:GetSelectedLine()
@@ -25,7 +25,7 @@ function PANEL:UpdateLines(lines)
         end
         existing[line:GetValue(1)] = true
     end
-    
+
     for line, _ in pairs(set) do
         if existing[line] then continue end
         self:AddLine(line)

@@ -10,7 +10,7 @@ local function CreateGhost(entity, color)
         g = ents.Create("prop_ragdoll")
     else
         g = ents.Create("prop_dynamic")
-        
+
         if class == "prop_effect" and IsValid(entity.AttachedEntity) then
             model = entity.AttachedEntity:GetModel()
         end
@@ -57,7 +57,7 @@ end
 
 function MGR.UpdateState(player, frame, settings)
     LastFrame = frame
-    
+
     if not GhostData[player] then
         return
     end
@@ -70,7 +70,7 @@ function MGR.UpdateState(player, frame, settings)
         end
     end
     table.Empty(ghosts)
-    
+
     if not settings.GhostPrevFrame and not settings.GhostNextFrame and not settings.OnionSkin or MGR.IsRendering then
         return
     end
@@ -91,7 +91,7 @@ function MGR.UpdateState(player, frame, settings)
     local alpha = settings.GhostTransparency * 255
 
     for entity, keyframes in pairs(entities) do
-        
+
         local prevKeyframe, nextKeyframe, lerpMultiplier = SMH.GetClosestKeyframes(keyframes, frame, true)
         if not prevKeyframe and not nextKeyframe then
             continue

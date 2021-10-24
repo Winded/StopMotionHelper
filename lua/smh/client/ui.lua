@@ -18,7 +18,6 @@ local function CreateCopyPointer(keyframeId)
     pointer.OnPointerReleased = function(_, frame)
         SMH.Controller.CopyKeyframe(keyframeId, frame)
         WorldClicker.MainMenu.FramePanel:DeleteFramePointer(pointer)
-        
         for id, pointer in pairs(KeyframePointers) do
             if id == keyframeId + 1 then continue end
             if pointer:GetFrame() == frame then
@@ -37,7 +36,6 @@ local function NewKeyframePointer(keyframeId)
 
     pointer.OnPointerReleased = function(_, frame)
         SMH.Controller.UpdateKeyframe(keyframeId, { Frame = frame })
-        
         for id, pointer in pairs(KeyframePointers) do
             if id == keyframeId then continue end
             if pointer:GetFrame() == frame then
@@ -137,7 +135,7 @@ local function AddCallbacks()
     LoadMenu.OnModelInfoRequested = function(_, path, modelName, loadFromClient)
         SMH.Controller.GetModelInfo(path, modelName, loadFromClient)
     end
-    
+
     PropertiesMenu.ApplyName = function(_, ent, name)
         SMH.Controller.ApplyEntityName(ent, name)
     end
@@ -169,15 +167,15 @@ hook.Add("InitPostEntity", "SMHMenuSetup", function()
     LoadMenu = vgui.Create("SMHLoad")
     LoadMenu:MakePopup()
     LoadMenu:SetVisible(false)
-    
+
     PropertiesMenu = vgui.Create("SMHProperties")
     PropertiesMenu:MakePopup()
     PropertiesMenu:SetVisible(false)
 
     AddCallbacks()
-    
+
     WorldClicker.MainMenu:SetInitialState(SMH.State)
-    
+
 end)
 
 local MGR = {}
@@ -198,9 +196,9 @@ function MGR.SetFrame(frame)
     if not WorldClicker.MainMenu.FramePointer:IsDragging() then
         WorldClicker.MainMenu.FramePointer:SetFrame(frame)
     end
-    
+
     WorldClicker.MainMenu:UpdatePositionLabel(frame, SMH.State.PlaybackLength)
-    
+
     if FrameToKeyframe[frame] ~= nil then
         local data = KeyframeEasingData[FrameToKeyframe[frame]]
         if data then
@@ -246,7 +244,6 @@ function MGR.UpdateKeyframe(keyframe)
         --     KeyframePointers[FrameToKeyframe[keyframe.Frame]] = nil
         --     WorldClicker.MainMenu.FramePanel:DeleteFramePointer(pointer)
         -- end
-        
     end
 
     KeyframePointers[keyframe.ID]:SetFrame(keyframe.Frame)

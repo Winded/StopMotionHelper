@@ -168,7 +168,7 @@ function CTRL.UpdateState(newState)
         end
         SMH.State[k] = v
     end
-    
+
     SMH.UI.UpdateState(SMH.State)
 end
 
@@ -282,7 +282,7 @@ end
 
 local function ApplyEntityNameResponse(msgLength)
     local name = net.ReadString()
-    
+
     SMH.UI.UpdateName(name)
 end
 
@@ -301,7 +301,7 @@ local function Setup()
     net.Receive(SMH.MessageTypes.GetModelInfoResponse, GetModelInfoResponse)
     net.Receive(SMH.MessageTypes.SaveResponse, SaveResponse)
     net.Receive(SMH.MessageTypes.DeleteSaveResponse, DeleteSaveResponse)
-    
+
     net.Receive(SMH.MessageTypes.ApplyEntityNameResponse, ApplyEntityNameResponse)
 end
 

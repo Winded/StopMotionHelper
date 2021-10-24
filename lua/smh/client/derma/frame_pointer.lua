@@ -14,7 +14,7 @@
 local PANEL = {}
 
 function PANEL:Init()
-    
+
     self:SetSize(8, 15)
     self.Color = Color(0, 200, 0)
     self.OutlineColor = Color(0, 0, 0)
@@ -54,7 +54,7 @@ function PANEL:Paint(width, height)
         surface.DrawLine(0, height - (height * 0.25), 0, 0)
 
     else
-        
+
         surface.SetDrawColor(self.Color:Unpack())
         surface.DrawRect(1, 1, width - 1, height - 1)
 
@@ -101,12 +101,12 @@ function PANEL:OnMousePressed(mousecode)
 
     self:MouseCapture(true)
     self._dragging = true
-    
+
     local parent = self:GetParent() -- this is the part from OnCursorMoved(), mostly needed to the cases when we copy and paste a frame on top of itself, as by default it seems to go back to frame 0
 
     local cursorX, cursorY = parent:CursorPos()
     local startX, endX = unpack(parent.FrameArea)
-    
+
     local targetX = cursorX - startX
     local width = endX - startX
 
@@ -137,7 +137,7 @@ function PANEL:OnCursorMoved()
 
     local cursorX, cursorY = parent:CursorPos()
     local startX, endX = unpack(parent.FrameArea)
-    
+
     local targetX = cursorX - startX
     local width = endX - startX
 

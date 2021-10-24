@@ -6,7 +6,7 @@ local function SetFrame(msgLength, player)
 
     SMH.PlaybackManager.SetFrame(player, newFrame, settings)
     SMH.GhostsManager.UpdateState(player, newFrame, settings)
-    
+
     net.Start(SMH.MessageTypes.SetFrameResponse)
     net.WriteUInt(newFrame, INT_BITCOUNT)
     net.Send(player)
@@ -78,9 +78,9 @@ local function DeleteKeyframe(msgLength, player)
     local id = net.ReadUInt(INT_BITCOUNT)
 
     SMH.KeyframeManager.Delete(player, id)
-    
+
     SMH.PropertiesManager.UpdateEntity(player)
-    
+
     net.Start(SMH.MessageTypes.DeleteKeyframeResponse)
     net.WriteUInt(id, INT_BITCOUNT)
     net.Send(player)
@@ -125,7 +125,7 @@ end
 
 local function GetModelList(msgLength, player)
     local path = net.ReadString()
-    
+
     local models, map = SMH.Saves.ListModels(path)
     net.Start(SMH.MessageTypes.GetModelListResponse)
     net.WriteTable(models)
@@ -136,7 +136,7 @@ end
 local function GetServerEntities(msgLength, player)
     local entities = SMH.PropertiesManager.GetAllEntityProperties(player)
     if not entities then entities = {} end
-    
+
     net.Start(SMH.MessageTypes.GetServerEntitiesResponse)
     net.WriteTable(entities)
     net.Send(player)
@@ -145,7 +145,7 @@ end
 local function Load(msgLength, player)
     local entity = net.ReadEntity()
     local loadFromClient = net.ReadBool()
-    
+
     local serializedKeyframes, entityProperties
     if loadFromClient then
         serializedKeyframes = net.ReadTable()
@@ -172,9 +172,9 @@ end
 local function GetModelInfo(msgLength, player)
     local path = net.ReadString()
     local modelName = net.ReadString()
-    
+
     modelName = SMH.Saves.GetModelName(path, modelName)
-    
+
     net.Start(SMH.MessageTypes.GetModelInfoResponse)
     net.WriteString(modelName)
     net.Send(player)
@@ -204,7 +204,7 @@ end
 local function DeleteSave(msgLength, player)
     local path = net.ReadString()
     SMH.Saves.Delete(path)
-    
+
     net.Start(SMH.MessageTypes.DeleteSaveResponse)
     net.WriteString(path)
     net.Send(player)
@@ -220,7 +220,7 @@ local function ApplyEntityName(msgLength, player)
     local name = net.ReadString()
     if not IsValid(ent) or not name then return end
     name = SMH.PropertiesManager.SetName(player, ent, name)
-    
+
     net.Start(SMH.MessageTypes.ApplyEntityNameResponse)
     net.WriteString(name)
     net.Send(player)

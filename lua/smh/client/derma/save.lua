@@ -5,7 +5,7 @@ function PANEL:Init()
     self:SetTitle("Save")
     self:SetDeleteOnClose(false)
     self:SetSizable(true)
-    
+
     self:SetSize(250, 250)
     self:SetMinWidth(250)
     self:SetMinHeight(250)
@@ -41,7 +41,7 @@ function PANEL:Init()
 end
 
 function PANEL:PerformLayout(width, height)
-    
+
     self.BaseClass.PerformLayout(self, width, height)
 
     self.FileName:SetPos(5, 45)

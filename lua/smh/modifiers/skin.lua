@@ -30,5 +30,5 @@ function MOD:LoadBetween(entity, data1, data2, percentage)
     end
 
     self:Load(entity, data1);
-    
+
 end

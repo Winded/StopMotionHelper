@@ -38,7 +38,7 @@ SMH.MessageTypes = {
     "SaveResponse",
     "DeleteSave",
     "DeleteSaveResponse",
-    
+
     "ApplyEntityName",
     "ApplyEntityNameResponse",
 }

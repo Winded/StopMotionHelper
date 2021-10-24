@@ -2,7 +2,7 @@
 MOD.Name = "Eye target";
 
 function MOD:HasEyes(entity)
-    
+
     local Eyes = entity:LookupAttachment("eyes");
 
     if Eyes == 0 then return false; end

@@ -26,7 +26,7 @@ function PANEL:Init()
     self.FrameArea = {0, 1}
     self._draggingScrollBar = false
     self._scrollCursorOffset = 0
-    
+
     self.FramePointers = {}
 
 end
@@ -174,7 +174,7 @@ function PANEL:OnScrollBarPressed(mousecode)
 
     self.ScrollBar:MouseCapture(true)
     self._draggingScrollBar = true
-    
+
     local cursorXOffset, _ = self.ScrollBar:CursorPos()
     self._scrollCursorOffset = cursorXOffset
 end
