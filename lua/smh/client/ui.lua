@@ -140,6 +140,13 @@ local function AddCallbacks()
         SMH.Controller.ApplyEntityName(ent, name)
     end
 
+    PropertiesMenu.SelectEntity = function(_, ent)
+        SMH.Controller.SelectEntity(ent)
+        LoadMenu:UpdateSelectedEnt(ent)
+        PropertiesMenu:UpdateSelectedEnt(ent)
+        ClickerEntity = ent
+    end
+
 end
 
 hook.Add("EntityRemoved", "SMHWorldClickerEntityRemoved", function(entity)

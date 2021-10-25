@@ -4,7 +4,7 @@ SMH.Properties = {
 
 local usednames = {}
 
-local function GetModelName(entity, usedModelNames)
+local function GetModelName(entity)
     local mdl = string.Split(entity:GetModel(), "/")
     mdl = mdl[#mdl]
 
