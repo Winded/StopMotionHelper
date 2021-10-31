@@ -3,9 +3,10 @@ local INT_BITCOUNT = 32
 local function SetFrame(msgLength, player)
     local newFrame = net.ReadUInt(INT_BITCOUNT)
     local settings = net.ReadTable()
+    local timeline = net.ReadUInt(INT_BITCOUNT)
 
     SMH.PlaybackManager.SetFrame(player, newFrame, settings)
-    SMH.GhostsManager.UpdateState(player, newFrame, settings)
+    SMH.GhostsManager.UpdateState(player, newFrame, settings, timeline)
 
     net.Start(SMH.MessageTypes.SetFrameResponse)
     net.WriteUInt(newFrame, INT_BITCOUNT)
@@ -21,26 +22,44 @@ local function SelectEntity(msgLength, player)
         keyframe.Modifiers = nil
     end
 
+    local timeline = SMH.PropertiesManager.GetAllEntityProperties(player, entity)
+
     net.Start(SMH.MessageTypes.SelectEntityResponse)
     net.WriteEntity(entity)
     net.WriteTable(keyframes)
+    net.WriteTable(timeline)
     net.Send(player)
 end
 
 local function CreateKeyframe(msgLength, player)
     local entity = net.ReadEntity()
     local frame = net.ReadUInt(INT_BITCOUNT)
+    local timeline = net.ReadUInt(INT_BITCOUNT)
+    local isnewent = SMH.PropertiesManager.CheckEntity(player, entity)
 
-    local keyframe = SMH.KeyframeManager.Create(player, entity, frame)
-    local clientKeyframe = table.Copy(keyframe)
-    clientKeyframe.ID = nil
-    clientKeyframe.Modifiers = nil
+    SMH.PropertiesManager.AddEntity(player, entity)
+    local totaltimelines = SMH.PropertiesManager.GetTimelines(player, entity)
+    if timeline > totaltimelines then timeline = 1 end
 
-    SMH.PropertiesManager.UpdateEntity(player, entity)
+    local keyframes = SMH.KeyframeManager.Create(player, entity, frame, timeline)
+    local IDs = {}
+    for _, kframe in ipairs(keyframes) do
+        table.insert(IDs, kframe.ID)
+    end
+
+    local clientKeyframes = table.Copy(keyframes)
+    for _, kframe in ipairs(clientKeyframes) do
+        kframe.ID = nil
+        kframe.Modifiers = nil
+    end
 
     net.Start(SMH.MessageTypes.UpdateKeyframeResponse)
-    net.WriteUInt(keyframe.ID, INT_BITCOUNT)
-    net.WriteTable(clientKeyframe)
+    net.WriteTable(IDs)
+    net.WriteTable(clientKeyframes)
+    net.WriteBool(isnewent)
+    if isnewent then 
+        net.WriteTable(SMH.PropertiesManager.GetAllEntityProperties(player, entity))
+    end
     net.Send(player)
 end
 
@@ -53,9 +72,13 @@ local function UpdateKeyframe(msgLength, player)
     clientKeyframe.ID = nil
     clientKeyframe.Modifiers = nil
 
+    local IDs = {keyframe.ID}
+    local clientKeyframes = {clientKeyframe}
+
     net.Start(SMH.MessageTypes.UpdateKeyframeResponse)
-    net.WriteUInt(keyframe.ID, INT_BITCOUNT)
-    net.WriteTable(clientKeyframe)
+    net.WriteTable(IDs)
+    net.WriteTable(clientKeyframes)
+    net.WriteBool(false)
     net.Send(player)
 end
 
@@ -68,21 +91,27 @@ local function CopyKeyframe(msgLength, player)
     clientKeyframe.ID = nil
     clientKeyframe.Modifiers = nil
 
+    local IDs = {keyframe.ID}
+    local clientKeyframes = {clientKeyframe}
+
     net.Start(SMH.MessageTypes.UpdateKeyframeResponse)
-    net.WriteUInt(keyframe.ID, INT_BITCOUNT)
-    net.WriteTable(clientKeyframe)
+    net.WriteTable(IDs)
+    net.WriteTable(clientKeyframes)
+    net.WriteBool(false)
     net.Send(player)
 end
 
 local function DeleteKeyframe(msgLength, player)
     local id = net.ReadUInt(INT_BITCOUNT)
 
-    SMH.KeyframeManager.Delete(player, id)
+    local entity = SMH.KeyframeManager.Delete(player, id)
 
-    SMH.PropertiesManager.UpdateEntity(player)
+    SMH.PropertiesManager.RemoveEntity(player)
+    local isoldent = SMH.PropertiesManager.CheckEntity(player, entity)
 
     net.Start(SMH.MessageTypes.DeleteKeyframeResponse)
     net.WriteUInt(id, INT_BITCOUNT)
+    net.WriteBool(isoldent)
     net.Send(player)
 end
 
@@ -134,8 +163,7 @@ local function GetModelList(msgLength, player)
 end
 
 local function GetServerEntities(msgLength, player)
-    local entities = SMH.PropertiesManager.GetAllEntityProperties(player)
-    if not entities then entities = {} end
+    local entities = SMH.PropertiesManager.GetAllEntitiesNames(player)
 
     net.Start(SMH.MessageTypes.GetServerEntitiesResponse)
     net.WriteTable(entities)
@@ -157,6 +185,7 @@ local function Load(msgLength, player)
 
     SMH.PropertiesManager.AddEntity(player, entity)
     SMH.KeyframeManager.ImportSave(player, entity, serializedKeyframes, entityProperties)
+    local timeline = SMH.PropertiesManager.GetAllEntityProperties(player, entity)
 
     local keyframes = SMH.KeyframeManager.GetAllForEntity(player, entity)
     for _, keyframe in pairs(keyframes) do
@@ -166,6 +195,7 @@ local function Load(msgLength, player)
     net.Start(SMH.MessageTypes.LoadResponse)
     net.WriteEntity(entity)
     net.WriteTable(keyframes)
+    net.WriteTable(timeline)
     net.Send(player)
 end
 
@@ -184,7 +214,7 @@ local function Save(msgLength, player)
     local saveToClient = net.ReadBool()
     local path = net.ReadString()
 
-    local properties = SMH.PropertiesManager.GetAllEntityProperties(player)
+    local properties = SMH.PropertiesManager.GetAllProperties(player)
     local keyframes = SMH.KeyframeManager.GetAll(player)
     local serializedKeyframes = SMH.Saves.Serialize(keyframes, properties)
 
@@ -226,6 +256,104 @@ local function ApplyEntityName(msgLength, player)
     net.Send(player)
 end
 
+local function UpdateTimeline(msgLength, player)
+    local entity = net.ReadEntity()
+
+    local keyframes = SMH.KeyframeManager.GetAllForEntity(player, entity)
+    for _, keyframe in pairs(keyframes) do
+        keyframe.Modifiers = nil
+    end
+
+    net.Start(SMH.MessageTypes.UpdateTimelineResponse)
+    net.WriteTable(keyframes)
+    net.Send(player)
+end
+
+local function RequestModifiers(msgLength, player)
+    local list = {}
+
+    for name, mod in pairs(SMH.Modifiers) do
+        list[name] = mod.Name
+    end
+
+    net.Start(SMH.MessageTypes.RequestModifiersResponse)
+    net.WriteTable(list)
+    net.Send(player)
+end
+
+local function AddTimeline(msgLength, player)
+    local entity = net.ReadEntity()
+    SMH.PropertiesManager.SetTimelines(player, entity, true)
+
+    local timeline = SMH.PropertiesManager.GetAllEntityProperties(player, entity)
+    local keyframes = SMH.KeyframeManager.GetAllForEntity(player, entity)
+    for _, keyframe in pairs(keyframes) do
+        keyframe.Modifiers = nil
+    end
+
+    net.Start(SMH.MessageTypes.UpdateTimelineInfoResponse)
+    net.WriteTable(timeline)
+    net.WriteTable(keyframes)
+    net.Send(player)
+end
+
+local function RemoveTimeline(msgLength, player)
+    local entity = net.ReadEntity()
+    SMH.PropertiesManager.SetTimelines(player, entity, false)
+
+    local timeline = SMH.PropertiesManager.GetAllEntityProperties(player, entity)
+    local keyframes = SMH.KeyframeManager.GetAllForEntity(player, entity)
+    for _, keyframe in pairs(keyframes) do
+        keyframe.Modifiers = nil
+    end
+
+    net.Start(SMH.MessageTypes.UpdateTimelineInfoResponse)
+    net.WriteTable(timeline)
+    net.WriteTable(keyframes)
+    net.Send(player)
+end
+
+local function UpdateModifier(msgLength, player)
+    local entity = net.ReadEntity()
+    local itimeline = net.ReadUInt(INT_BITCOUNT)
+    local name = net.ReadString()
+    local state = net.ReadBool()
+
+    local changed = SMH.PropertiesManager.UpdateModifier(player, entity, itimeline, name, state)
+    local timeline = SMH.PropertiesManager.GetAllEntityProperties(player, entity)
+    local keyframes = SMH.KeyframeManager.GetAllForEntity(player, entity)
+    for _, keyframe in pairs(keyframes) do
+        keyframe.Modifiers = nil
+    end
+
+    net.Start(SMH.MessageTypes.UpdateModifierResponse)
+    net.WriteString(changed)
+    net.WriteTable(timeline)
+    net.WriteTable(keyframes)
+    net.Send(player)
+end
+
+local function UpdateKeyframeColor(msgLength, player)
+    local entity = net.ReadEntity()
+    local timeline = net.ReadUInt(INT_BITCOUNT)
+    local color = net.ReadColor()
+
+    SMH.PropertiesManager.UpdateKeyframeColor(player, entity, color, timeline)
+    local timelineinfo = SMH.PropertiesManager.GetAllEntityProperties(player, entity)
+
+    net.Start(SMH.MessageTypes.UpdateKeyframeColorResponse)
+    net.WriteTable(timelineinfo)
+    net.Send(player)
+end
+
+local function SaveProperties(msgLength, player)
+    local entity = net.ReadEntity()
+    if not entity then return end
+    local timeline = SMH.PropertiesManager.GetAllEntityProperties(player, entity)
+
+    SMH.Saves.SaveProperties(timeline, player)
+end
+
 for _, message in pairs(SMH.MessageTypes) do
     util.AddNetworkString(message)
 end
@@ -254,3 +382,11 @@ net.Receive(SMH.MessageTypes.Save, Save)
 net.Receive(SMH.MessageTypes.DeleteSave, DeleteSave)
 
 net.Receive(SMH.MessageTypes.ApplyEntityName, ApplyEntityName)
+net.Receive(SMH.MessageTypes.UpdateTimeline, UpdateTimeline)
+net.Receive(SMH.MessageTypes.RequestModifiers, RequestModifiers)
+net.Receive(SMH.MessageTypes.AddTimeline, AddTimeline)
+net.Receive(SMH.MessageTypes.RemoveTimeline, RemoveTimeline)
+net.Receive(SMH.MessageTypes.UpdateModifier, UpdateModifier)
+net.Receive(SMH.MessageTypes.UpdateKeyframeColor, UpdateKeyframeColor)
+
+net.Receive(SMH.MessageTypes.SaveProperties, SaveProperties)

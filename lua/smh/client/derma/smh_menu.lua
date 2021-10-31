@@ -3,7 +3,7 @@ local PANEL = {}
 function PANEL:Init()
 
     self:SetTitle("Stop Motion Helper")
-    self:SetSize(ScrW(), 75)
+    self:SetSize(ScrW(), 90)
     self:SetPos(0, ScrH() - self:GetTall())
     self:SetDraggable(false)
     self:ShowCloseButton(false)
@@ -15,6 +15,8 @@ function PANEL:Init()
     self.FramePanel = vgui.Create("SMHFramePanel", self)
 
     self.FramePointer = self.FramePanel:CreateFramePointer(Color(255, 255, 255), self.FramePanel:GetTall() / 4, true)
+
+    self.TimelinesBase = vgui.Create("Panel", self)
 
     self.PositionLabel = vgui.Create("DLabel", self)
 
@@ -96,10 +98,13 @@ function PANEL:PerformLayout(width, height)
 
     self:SetTitle("Stop Motion Helper")
 
-    self.FramePanel:SetPos(5, 25)
+    self.FramePanel:SetPos(5, 40)
     self.FramePanel:SetSize(width - 5 * 2, 45)
 
     self.FramePointer.VerticalPosition = self.FramePanel:GetTall() / 4
+
+    self.TimelinesBase:SetPos(0, 25)
+    self.TimelinesBase:SetSize(ScrW(),15)
 
     self.PositionLabel:SetPos(150, 5)
 
@@ -141,6 +146,48 @@ function PANEL:PerformLayout(width, height)
     self.SettingsButton:SetPos(width - 60 * 1 - 5 * 1, 2)
     self.SettingsButton:SetSize(60, 20)
 
+end
+
+function PANEL:UpdateTimelines(timelineinfo)
+    self.TimelinesBase:Clear()
+
+    if next(timelineinfo) == nil then return end --check if supplied table is empty
+    local TotallTimelines = timelineinfo.Timelines
+    if TotallTimelines < SMH.State.Timeline then SMH.State.Timeline = 1 end
+    self.TimelinesBase.Timeline = {}
+
+    for i = 1, TotallTimelines do
+        self.TimelinesBase.Timeline[i] = vgui.Create("DPanel", self.TimelinesBase)
+        self.TimelinesBase.Timeline[i]:SetPos((i - 1) * (ScrW() / TotallTimelines) + 4,0)
+        self.TimelinesBase.Timeline[i]:SetSize((ScrW() / TotallTimelines) - 8,15)
+        if i == SMH.State.Timeline then
+            self.TimelinesBase.Timeline[i]:SetBackgroundColor(Color(220, 220, 220, 255))
+        else
+            self.TimelinesBase.Timeline[i]:SetBackgroundColor(Color(175, 175, 175, 255))
+        end
+
+        self.TimelinesBase.Timeline[i].Label = vgui.Create("DLabel", self.TimelinesBase.Timeline[i])
+        self.TimelinesBase.Timeline[i].Label:SetText("Timeline " .. i)
+        self.TimelinesBase.Timeline[i].Label:SetTextColor(Color(100, 100, 100))
+        self.TimelinesBase.Timeline[i].Label:SizeToContents()
+        self.TimelinesBase.Timeline[i].Label:Center()
+
+        self.TimelinesBase.Timeline[i]._pressed = false
+        self.TimelinesBase.Timeline[i].OnMousePressed = function(_, mousecode)
+            if mousecode ~= MOUSE_LEFT then return end
+
+            SMH.State.Timeline = i
+            SMH.Controller.UpdateTimeline()
+
+            for j = 1, TotallTimelines do
+                if j ~= i then
+                    self.TimelinesBase.Timeline[j]:SetBackgroundColor(Color(175, 175, 175, 255))
+                else
+                    self.TimelinesBase.Timeline[j]:SetBackgroundColor(Color(220, 220, 220, 255))
+                end
+            end
+        end
+    end
 end
 
 function PANEL:SetInitialState(state)

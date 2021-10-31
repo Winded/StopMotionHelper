@@ -1,7 +1,12 @@
 local GhostData = {}
 local LastFrame = 0
+local LastTimeline = 1
 
-local function CreateGhost(entity, color)
+local function CreateGhost(player, entity, color, frame)
+    for _, ghost in ipairs(GhostData[player].Ghosts) do
+        if ghost.Entity == entity and ghost.Frame == frame then return ghost end -- we already have a ghost on this entity for this frame, just return it.
+    end
+
     local class = entity:GetClass()
     local model = entity:GetModel()
 
@@ -28,6 +33,8 @@ local function CreateGhost(entity, color)
 
     g.SMHGhost = true
     g.Entity = entity
+    g.Frame = frame
+    g.Physbones = false
 
     return g
 end
@@ -35,7 +42,27 @@ end
 local function SetGhostFrame(entity, ghost, modifiers)
     for name, mod in pairs(SMH.Modifiers) do
         if modifiers[name] ~= nil then
-            mod:LoadGhost(entity, ghost, modifiers[name]);
+            mod:LoadGhost(entity, ghost, modifiers[name])
+            if name == "physbones" then ghost.Physbones = true end
+            break
+        end
+    end
+end
+
+local function SetGhostBetween(entity, ghost, data1, data2, percentage)
+    for name, mod in pairs(SMH.Modifiers) do
+        if data1[name] ~= nil then
+            mod:LoadGhostBetween(entity, ghost, data1[name], data2[name], percentage)
+            if name == "physbones" then ghost.Physbones = true end
+            break
+        end
+    end
+end
+
+local function ClearNoPhysGhosts(ghosts)
+    for _, g in ipairs(ghosts) do
+        if g:GetClass() == "prop_ragdoll" and not g.Physbones and IsValid(g) then
+            g:Remove()
         end
     end
 end
@@ -55,8 +82,9 @@ function MGR.SelectEntity(player, entity)
     GhostData[player].Entity = entity
 end
 
-function MGR.UpdateState(player, frame, settings)
+function MGR.UpdateState(player, frame, settings, settimeline)
     LastFrame = frame
+    LastTimeline = settimeline
 
     if not GhostData[player] then
         return
@@ -91,48 +119,94 @@ function MGR.UpdateState(player, frame, settings)
     local alpha = settings.GhostTransparency * 255
 
     for entity, keyframes in pairs(entities) do
-
-        local prevKeyframe, nextKeyframe, lerpMultiplier = SMH.GetClosestKeyframes(keyframes, frame, true)
-        if not prevKeyframe and not nextKeyframe then
-            continue
+        local timeline = SMH.PropertiesManager.GetAllEntityProperties(player, entity)
+        if next(timeline) == nil then continue end
+        local selectedtime  = settimeline
+        if selectedtime > timeline.Timelines then
+            selectedtime = 1
         end
 
-        if lerpMultiplier == 0 then
-            if settings.GhostPrevFrame and prevKeyframe.Frame < frame then
-                local g = CreateGhost(entity, Color(200, 0, 0, alpha))
-                table.insert(ghosts, g)
-                SetGhostFrame(entity, g, prevKeyframe.Modifiers)
-            elseif settings.GhostNextFrame and nextKeyframe.Frame > frame then
-                local g = CreateGhost(entity, Color(0, 200, 0, alpha))
-                table.insert(ghosts, g)
-                SetGhostFrame(entity, g, nextKeyframe.Modifiers)
+        local filtermods = {}
+
+        for _, name in ipairs(timeline.TimelineMods[selectedtime]) do
+            filtermods[name] = true
+        end
+
+        for name, _ in pairs(filtermods) do -- gonna apply used modifiers
+            local prevKeyframe, nextKeyframe, lerpMultiplier = SMH.GetClosestKeyframes(keyframes, frame, true, name)
+            if not prevKeyframe and not nextKeyframe then
+                continue
             end
-        else
-            if settings.GhostPrevFrame then
-                local g = CreateGhost(entity, Color(200, 0, 0, alpha))
-                table.insert(ghosts, g)
-                SetGhostFrame(entity, g, prevKeyframe.Modifiers)
+
+            if lerpMultiplier == 0 then
+                if settings.GhostPrevFrame and prevKeyframe.Frame < frame then
+                    local g = CreateGhost(player, entity, Color(200, 0, 0, alpha), prevKeyframe.Frame)
+                    table.insert(ghosts, g)
+                    SetGhostFrame(entity, g, prevKeyframe.Modifiers)
+                elseif settings.GhostNextFrame and nextKeyframe.Frame > frame then
+                    local g = CreateGhost(player, entity, Color(0, 200, 0, alpha), nextKeyframe.Frame)
+                    table.insert(ghosts, g)
+                    SetGhostFrame(entity, g, nextKeyframe.Modifiers)
+                end
+            else
+                if settings.GhostPrevFrame then
+                    local g = CreateGhost(player, entity, Color(200, 0, 0, alpha), prevKeyframe.Frame)
+                    table.insert(ghosts, g)
+                    SetGhostFrame(entity, g, prevKeyframe.Modifiers)
+                end
+                if settings.GhostNextFrame then
+                    local g = CreateGhost(player, entity, Color(0, 200, 0, alpha), nextKeyframe.Frame)
+                    table.insert(ghosts, g)
+                    SetGhostFrame(entity, g, nextKeyframe.Modifiers)
+                end
             end
-            if settings.GhostNextFrame then
-                local g = CreateGhost(entity, Color(0, 200, 0, alpha))
-                table.insert(ghosts, g)
-                SetGhostFrame(entity, g, nextKeyframe.Modifiers)
+
+            if settings.OnionSkin then
+                for _, keyframe in pairs(keyframes) do
+                    if keyframe.Modifier == name then
+                        local g = CreateGhost(player, entity, Color(255, 255, 255, alpha), keyframe.Frame)
+                        table.insert(ghosts, g)
+                        SetGhostFrame(entity, g, keyframe.Modifiers)
+                    end
+                end
             end
         end
 
-        if settings.OnionSkin then
-            for _, keyframe in pairs(keyframes) do
-                local g = CreateGhost(entity, Color(255, 255, 255, alpha))
-                table.insert(ghosts, g)
-                SetGhostFrame(entity, g, keyframe.Modifiers)
+        for _, g in ipairs(ghosts) do
+            for name, mod in pairs(SMH.Modifiers) do
+                if filtermods[name] then continue end -- we used these modifiers already
+                local IsSet = false
+                for _, keyframe in pairs(keyframes) do
+                    if keyframe.Frame == g.Frame and keyframe.Modifier == name then
+                        SetGhostFrame(entity, g, keyframe.Modifiers)
+                        IsSet = true
+                        break
+                    end
+                end
+
+                if not IsSet then
+                    local prevKeyframe, nextKeyframe, lerpMultiplier = SMH.GetClosestKeyframes(keyframes, g.Frame, true, name)
+                    if not prevKeyframe then
+                        continue
+                    end
+
+                    if lerpMultiplier <= 0 or settings.TweenDisable then
+                        SetGhostFrame(entity, g, prevKeyframe.Modifiers)
+                    elseif lerpMultiplier >= 1 then
+                        SetGhostFrame(entity, g, nextKeyframe.Modifiers)
+                    else
+                        SetGhostBetween(entity, g, prevKeyframe.Modifiers, nextKeyframe.Modifiers, lerpMultiplier)
+                    end
+                end
             end
         end
 
+        ClearNoPhysGhosts(ghosts) -- need to delete ragdoll ghosts that don't have physbone modifier, or else they'll just keep falling through ground.
     end
 end
 
 function MGR.UpdateSettings(player, settings)
-    MGR.UpdateState(player, LastFrame, settings)
+    MGR.UpdateState(player, LastFrame, settings, LastTimeline)
 end
 
 SMH.GhostsManager = MGR

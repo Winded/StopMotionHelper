@@ -45,3 +45,7 @@ end)
 concommand.Add("smh_makescreenshot", function()
     SMH.Controller.ToggleRendering(true)
 end)
+
+concommand.Add("smh_savepreset", function()
+    SMH.Controller.SaveProperties()
+end)

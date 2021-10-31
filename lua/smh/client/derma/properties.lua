@@ -1,5 +1,7 @@
 local PANEL = {}
 local EntsTable = {}
+local PropertyTable = {}
+local ModifierList = {}
 local Fallback = "none"
 local selectedEntity = nil
 
@@ -46,8 +48,8 @@ function PANEL:Init()
     self:SetDeleteOnClose(false)
     self:SetSizable(true)
 
-    self:SetSize(500, 420)
-    self:SetMinWidth(500)
+    self:SetSize(704, 420)
+    self:SetMinWidth(704)
     self:SetMinHeight(420)
     self:SetPos(ScrW() / 2 - self:GetWide() / 2, ScrH() / 2 - self:GetTall() / 2)
 
@@ -80,13 +82,51 @@ function PANEL:Init()
         self:SelectEntity(selectedEntity)
     end
 
+    self.TimelinesPanel = vgui.Create("DPanel", self)
+    self.TimelinesPanel:SetBackgroundColor(Color(155, 155, 155, 255))
+
+    self.SelectedEntityLabel = vgui.Create("DLabel", self.TimelinesPanel)
+    self.SelectedEntityLabel:SetText("Selected model: " .. "none")
+
+    self.AddTimeButton = vgui.Create("DButton", self.TimelinesPanel)
+    self.AddTimeButton:SetText("Add Timeline")
+    self.AddTimeButton.DoClick = function() self:ButtonTimeline(true) end
+
+    self.RemoveTimeButton = vgui.Create("DButton", self.TimelinesPanel)
+    self.RemoveTimeButton:SetText("Remove Timeline")
+    self.RemoveTimeButton.DoClick = function() self:ButtonTimeline(false) end
+
+    self.TimelinesCList = vgui.Create("DCategoryList", self.TimelinesPanel)
+
+    self.ColorPanel = vgui.Create("DPanel", self)
+    self.ColorPanel:SetBackgroundColor(Color(155, 155, 155, 255))
+
+    self.ColorLabel = vgui.Create("DLabel", self.ColorPanel)
+    self.ColorLabel:SetText("Keyframe Color for timeline: " .. "none")
+ 
+    self.ColorPicker = vgui.Create("DColorMixer", self.ColorPanel)
+    self.ColorPicker:SetPalette(false)
+    self.ColorPicker:SetAlphaBar(false)
+    self.ColorPicker:SetWangs(true)
+    self.ColorPicker.Timeline = -1
+    self.ColorPicker.ValueChanged = function(_, col)
+        col = Color(col.r, col.g, col.b)
+        self.ColorPreview:SetBackgroundColor(col)
+        if next(PropertyTable) == nil or self.ColorPicker.Timeline == -1 then return end
+        self:OnUpdateKeyframeColorRequested(col, self.ColorPicker.Timeline)
+        if self.ColorPicker.Timeline == SMH.State.Timeline then SMH.UI.PaintKeyframes(col) end
+    end
+ 
+    self.ColorPreview = vgui.Create("DPanel", self.ColorPanel)
+    self.ColorPreview:SetBackgroundColor(self.ColorPicker:GetColor())
+
 end
 
 function PANEL:PerformLayout(width, height)
 
     self.BaseClass.PerformLayout(self, width, height)
 
-	self.EntitiesPanel:SetPos(4, 30)
+    self.EntitiesPanel:SetPos(4, 30)
     self.EntitiesPanel:SetSize(240, self:GetTall() - 4 - 30)
 
     self.EntityNameEnter:SetPos(2, 25)
@@ -95,9 +135,39 @@ function PANEL:PerformLayout(width, height)
     self.EntityList:SetPos(5, 60)
     self.EntityList:SetSize(230, self.EntitiesPanel:GetTall() - 60 - 5)
 
+    self.TimelinesPanel:SetPos(248, 30)
+    self.TimelinesPanel:SetSize(self:GetWide() - 456, self:GetTall() - 4 - 30)
+
+    self.SelectedEntityLabel:SetPos(4, 5)
+    self.SelectedEntityLabel:SetSize(self.TimelinesPanel:GetWide() - 8, 15)
+
+    self.TimelinesCList:SetPos(5, 55)
+    self.TimelinesCList:SetSize(self.TimelinesPanel:GetWide() - 10, self.TimelinesPanel:GetTall() - 55 - 5)
+
+    self.AddTimeButton:SetPos(5, 35)
+    self.AddTimeButton:SetSize(self.TimelinesCList:GetWide() / 2 - 2, 20)
+
+    self.RemoveTimeButton:SetPos(5 + self.TimelinesCList:GetWide() / 2 + 2, 35)
+    self.RemoveTimeButton:SetSize(self.TimelinesCList:GetWide() / 2 - 2, 20)
+
+    self.ColorPanel:SetPos(248 + self:GetWide() - 456 + 4, 30)
+    self.ColorPanel:SetSize(200, self:GetTall() - 4 - 30)
+
+    self.ColorLabel:SetPos(4, 5)
+    self.ColorLabel:SetSize(self.ColorPanel:GetWide() - 8, 15)
+
+    self.ColorPicker:SetPos(5, 35)
+    self.ColorPicker:SetSize(190, 130)
+
+    self.ColorPreview:SetPos(5, 165 + 5)
+    self.ColorPreview:SetSize(105, 15)
+
 end
 
 function PANEL:UpdateSelectedEnt(ent)
+    local modelname = IsValid(ent) and ent:GetModel() or "none"
+    self.SelectedEntityLabel:SetText("Selected model: " .. modelname)
+
     selectedEntity = ent
     self:SetEntities(EntsTable)
 end
@@ -106,6 +176,71 @@ function PANEL:SetName(name)
     self.EntityNameEnter:SetText(name)
     UpdateName(name)
     self:SetEntities(EntsTable)
+end
+
+function PANEL:UpdateTimelineInfo(timelineinfo)
+    PropertyTable = table.Copy(timelineinfo)
+    self:BuildTimelineinfo()
+end
+
+function PANEL:UpdateModifiersInfo(timelineinfo, changed)
+    PropertyTable = table.Copy(timelineinfo)
+
+    for i = 1, PropertyTable.Timelines do
+        local set = false
+        for _, name in ipairs(PropertyTable.TimelineMods[i]) do
+            if changed == name then
+                self.TimelinesUI[i].Contents.Checker[name]:SetChecked(true)
+                set = true
+            end
+        end
+        if not set then
+            self.TimelinesUI[i].Contents.Checker[changed]:SetChecked(false)
+        end
+    end
+end
+
+function PANEL:BuildTimelineinfo()
+    self.TimelinesCList:Clear()
+    self.TimelinesUI = {}
+
+    self.ColorLabel:SetText("Keyframe Color for timeline: " .. "none")
+    self.ColorPicker.Timeline = -1
+    if next(PropertyTable) == nil then return end
+
+    for i = 1, PropertyTable.Timelines do
+        self.TimelinesUI[i] = self.TimelinesCList:Add("Timeline " .. i)
+        self.TimelinesUI[i]:SetTall(200)
+        self.TimelinesUI[i].Contents = vgui.Create("DPanel")
+        self.TimelinesUI[i].OnToggle = function(_, expanded)
+            if expanded then 
+                self.ColorLabel:SetText("Keyframe Color for timeline: " .. i)
+                self.ColorPicker.Timeline = i
+                self.ColorPicker:SetColor(PropertyTable.TimelineMods[i].KeyColor)
+            end
+        end
+        self.TimelinesUI[i].Contents.Checker = {}
+        for mod, name in pairs(ModifierList) do
+            self.TimelinesUI[i].Contents.Checker[mod] = vgui.Create("DCheckBoxLabel", self.TimelinesUI[i].Contents)
+            self.TimelinesUI[i].Contents.Checker[mod]:SetText(name)
+            self.TimelinesUI[i].Contents.Checker[mod]:SetTextColor(Color(25, 25, 25))
+            self.TimelinesUI[i].Contents.Checker[mod].OnChange = function(_, check) self:OnUpdateModifierRequested(i, mod, check) end
+            self.TimelinesUI[i].Contents.Checker[mod]:DockMargin(0, 0, 0, 2)
+            self.TimelinesUI[i].Contents.Checker[mod]:Dock(TOP)
+        end
+
+        for _, mod in ipairs(PropertyTable.TimelineMods[i]) do
+            self.TimelinesUI[i].Contents.Checker[mod]:SetChecked(true)
+        end
+
+        self.TimelinesUI[i]:SetContents(self.TimelinesUI[i].Contents)
+        self.TimelinesUI[i]:SetExpanded(false)
+    end
+end
+
+function PANEL:GetCurrentModifiers()
+    if not PropertyTable or not PropertyTable.TimelineMods then return {} end
+    return PropertyTable.TimelineMods[SMH.State.Timeline]
 end
 
 function PANEL:SetEntities(entities)
@@ -136,7 +271,36 @@ function PANEL:SetEntities(entities)
     self.EntityList:UpdateLines(entlist)
 end
 
+function PANEL:InitModifiers(list)
+    ModifierList = table.Copy(list)
+end
+
+function PANEL:GetModifiers()
+    return ModifierList
+end
+
+function PANEL:UpdateColor(timelineinfo)
+    PropertyTable = table.Copy(timelineinfo)
+end
+
+function PANEL:ButtonTimeline(add)
+    if next(PropertyTable) == nil then return end
+
+    if add and PropertyTable.Timelines < 10 then
+        self:OnAddTimelineRequested()
+
+    elseif add then return
+
+    elseif PropertyTable.Timelines > 1 then
+        self:OnRemoveTimelineRequested()
+    end
+end
+
 function PANEL:ApplyName(ent, name) end
 function PANEL:SelectEntity(entity) end
+function PANEL:OnAddTimelineRequested() end
+function PANEL:OnRemoveTimelineRequested() end
+function PANEL:OnUpdateModifierRequested(i, mod, check) end
+function PANEL:OnUpdateKeyframeColorRequested(color, timeline) end
 
 vgui.Register("SMHProperties", PANEL, "DFrame")
