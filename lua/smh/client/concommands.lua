@@ -49,7 +49,7 @@ concommand.Add("smh_makejpeg", function(pl, cmd, args)
     if startframe < SMH.State.PlaybackLength then
         SMH.Controller.ToggleRendering(false, startframe)
     else
-		print("Specified starting frame is outside of the current Frame Count!")
+        print("Specified starting frame is outside of the current Frame Count!")
     end
 end)
 
@@ -63,8 +63,8 @@ concommand.Add("smh_makescreenshot", function(pl, cmd, args)
     if startframe < 0 then startframe = 0 end
     if startframe < SMH.State.PlaybackLength then
         SMH.Controller.ToggleRendering(true, startframe)
-	else
-		print("Specified starting frame is outside of the current Frame Count!")
+    else
+        print("Specified starting frame is outside of the current Frame Count!")
     end
 end)
 
