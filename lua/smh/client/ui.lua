@@ -6,19 +6,83 @@ local PropertiesMenu = nil
 local FrameToKeyframe = {}
 local KeyframePointers = {}
 local KeyframeEasingData = {}
+local SelectedPointers = {}
+local OffsetPointers = {}
 local LastID = 0
 local ClickerEntity = nil
+local LastSelectedKeyframe = nil
 local KeyColor = Color(0, 200, 0)
 
 local function CreateCopyPointer(keyframeId, mods)
+    OffsetPointers = {}
+    local KeysToDelete = {}
+    local originFrame = KeyframePointers[keyframeId]:GetFrame()
+
+    local counter = 1
+
+    for id, kpointer in pairs(KeyframePointers) do
+        if id == keyframeId then continue end
+        if SelectedPointers[id] then
+            kpointer:SetSelected(false)
+            SelectedPointers[id] = nil
+
+            local difference = kpointer:GetFrame() - originFrame
+            local pointer = WorldClicker.MainMenu.FramePanel:CreateFramePointer(
+            Color(0, 200, 0),
+            WorldClicker.MainMenu.FramePanel:GetTall() / 4 * 2.2,
+            false
+            )
+            table.insert(OffsetPointers, pointer)
+            pointer:SetFrame(originFrame + difference)
+            pointer:SetSelected(true)
+
+            pointer.OnPointerReleased = function(_, frame)
+                WorldClicker.MainMenu.FramePanel:DeleteFramePointer(pointer)
+                if frame < 0 then return end
+                SMH.Controller.CopyKeyframe(id, frame)
+                for id, pointer in pairs(KeyframePointers) do
+                    if id == LastID + counter then continue end
+                    if pointer:GetFrame() == frame then
+                        table.insert(KeysToDelete, id)
+                    end
+                end
+            end
+            counter = counter + 1
+        end
+    end
+
     local pointer = WorldClicker.MainMenu.FramePanel:CreateFramePointer(
         KeyColor,
         WorldClicker.MainMenu.FramePanel:GetTall() / 4 * 2.2,
         false
     )
+
+    pointer:SetFrame(originFrame)
+    local minimum, maximum = 0, 0
+    for _, kpointer in ipairs(OffsetPointers) do
+        kpointer:SetParentPointer(pointer)
+        local difference = kpointer:GetFrame() - pointer:GetFrame()
+        if minimum > difference then
+            minimum = difference
+        elseif maximum < difference then
+            maximum = difference
+        end
+    end
+
     pointer:OnMousePressed(MOUSE_LEFT)
+    pointer:SetOffsets(minimum, maximum)
     pointer.OnPointerReleased = function(_, frame)
+        for _, kpointer in ipairs(OffsetPointers) do
+            kpointer:OnPointerReleased(kpointer:GetFrame())
+        end
+        OffsetPointers = {}
         WorldClicker.MainMenu.FramePanel:DeleteFramePointer(pointer)
+        if frame < 0 then return end
+        SMH.Controller.CopyKeyframe(keyframeId, frame)
+        for id, pointer in pairs(KeyframePointers) do -- weird
+            if id == LastID + counter then continue end
+            if pointer:GetFrame() == frame then
+                table.insert(KeysToDelete, id)
         local counter = 1
         for mod, idm in pairs(mods) do
             SMH.Controller.CopyKeyframe(idm, frame)
@@ -27,14 +91,20 @@ local function CreateCopyPointer(keyframeId, mods)
                 if id == LastID + counter then continue end
                 if pointer:GetFrame() == frame and mod == pointer:GetMod() then
                     SMH.Controller.DeleteKeyframe(id)
-                end
+                end -- weird
             end
             counter = counter + 1
+        end
+
+        for _, id in ipairs(KeysToDelete) do
+            SMH.Controller.DeleteKeyframe(id)
         end
     end
 end
 
 local function NewKeyframePointer(keyframeId, modname)
+    if keyframeId > LastID then LastID = keyframeId end
+
     if keyframeId > LastID then LastID = keyframeId end
 
     local pointer = WorldClicker.MainMenu.FramePanel:CreateFramePointer(
@@ -45,6 +115,10 @@ local function NewKeyframePointer(keyframeId, modname)
     pointer:SetMod(modname)
 
     pointer.OnPointerReleased = function(_, frame)
+        if frame < 0 then
+            SMH.Controller.DeleteKeyframe(keyframeId)
+            return
+        end
         SMH.Controller.UpdateKeyframe(keyframeId, { Frame = frame })
         for id, pointer in pairs(KeyframePointers) do
             if id == keyframeId then continue end
@@ -61,7 +135,18 @@ local function NewKeyframePointer(keyframeId, modname)
                     SMH.Controller.DeleteKeyframe(id)
                 end
             end
+            for id, kpointer in pairs(KeyframePointers) do
+                if id == keyframeId then continue end
+                if SelectedPointers[id] then
+                    if kpointer == LastSelectedKeyframe then LastSelectedKeyframe = nil end
+                    SMH.Controller.DeleteKeyframe(id)
+                end
+            end
         elseif mousecode == MOUSE_MIDDLE or (mousecode == MOUSE_RIGHT and input.IsKeyDown(KEY_LCONTROL)) then
+            pointer:SetSelected(false)
+            if pointer == LastSelectedKeyframe then LastSelectedKeyframe = nil end
+            SelectedPointers[keyframeId] = nil
+            CreateCopyPointer(keyframeId)
             local mods = {}
             for id, kpointer in pairs(KeyframePointers) do
                 if kpointer:GetFrame() == frame then
@@ -260,6 +345,7 @@ function MGR.SetFrame(frame)
 end
 
 function MGR.SetKeyframes(keyframes)
+
     for _, pointer in pairs(KeyframePointers) do
         WorldClicker.MainMenu.FramePanel:DeleteFramePointer(pointer)
     end
@@ -278,6 +364,8 @@ function MGR.SetKeyframes(keyframes)
     end
     KeyframePointers = {}
     FrameToKeyframe = {}
+    SelectedPointers = {}
+    LastSelectedKeyframe = nil
 
     for _, keyframe in pairs(keyframes) do
         if Modifiers[keyframe.Modifier] then
@@ -325,6 +413,8 @@ function MGR.DeleteKeyframe(keyframeId)
         return
     end
 
+    if KeyframePointers[keyframeId] == LastSelectedKeyframe then LastSelectedKeyframe = nil end
+    SelectedPointers[KeyframePointers[keyframeId]] = nil
     WorldClicker.MainMenu.FramePanel:DeleteFramePointer(KeyframePointers[keyframeId])
     KeyframePointers[keyframeId] = nil
     KeyframeEasingData[keyframeId] = nil
@@ -335,6 +425,21 @@ function MGR.DeleteKeyframe(keyframeId)
             break
         end
     end
+end
+
+function MGR.SetOffsets(pointer)
+    local minimum, maximum = 0, 0
+    for id, kpointer in pairs(KeyframePointers) do
+        if SelectedPointers[id] then
+            local difference = kpointer:GetFrame() - pointer:GetFrame()
+            if minimum > difference then
+                minimum = difference
+            elseif maximum < difference then
+                maximum = difference
+            end
+        end
+    end
+    pointer:SetOffsets(minimum, maximum)
 end
 
 function MGR.AssignFrames(pointer)
@@ -358,9 +463,21 @@ function MGR.AssignFrames(pointer)
 end
 
 function MGR.MoveChildren(pointer, frame)
-    for id, kpointer in pairs(KeyframePointers) do
-        if kpointer:GetParentKeyframe() == pointer then
-            kpointer:SetFrame(frame)
+    if next(OffsetPointers) then
+        for _, kpointer in ipairs(OffsetPointers) do
+            local difference = kpointer:GetFrame() - pointer:GetFrame()
+            kpointer:SetFrame(frame + difference)
+        end
+    else
+        for id, kpointer in pairs(KeyframePointers) do
+            if kpointer:GetParentKeyframe() == pointer then
+                kpointer:SetFrame(frame)
+            end
+            if kpointer == pointer then continue end
+            if SelectedPointers[id] then
+                local difference = kpointer:GetFrame() - pointer:GetFrame()
+                kpointer:SetFrame(frame + difference)
+            end
         end
     end
 end
@@ -371,9 +488,70 @@ function MGR.ClearFrames(pointer)
             kpointer:OnPointerReleased(kpointer:GetFrame())
             kpointer:ClearParentPointer()
         end
+        if kpointer == pointer then continue end
+        if SelectedPointers[id] then
+            kpointer:OnPointerReleased(kpointer:GetFrame())
+        end
     end
 end
 
+function MGR.ClearAllSelected()
+    for id, pointer in pairs(KeyframePointers) do
+        if SelectedPointers[id] then
+            pointer:SetSelected(false)
+        end
+    end
+    LastSelectedKeyframe = nil
+    SelectedPointers = {}
+end
+
+function MGR.ShiftSelect(pointer)
+    if not LastSelectedKeyframe then 
+        MGR.ToggleSelect(pointer) 
+        return
+    end
+
+    local minimum, maximum = 0, 0
+    if pointer:GetFrame() > LastSelectedKeyframe:GetFrame() then
+        minimum, maximum = LastSelectedKeyframe:GetFrame(), pointer:GetFrame()
+    else
+        minimum, maximum = pointer:GetFrame(), LastSelectedKeyframe:GetFrame()
+    end
+
+    for id, kpointer in pairs(KeyframePointers) do
+        if kpointer == pointer then
+            SelectedPointers[id] = true
+            kpointer:SetSelected(true)
+            continue
+        end
+        if kpointer:GetFrame() > minimum and kpointer:GetFrame() < maximum then
+            SelectedPointers[id] = true
+            kpointer:SetSelected(true)
+        end
+    end
+
+    LastSelectedKeyframe = pointer
+end
+
+function MGR.ToggleSelect(pointer)
+    local selected = not pointer:GetSelected()
+    for id, kpointer in pairs(KeyframePointers) do
+        if kpointer ~= pointer then continue end
+            if selected then
+                SelectedPointers[id] = true
+                LastSelectedKeyframe = kpointer
+            else
+                if kpointer == LastSelectedKeyframe then LastSelectedKeyframe = nil end
+                SelectedPointers[id] = nil
+            end
+        break
+    end
+    for id, kpointer in pairs(KeyframePointers) do
+        if kpointer == pointer then continue end
+        if kpointer == LastSelectedKeyframe then LastSelectedKeyframe = nil end
+    end
+    pointer:SetSelected(selected)
+end
 function MGR.SetServerSaves(saves)
     LoadMenu:SetSaves(saves)
     SaveMenu:SetSaves(saves)
