@@ -122,7 +122,6 @@ function PANEL:OnMousePressed(mousecode)
     self._dragging = true
 
     SMH.UI.SetOffsets(self)
-    SMH.UI.AssignFrames(self)
 end
 
 function PANEL:SetParentPointer(ppointer)
@@ -158,8 +157,7 @@ function PANEL:OnMouseReleased(mousecode)
         return
     end
 
-    self._minoffset = 0
-    self._maxoffset = 0
+    self:SetOffsets(0, 0)
 
     self:MouseCapture(false)
     self._dragging = false

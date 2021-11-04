@@ -9,9 +9,10 @@ local KeyframeEasingData = {}
 local SelectedPointers = {}
 local OffsetPointers = {}
 local LastID = 0
-local ClickerEntity = nil
 local LastSelectedKeyframe = nil
 local KeyColor = Color(0, 200, 0)
+
+local ClickerEntity = nil
 
 local function CreateCopyPointer(keyframeId, mods)
     OffsetPointers = {}
@@ -23,15 +24,17 @@ local function CreateCopyPointer(keyframeId, mods)
     for id, kpointer in pairs(KeyframePointers) do
         if id == keyframeId then continue end
         if SelectedPointers[id] then
+            local difference = kpointer:GetFrame() - originFrame
+
             kpointer:SetSelected(false)
             SelectedPointers[id] = nil
 
-            local difference = kpointer:GetFrame() - originFrame
             local pointer = WorldClicker.MainMenu.FramePanel:CreateFramePointer(
             Color(0, 200, 0),
             WorldClicker.MainMenu.FramePanel:GetTall() / 4 * 2.2,
             false
             )
+
             table.insert(OffsetPointers, pointer)
             pointer:SetFrame(originFrame + difference)
             pointer:SetSelected(true)
@@ -345,7 +348,6 @@ function MGR.SetFrame(frame)
 end
 
 function MGR.SetKeyframes(keyframes)
-
     for _, pointer in pairs(KeyframePointers) do
         WorldClicker.MainMenu.FramePanel:DeleteFramePointer(pointer)
     end
@@ -414,7 +416,7 @@ function MGR.DeleteKeyframe(keyframeId)
     end
 
     if KeyframePointers[keyframeId] == LastSelectedKeyframe then LastSelectedKeyframe = nil end
-    SelectedPointers[KeyframePointers[keyframeId]] = nil
+    SelectedPointers[keyframeId] = nil
     WorldClicker.MainMenu.FramePanel:DeleteFramePointer(KeyframePointers[keyframeId])
     KeyframePointers[keyframeId] = nil
     KeyframeEasingData[keyframeId] = nil
@@ -440,26 +442,6 @@ function MGR.SetOffsets(pointer)
         end
     end
     pointer:SetOffsets(minimum, maximum)
-end
-
-function MGR.AssignFrames(pointer)
-    local frame = pointer:GetFrame()
-    local keyID
-    for id, kpointer in pairs(KeyframePointers) do
-        if pointer == kpointer then
-            keyID = id
-            break
-        end
-    end
-
-    if not keyID then return end
-
-    for id, kpointer in pairs(KeyframePointers) do
-        if keyID == id then continue end
-        if kpointer:GetFrame() == frame then
-            kpointer:SetParentPointer(pointer)
-        end
-    end
 end
 
 function MGR.MoveChildren(pointer, frame)
