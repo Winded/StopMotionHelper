@@ -88,8 +88,10 @@ local function AddCallbacks()
         SMH.Controller.UpdateState(newState)
     end
     WorldClicker.MainMenu.OnRequestKeyframeUpdate = function(_, newKeyframeData)
-        if FrameToKeyframe[SMH.State.Frame] then
-            SMH.Controller.UpdateKeyframe(FrameToKeyframe[SMH.State.Frame], newKeyframeData)
+        for id, pointer in pairs(KeyframePointers) do
+            if pointer:GetFrame() == SMH.State.Frame then
+                SMH.Controller.UpdateKeyframe(id, newKeyframeData)
+            end
         end
     end
     WorldClicker.MainMenu.OnRequestOpenPropertiesMenu = function()
