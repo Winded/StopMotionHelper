@@ -18,16 +18,37 @@ local function SelectEntity(msgLength, player)
     SMH.GhostsManager.SelectEntity(player, entity)
 
     local keyframes = SMH.KeyframeManager.GetAllForEntity(player, entity)
-    for _, keyframe in pairs(keyframes) do
-        keyframe.Modifiers = nil
-    end
+    local framecount, IDs, ents, Frame, In, Out, _, Modifier = SMH.TableSplit.DKeyframes(keyframes)
 
     local timeline = SMH.PropertiesManager.GetAllEntityProperties(player, entity)
+    local Name, Timelines, KeyColor, ModCount, Modifiers = SMH.TableSplit.DProperties(timeline)
+    local exists = Name and true or false
 
     net.Start(SMH.MessageTypes.SelectEntityResponse)
     net.WriteEntity(entity)
-    net.WriteTable(keyframes)
-    net.WriteTable(timeline)
+
+    net.WriteUInt(framecount, INT_BITCOUNT)
+    for i = 1, #IDs do
+        net.WriteUInt(IDs[i],INT_BITCOUNT)
+        net.WriteUInt(Frame[i], INT_BITCOUNT)
+        net.WriteFloat(In[i])
+        net.WriteFloat(Out[i])
+        net.WriteString(Modifier[i])
+    end
+
+    net.WriteBool(exists)
+    if exists then
+        net.WriteString(Name)
+        net.WriteUInt(Timelines, INT_BITCOUNT)
+        for i=1, Timelines do
+            net.WriteUInt(i, 4) -- Timelines can't go over 10, unless someone hacky messes it up
+            net.WriteColor(KeyColor[i])
+            net.WriteUInt(ModCount[i], INT_BITCOUNT)
+            for j=1, ModCount[i] do
+                net.WriteString(Modifiers[i][j])
+            end
+        end
+    end
     net.Send(player)
 end
 
@@ -42,23 +63,32 @@ local function CreateKeyframe(msgLength, player)
     if timeline > totaltimelines then timeline = 1 end
 
     local keyframes = SMH.KeyframeManager.Create(player, entity, frame, timeline)
-    local IDs = {}
-    for _, kframe in ipairs(keyframes) do
-        table.insert(IDs, kframe.ID)
-    end
-
-    local clientKeyframes = table.Copy(keyframes)
-    for _, kframe in ipairs(clientKeyframes) do
-        kframe.ID = nil
-        kframe.Modifiers = nil
-    end
+    local framecount, IDs, ents, Frame, In, Out, _, Modifier = SMH.TableSplit.DKeyframes(keyframes)
 
     net.Start(SMH.MessageTypes.UpdateKeyframeResponse)
-    net.WriteTable(IDs)
-    net.WriteTable(clientKeyframes)
+    net.WriteEntity(ents)
+    net.WriteUInt(framecount, INT_BITCOUNT)
+    for i = 1, framecount do
+        net.WriteUInt(IDs[i],INT_BITCOUNT)
+        net.WriteUInt(Frame[i], INT_BITCOUNT)
+        net.WriteFloat(In[i])
+        net.WriteFloat(Out[i])
+        net.WriteString(Modifier[i])
+    end
     net.WriteBool(isnewent)
-    if isnewent then 
-        net.WriteTable(SMH.PropertiesManager.GetAllEntityProperties(player, entity))
+    if isnewent then
+        local timeline = SMH.PropertiesManager.GetAllEntityProperties(player, entity)
+        local Name, Timelines, KeyColor, ModCount, Modifiers = SMH.TableSplit.DProperties(timeline)
+        net.WriteString(Name)
+        net.WriteUInt(Timelines, INT_BITCOUNT)
+        for i=1, Timelines do
+            net.WriteUInt(i, 4) -- Timelines can't go over 10, unless someone hacky messes it up
+            net.WriteColor(KeyColor[i])
+            net.WriteUInt(ModCount[i], INT_BITCOUNT)
+            for j=1, ModCount[i] do
+                net.WriteString(Modifiers[i][j])
+            end
+        end
     end
     net.Send(player)
 end
@@ -68,16 +98,18 @@ local function UpdateKeyframe(msgLength, player)
     local updateData = net.ReadTable()
 
     local keyframe = SMH.KeyframeManager.Update(player, id, updateData)
-    local clientKeyframe = table.Copy(keyframe)
-    clientKeyframe.ID = nil
-    clientKeyframe.Modifiers = nil
-
-    local IDs = {keyframe.ID}
-    local clientKeyframes = {clientKeyframe}
+    local framecount, IDs, ents, Frame, In, Out, _, Modifier = SMH.TableSplit.DKeyframes({keyframe})
 
     net.Start(SMH.MessageTypes.UpdateKeyframeResponse)
-    net.WriteTable(IDs)
-    net.WriteTable(clientKeyframes)
+    net.WriteEntity(ents)
+    net.WriteUInt(framecount, INT_BITCOUNT)
+    for i = 1, framecount do
+        net.WriteUInt(IDs[i],INT_BITCOUNT)
+        net.WriteUInt(Frame[i], INT_BITCOUNT)
+        net.WriteFloat(In[i])
+        net.WriteFloat(Out[i])
+        net.WriteString(Modifier[i])
+    end
     net.WriteBool(false)
     net.Send(player)
 end
@@ -87,16 +119,18 @@ local function CopyKeyframe(msgLength, player)
     local frame = net.ReadUInt(INT_BITCOUNT)
 
     local keyframe = SMH.KeyframeManager.Copy(player, id, frame)
-    local clientKeyframe = table.Copy(keyframe)
-    clientKeyframe.ID = nil
-    clientKeyframe.Modifiers = nil
-
-    local IDs = {keyframe.ID}
-    local clientKeyframes = {clientKeyframe}
+    local framecount, IDs, ents, Frame, In, Out, _, Modifier = SMH.TableSplit.DKeyframes({keyframe})
 
     net.Start(SMH.MessageTypes.UpdateKeyframeResponse)
-    net.WriteTable(IDs)
-    net.WriteTable(clientKeyframes)
+    net.WriteEntity(ents)
+    net.WriteUInt(framecount, INT_BITCOUNT)
+    for i = 1, framecount do
+        net.WriteUInt(IDs[i],INT_BITCOUNT)
+        net.WriteUInt(Frame[i], INT_BITCOUNT)
+        net.WriteFloat(In[i])
+        net.WriteFloat(Out[i])
+        net.WriteString(Modifier[i])
+    end
     net.WriteBool(false)
     net.Send(player)
 end
@@ -146,27 +180,40 @@ local function UpdateGhostState(msgLength, player)
 end
 
 local function GetServerSaves(msgLength, player)
-    local saves = SMH.Saves.ListFiles()
+    local saves, keys, count = SMH.TableSplit.DList(SMH.Saves.ListFiles())
     net.Start(SMH.MessageTypes.GetServerSavesResponse)
-    net.WriteTable(saves)
+    net.WriteUInt(count, INT_BITCOUNT)
+    for i = 1, count do
+        net.WriteString(keys[i])
+        net.WriteString(saves[i])
+    end
     net.Send(player)
 end
 
 local function GetModelList(msgLength, player)
     local path = net.ReadString()
 
-    local models, map = SMH.Saves.ListModels(path)
+    local modelslist, map = SMH.Saves.ListModels(path)
+    local models, keys, count = SMH.TableSplit.DList(modelslist)
     net.Start(SMH.MessageTypes.GetModelListResponse)
-    net.WriteTable(models)
+    net.WriteUInt(count, INT_BITCOUNT)
+    for i = 1, count do
+        net.WriteString(keys[i])
+        net.WriteString(models[i])
+    end
     net.WriteString(map)
     net.Send(player)
 end
 
 local function GetServerEntities(msgLength, player)
-    local entities = SMH.PropertiesManager.GetAllEntitiesNames(player)
+    local entities, keys, count = SMH.TableSplit.DList(SMH.PropertiesManager.GetAllEntitiesNames(player))
 
     net.Start(SMH.MessageTypes.GetServerEntitiesResponse)
-    net.WriteTable(entities)
+    net.WriteUInt(count, INT_BITCOUNT)
+    for i = 1, count do
+        net.WriteEntity(keys[i])
+        net.WriteString(entities[i].Name)
+    end
     net.Send(player)
 end
 
@@ -186,16 +233,33 @@ local function Load(msgLength, player)
     SMH.PropertiesManager.AddEntity(player, entity)
     SMH.KeyframeManager.ImportSave(player, entity, serializedKeyframes, entityProperties)
     local timeline = SMH.PropertiesManager.GetAllEntityProperties(player, entity)
+    local Name, Timelines, KeyColor, ModCount, Modifiers = SMH.TableSplit.DProperties(timeline)
 
     local keyframes = SMH.KeyframeManager.GetAllForEntity(player, entity)
-    for _, keyframe in pairs(keyframes) do
-        keyframe.Modifiers = nil
-    end
+    local framecount, IDs, ents, Frame, In, Out, _, Modifier = SMH.TableSplit.DKeyframes(keyframes)
 
     net.Start(SMH.MessageTypes.LoadResponse)
     net.WriteEntity(entity)
-    net.WriteTable(keyframes)
-    net.WriteTable(timeline)
+
+    net.WriteUInt(framecount, INT_BITCOUNT)
+    for i = 1, #IDs do
+        net.WriteUInt(IDs[i],INT_BITCOUNT)
+        net.WriteUInt(Frame[i], INT_BITCOUNT)
+        net.WriteFloat(In[i])
+        net.WriteFloat(Out[i])
+        net.WriteString(Modifier[i])
+    end
+
+    net.WriteString(Name)
+    net.WriteUInt(Timelines, INT_BITCOUNT)
+    for i=1, Timelines do
+        net.WriteUInt(i, 4)
+        net.WriteColor(KeyColor[i])
+        net.WriteUInt(ModCount[i], INT_BITCOUNT)
+        for j=1, ModCount[i] do
+            net.WriteString(Modifiers[i][j])
+        end
+    end
     net.Send(player)
 end
 
@@ -260,12 +324,19 @@ local function UpdateTimeline(msgLength, player)
     local entity = net.ReadEntity()
 
     local keyframes = SMH.KeyframeManager.GetAllForEntity(player, entity)
-    for _, keyframe in pairs(keyframes) do
-        keyframe.Modifiers = nil
-    end
+    local framecount, IDs, ents, Frame, In, Out, _, Modifier = SMH.TableSplit.DKeyframes(keyframes)
 
     net.Start(SMH.MessageTypes.UpdateTimelineResponse)
-    net.WriteTable(keyframes)
+    net.WriteEntity(entity)
+
+    net.WriteUInt(framecount, INT_BITCOUNT)
+    for i = 1, framecount do
+        net.WriteUInt(IDs[i],INT_BITCOUNT)
+        net.WriteUInt(Frame[i], INT_BITCOUNT)
+        net.WriteFloat(In[i])
+        net.WriteFloat(Out[i])
+        net.WriteString(Modifier[i])
+    end
     net.Send(player)
 end
 
@@ -286,14 +357,33 @@ local function AddTimeline(msgLength, player)
     SMH.PropertiesManager.SetTimelines(player, entity, true)
 
     local timeline = SMH.PropertiesManager.GetAllEntityProperties(player, entity)
+    local Name, Timelines, KeyColor, ModCount, Modifiers = SMH.TableSplit.DProperties(timeline)
+
     local keyframes = SMH.KeyframeManager.GetAllForEntity(player, entity)
-    for _, keyframe in pairs(keyframes) do
-        keyframe.Modifiers = nil
-    end
+    local framecount, IDs, ents, Frame, In, Out, _, Modifier = SMH.TableSplit.DKeyframes(keyframes)
 
     net.Start(SMH.MessageTypes.UpdateTimelineInfoResponse)
-    net.WriteTable(timeline)
-    net.WriteTable(keyframes)
+    net.WriteString(Name)
+    net.WriteUInt(Timelines, INT_BITCOUNT)
+    for i=1, Timelines do
+        net.WriteUInt(i, 4) -- Timelines can't go over 10, unless someone hacky messes it up
+        net.WriteColor(KeyColor[i])
+        net.WriteUInt(ModCount[i], INT_BITCOUNT)
+        for j=1, ModCount[i] do
+            net.WriteString(Modifiers[i][j])
+        end
+    end
+
+    net.WriteEntity(entity)
+
+    net.WriteUInt(framecount, INT_BITCOUNT)
+    for i = 1, framecount do
+        net.WriteUInt(IDs[i],INT_BITCOUNT)
+        net.WriteUInt(Frame[i], INT_BITCOUNT)
+        net.WriteFloat(In[i])
+        net.WriteFloat(Out[i])
+        net.WriteString(Modifier[i])
+    end
     net.Send(player)
 end
 
@@ -302,14 +392,33 @@ local function RemoveTimeline(msgLength, player)
     SMH.PropertiesManager.SetTimelines(player, entity, false)
 
     local timeline = SMH.PropertiesManager.GetAllEntityProperties(player, entity)
+    local Name, Timelines, KeyColor, ModCount, Modifiers = SMH.TableSplit.DProperties(timeline)
+
     local keyframes = SMH.KeyframeManager.GetAllForEntity(player, entity)
-    for _, keyframe in pairs(keyframes) do
-        keyframe.Modifiers = nil
-    end
+    local framecount, IDs, ents, Frame, In, Out, _, Modifier = SMH.TableSplit.DKeyframes(keyframes)
 
     net.Start(SMH.MessageTypes.UpdateTimelineInfoResponse)
-    net.WriteTable(timeline)
-    net.WriteTable(keyframes)
+    net.WriteString(Name)
+    net.WriteUInt(Timelines, INT_BITCOUNT)
+    for i=1, Timelines do
+        net.WriteUInt(i, 4) -- Timelines can't go over 10, unless someone hacky messes it up
+        net.WriteColor(KeyColor[i])
+        net.WriteUInt(ModCount[i], INT_BITCOUNT)
+        for j=1, ModCount[i] do
+            net.WriteString(Modifiers[i][j])
+        end
+    end
+
+    net.WriteEntity(entity)
+
+    net.WriteUInt(framecount, INT_BITCOUNT)
+    for i = 1, framecount do
+        net.WriteUInt(IDs[i],INT_BITCOUNT)
+        net.WriteUInt(Frame[i], INT_BITCOUNT)
+        net.WriteFloat(In[i])
+        net.WriteFloat(Out[i])
+        net.WriteString(Modifier[i])
+    end
     net.Send(player)
 end
 
@@ -321,15 +430,34 @@ local function UpdateModifier(msgLength, player)
 
     local changed = SMH.PropertiesManager.UpdateModifier(player, entity, itimeline, name, state)
     local timeline = SMH.PropertiesManager.GetAllEntityProperties(player, entity)
+    local Name, Timelines, KeyColor, ModCount, Modifiers = SMH.TableSplit.DProperties(timeline)
+
     local keyframes = SMH.KeyframeManager.GetAllForEntity(player, entity)
-    for _, keyframe in pairs(keyframes) do
-        keyframe.Modifiers = nil
-    end
+    local framecount, IDs, ents, Frame, In, Out, _, Modifier = SMH.TableSplit.DKeyframes(keyframes)
 
     net.Start(SMH.MessageTypes.UpdateModifierResponse)
     net.WriteString(changed)
-    net.WriteTable(timeline)
-    net.WriteTable(keyframes)
+    net.WriteString(Name)
+    net.WriteUInt(Timelines, INT_BITCOUNT)
+    for i=1, Timelines do
+        net.WriteUInt(i, 4)
+        net.WriteColor(KeyColor[i])
+        net.WriteUInt(ModCount[i], INT_BITCOUNT)
+        for j=1, ModCount[i] do
+            net.WriteString(Modifiers[i][j])
+        end
+    end
+
+    net.WriteEntity(entity)
+
+    net.WriteUInt(framecount, INT_BITCOUNT)
+    for i = 1, framecount do
+        net.WriteUInt(IDs[i],INT_BITCOUNT)
+        net.WriteUInt(Frame[i], INT_BITCOUNT)
+        net.WriteFloat(In[i])
+        net.WriteFloat(Out[i])
+        net.WriteString(Modifier[i])
+    end
     net.Send(player)
 end
 
@@ -340,9 +468,19 @@ local function UpdateKeyframeColor(msgLength, player)
 
     SMH.PropertiesManager.UpdateKeyframeColor(player, entity, color, timeline)
     local timelineinfo = SMH.PropertiesManager.GetAllEntityProperties(player, entity)
+    local Name, Timelines, KeyColor, ModCount, Modifiers = SMH.TableSplit.DProperties(timelineinfo)
 
     net.Start(SMH.MessageTypes.UpdateKeyframeColorResponse)
-    net.WriteTable(timelineinfo)
+    net.WriteString(Name)
+    net.WriteUInt(Timelines, INT_BITCOUNT)
+    for i=1, Timelines do
+        net.WriteUInt(i, 4)
+        net.WriteColor(KeyColor[i])
+        net.WriteUInt(ModCount[i], INT_BITCOUNT)
+        for j=1, ModCount[i] do
+            net.WriteString(Modifiers[i][j])
+        end
+    end
     net.Send(player)
 end
 

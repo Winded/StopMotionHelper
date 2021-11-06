@@ -61,3 +61,4 @@ for key, val in pairs(SMH.MessageTypes) do
 end
 
 include("shared/saves.lua")
+include("shared/tablesplit.lua")
