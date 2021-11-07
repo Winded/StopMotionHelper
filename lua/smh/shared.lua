@@ -41,6 +41,19 @@ SMH.MessageTypes = {
 
     "ApplyEntityName",
     "ApplyEntityNameResponse",
+    "UpdateTimeline",
+    "UpdateTimelineResponse",
+    "RequestModifiers",
+    "RequestModifiersResponse",
+    "AddTimeline",
+    "RemoveTimeline",
+    "UpdateTimelineInfoResponse",
+    "UpdateModifier",
+    "UpdateModifierResponse",
+    "UpdateKeyframeColor",
+    "UpdateKeyframeColorResponse",
+
+    "SaveProperties",
 }
 for key, val in pairs(SMH.MessageTypes) do
     local prefixVal = "SMH" .. val
@@ -48,3 +61,4 @@ for key, val in pairs(SMH.MessageTypes) do
 end
 
 include("shared/saves.lua")
+include("shared/tablesplit.lua")

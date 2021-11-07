@@ -1,11 +1,33 @@
 local INT_BITCOUNT = 32
 
+local function ReceiveKeyframes()
+    local entity = net.ReadEntity()
+    local framecount = net.ReadUInt(INT_BITCOUNT)
+    for i = 1, framecount do
+        SMH.TableSplit.AKeyframes(net.ReadUInt(INT_BITCOUNT), entity, net.ReadUInt(INT_BITCOUNT), net.ReadFloat(), net.ReadFloat(), nil, net.ReadString())
+    end
+    return SMH.TableSplit.GetKeyframes(), entity
+end
+
+local function ReceiveProperties()
+    local Timelines = SMH.TableSplit.StartAProperties(net.ReadString(), net.ReadUInt(INT_BITCOUNT))
+    for i=1, Timelines do
+        net.ReadUInt(4)
+        SMH.TableSplit.AProperties(i, nil, net.ReadColor())
+        for j=1, net.ReadUInt(INT_BITCOUNT) do
+            SMH.TableSplit.AProperties(i, net.ReadString())
+        end
+    end
+    return SMH.TableSplit.GetProperties()
+end
+
 local CTRL = {}
 
 function CTRL.SetFrame(frame)
     net.Start(SMH.MessageTypes.SetFrame)
     net.WriteUInt(frame, INT_BITCOUNT)
     net.WriteTable(SMH.Settings.GetAll())
+    net.WriteUInt(SMH.State.Timeline, INT_BITCOUNT)
     net.SendToServer()
 end
 
@@ -16,13 +38,14 @@ function CTRL.SelectEntity(entity)
 end
 
 function CTRL.Record()
-    if not IsValid(SMH.State.Entity) or SMH.State.Frame < 0 then
+    if not IsValid(SMH.State.Entity) or SMH.State.Frame < 0 or SMH.State.Timeline < 1 then
         return
     end
 
     net.Start(SMH.MessageTypes.CreateKeyframe)
     net.WriteEntity(SMH.State.Entity)
     net.WriteUInt(SMH.State.Frame, INT_BITCOUNT)
+    net.WriteUInt(SMH.State.Timeline, INT_BITCOUNT)
     net.SendToServer()
 end
 
@@ -158,6 +181,7 @@ end
 function CTRL.UpdateState(newState)
     local allowedKeys = {
         Frame = true,
+        Timeline = true,
         PlaybackRate = true,
         PlaybackLength = true,
     }
@@ -199,6 +223,52 @@ function CTRL.ApplyEntityName(ent, name)
     net.SendToServer()
 end
 
+function CTRL.UpdateTimeline()
+    net.Start(SMH.MessageTypes.UpdateTimeline)
+    net.WriteEntity(SMH.State.Entity)
+    net.SendToServer()
+end
+
+function CTRL.RequestModifiers()
+    net.Start(SMH.MessageTypes.RequestModifiers)
+    net.SendToServer()
+end
+
+function CTRL.AddTimeline()
+    net.Start(SMH.MessageTypes.AddTimeline)
+    net.WriteEntity(SMH.State.Entity)
+    net.SendToServer()
+end
+
+function CTRL.RemoveTimeline()
+    net.Start(SMH.MessageTypes.RemoveTimeline)
+    net.WriteEntity(SMH.State.Entity)
+    net.SendToServer()
+end
+
+function CTRL.UpdateModifier(i, mod, check)
+    net.Start(SMH.MessageTypes.UpdateModifier)
+    net.WriteEntity(SMH.State.Entity)
+    net.WriteUInt(i, INT_BITCOUNT)
+    net.WriteString(mod)
+    net.WriteBool(check)
+    net.SendToServer()
+end
+
+function CTRL.UpdateKeyframeColor(color, timeline)
+    net.Start(SMH.MessageTypes.UpdateKeyframeColor)
+    net.WriteEntity(SMH.State.Entity)
+    net.WriteUInt(timeline, INT_BITCOUNT)
+    net.WriteColor(color)
+    net.SendToServer()
+end
+
+function CTRL.SaveProperties()
+    net.Start(SMH.MessageTypes.SaveProperties)
+    net.WriteEntity(SMH.State.Entity)
+    net.SendToServer()
+end
+
 SMH.Controller = CTRL
 
 local function SetFrameResponse(msgLength)
@@ -208,50 +278,73 @@ local function SetFrameResponse(msgLength)
 end
 
 local function SelectEntityResponse(msgLength)
-    local entity = net.ReadEntity()
-    local keyframes = net.ReadTable()
+    local keyframes, entity = ReceiveKeyframes()
+    local timeline = {}
+
+    if net.ReadBool() then
+        timeline = ReceiveProperties()
+    end
 
     SMH.State.Entity = entity
+    SMH.UI.SetTimeline(timeline)
     SMH.UI.SetKeyframes(keyframes)
 end
 
 local function UpdateKeyframeResponse(msgLength)
-    local keyframeId = net.ReadUInt(INT_BITCOUNT)
-    local keyframe = net.ReadTable()
+    local keyframes = ReceiveKeyframes()
 
-    keyframe.ID = keyframeId
+    for num, keyframe in ipairs(keyframes) do
+        if keyframe.Entity == SMH.State.Entity then
+            SMH.UI.UpdateKeyframe(keyframe)
+        end
+    end
 
-    if keyframe.Entity == SMH.State.Entity then
-        SMH.UI.UpdateKeyframe(keyframe)
+    if net.ReadBool() then
+        local timeline = ReceiveProperties()
+        SMH.UI.SetTimeline(timeline)
     end
 end
 
 local function DeleteKeyframeResponse(msgLength)
     local keyframeId = net.ReadUInt(INT_BITCOUNT)
     SMH.UI.DeleteKeyframe(keyframeId)
+
+    if net.ReadBool() then
+        SMH.UI.SetTimeline({})
+    end
 end
 
 local function GetServerSavesResponse(msgLength)
-    local saves = net.ReadTable()
+    for i=1, net.ReadUInt(INT_BITCOUNT) do
+        SMH.TableSplit.AList(net.ReadString(), net.ReadString())
+    end
+    local saves = SMH.TableSplit.GetList()
     SMH.UI.SetServerSaves(saves)
 end
 
 local function GetModelListResponse(msgLength)
-    local models = net.ReadTable()
+    for i=1, net.ReadUInt(INT_BITCOUNT) do
+        SMH.TableSplit.AList(net.ReadString(), net.ReadString())
+    end
+    local models = SMH.TableSplit.GetList()
     local map = net.ReadString()
     SMH.UI.SetModelList(models, map)
 end
 
 local function GetServerEntitiesResponse(msgLength)
-    local entities = net.ReadTable()
+    for i=1, net.ReadUInt(INT_BITCOUNT) do
+        SMH.TableSplit.AList(net.ReadEntity(), {Name = net.ReadString()})
+    end
+    local entities = SMH.TableSplit.GetList()
     SMH.UI.SetEntityList(entities)
 end
 
 local function LoadResponse(msgLength)
-    local entity = net.ReadEntity()
-    local keyframes = net.ReadTable()
+    local keyframes, entity = ReceiveKeyframes()
+    local timeline = ReceiveProperties()
 
     if entity == SMH.State.Entity then
+        SMH.UI.SetTimeline(timeline)
         SMH.UI.SetKeyframes(keyframes)
     end
 end
@@ -286,6 +379,41 @@ local function ApplyEntityNameResponse(msgLength)
     SMH.UI.UpdateName(name)
 end
 
+local function UpdateTimelineResponse(msgLength)
+    local keyframes = ReceiveKeyframes()
+
+    SMH.UI.SetKeyframes(keyframes)
+end
+
+local function RequestModifiersResponse(msgLength)
+    local list = net.ReadTable()
+
+    SMH.UI.InitModifiers(list)
+end
+
+local function UpdateTimelineInfoResponse(msgLength)
+    local timeline = ReceiveProperties()
+    local keyframes = ReceiveKeyframes()
+
+    SMH.UI.SetTimeline(timeline)
+    SMH.UI.SetKeyframes(keyframes)
+end
+
+local function UpdateModifierResponse(msgLength)
+    local changed = net.ReadString()
+    local timeline = ReceiveProperties()
+    local keyframes = ReceiveKeyframes()
+
+    SMH.UI.UpdateModifier(timeline, changed)
+    SMH.UI.SetKeyframes(keyframes)
+end
+
+local function UpdateKeyframeColorResponse(msgLength)
+    local timelineinfo = ReceiveProperties()
+
+    SMH.UI.UpdateKeyColor(timelineinfo)
+end
+
 local function Setup()
     net.Receive(SMH.MessageTypes.SetFrameResponse, SetFrameResponse)
 
@@ -303,6 +431,11 @@ local function Setup()
     net.Receive(SMH.MessageTypes.DeleteSaveResponse, DeleteSaveResponse)
 
     net.Receive(SMH.MessageTypes.ApplyEntityNameResponse, ApplyEntityNameResponse)
+    net.Receive(SMH.MessageTypes.UpdateTimelineResponse, UpdateTimelineResponse)
+    net.Receive(SMH.MessageTypes.RequestModifiersResponse, RequestModifiersResponse)
+    net.Receive(SMH.MessageTypes.UpdateTimelineInfoResponse, UpdateTimelineInfoResponse)
+    net.Receive(SMH.MessageTypes.UpdateModifierResponse, UpdateModifierResponse)
+    net.Receive(SMH.MessageTypes.UpdateKeyframeColorResponse, UpdateKeyframeColorResponse)
 end
 
 Setup()

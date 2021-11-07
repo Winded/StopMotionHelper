@@ -40,11 +40,16 @@ function MOD:Save(entity)
         local theclass = entity:GetClass();
         if theclass ~= "expensive_light" and theclass ~= "expensive_light_new" then -- expensive lights don't have FoV settings, but they are projected lights
             data.FOV = entity:GetLightFOV();
-            end
+        end
+        if theclass == "projected_light_new" then
+            data.OrthoBottom = entity:GetOrthoBottom();
+            data.OrthoLeft = entity:GetOrthoLeft();
+            data.OrthoRight = entity:GetOrthoRight();
+            data.OrthoTop = entity:GetOrthoTop();
+        end
         data.Nearz = entity:GetNearZ();
         data.Farz = entity:GetFarZ();
     elseif entity:GetClass() == "cheap_light" then
-
         data.LightSize = entity:GetLightSize();
     else
         data.InFOV = entity:GetInnerFOV();
@@ -67,11 +72,16 @@ function MOD:Load(entity, data)
         local theclass = entity:GetClass();
         if theclass ~= "expensive_light" and theclass ~= "expensive_light_new" then
             entity:SetLightFOV(data.FOV);
-            end
+        end
+        if theclass == "projected_light_new" then
+            entity:SetOrthoBottom(data.OrthoBottom);
+            entity:SetOrthoLeft(data.OrthoLeft);
+            entity:SetOrthoRight(data.OrthoRight);
+            entity:SetOrthoTop(data.OrthoTop);
+        end
         entity:SetNearZ(data.Nearz);
         entity:SetFarZ(data.Farz);
     elseif entity:GetClass() == "cheap_light" then
-
         entity:SetLightSize(data.LightSize);
     else
         entity:SetInnerFOV(data.InFOV);
@@ -92,7 +102,13 @@ function MOD:LoadBetween(entity, data1, data2, percentage)
         local theclass = entity:GetClass();
         if theclass ~= "expensive_light" and theclass ~= "expensive_light_new" then
             entity:SetLightFOV(SMH.LerpLinear(data1.FOV, data2.FOV, percentage));
-            end
+        end
+        if theclass == "projected_light_new" then
+            entity:SetOrthoBottom(SMH.LerpLinear(data1.OrthoBottom, data2.OrthoBottom, percentage));
+            entity:SetOrthoLeft(SMH.LerpLinear(data1.OrthoLeft, data2.OrthoLeft, percentage));
+            entity:SetOrthoRight(SMH.LerpLinear(data1.OrthoRight, data2.OrthoRight, percentage));
+            entity:SetOrthoTop(SMH.LerpLinear(data1.OrthoTop, data2.OrthoTop, percentage));
+        end
         entity:SetNearZ(SMH.LerpLinear(data1.Nearz, data2.Nearz, percentage));
         entity:SetFarZ(SMH.LerpLinear(data1.Farz, data2.Farz, percentage));
     elseif entity:GetClass() == "cheap_light" then

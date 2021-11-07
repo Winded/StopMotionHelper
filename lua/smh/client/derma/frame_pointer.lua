@@ -24,6 +24,7 @@ function PANEL:Init()
 
     self._frame = 0
     self._dragging = false
+    self._mod = "nil"
 
 end
 
@@ -93,6 +94,14 @@ function PANEL:IsDragging()
     return self._dragging
 end
 
+function PANEL:GetMod()
+    return self._mod
+end
+
+function PANEL:SetMod(mod)
+    self._mod = mod
+end
+
 function PANEL:OnMousePressed(mousecode)
     if mousecode ~= MOUSE_LEFT then
         self:OnCustomMousePressed(mousecode)
@@ -101,6 +110,8 @@ function PANEL:OnMousePressed(mousecode)
 
     self:MouseCapture(true)
     self._dragging = true
+
+    SMH.UI.AssignFrames(self)
 
     local parent = self:GetParent() -- this is the part from OnCursorMoved(), mostly needed to the cases when we copy and paste a frame on top of itself, as by default it seems to go back to frame 0
 
@@ -115,7 +126,20 @@ function PANEL:OnMousePressed(mousecode)
 
     if targetPos ~= self._frame then
         self:SetFrame(targetPos)
+        SMH.UI.MoveChildren(self, targetPos)
     end
+end
+
+function PANEL:SetParentPointer(ppointer)
+    self.parent = ppointer
+end
+
+function PANEL:ClearParentPointer()
+    self.parent = nil
+end
+
+function PANEL:GetParentKeyframe()
+    return self.parent
 end
 
 function PANEL:OnMouseReleased(mousecode)
@@ -125,6 +149,7 @@ function PANEL:OnMouseReleased(mousecode)
 
     self:MouseCapture(false)
     self._dragging = false
+    SMH.UI.ClearFrames(self)
     self:OnPointerReleased(self._frame)
 end
 
@@ -147,6 +172,7 @@ function PANEL:OnCursorMoved()
     if targetPos ~= self._frame then
         self:SetFrame(targetPos)
         self:OnFrameChanged(targetPos)
+        SMH.UI.MoveChildren(self, targetPos)
     end
 end
 

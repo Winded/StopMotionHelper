@@ -1,4 +1,4 @@
-function SMH.GetClosestKeyframes(keyframes, frame, ignoreCurrentFrame)
+function SMH.GetClosestKeyframes(keyframes, frame, ignoreCurrentFrame, modname)
     if ignoreCurrentFrame == nil then
         ignoreCurrentFrame = false
     end
@@ -6,15 +6,15 @@ function SMH.GetClosestKeyframes(keyframes, frame, ignoreCurrentFrame)
     local prevKeyframe = nil
     local nextKeyframe = nil
     for _, keyframe in pairs(keyframes) do
-        if keyframe.Frame == frame and not ignoreCurrentFrame then
+        if keyframe.Frame == frame and keyframe.Modifier == modname and not ignoreCurrentFrame then
             prevKeyframe = keyframe
             nextKeyframe = keyframe
             break
         end
 
-        if keyframe.Frame < frame and (not prevKeyframe or prevKeyframe.Frame < keyframe.Frame) then
+        if keyframe.Frame < frame and (not prevKeyframe or prevKeyframe.Frame < keyframe.Frame) and keyframe.Modifier == modname then
             prevKeyframe = keyframe
-        elseif keyframe.Frame > frame and (not nextKeyframe or nextKeyframe.Frame > keyframe.Frame) then
+        elseif keyframe.Frame > frame and (not nextKeyframe or nextKeyframe.Frame > keyframe.Frame) and keyframe.Modifier == modname then
             nextKeyframe = keyframe
         end
     end
@@ -47,6 +47,7 @@ function META:New(player, entity)
         EaseIn = 0,
         EaseOut = 0,
         Modifiers = {},
+        Modifier = "nil"
     }
     self.NextKeyframeId = self.NextKeyframeId + 1
 

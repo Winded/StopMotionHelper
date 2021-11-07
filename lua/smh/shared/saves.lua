@@ -6,6 +6,7 @@ local function GetModelName(entity, usedModelNames)
 end
 
 local SaveDir = "smh/"
+local SettingsDir = "smhsettings/"
 
 local MGR = {}
 
@@ -74,14 +75,54 @@ function MGR.LoadForEntity(path, modelName)
         if not sEntity.Properties then
             if sEntity.Model == modelName then
 
+                local timelinemods = {}
+                timelinemods[1] = { KeyColor = Color(0, 200, 0) }
+
+                if SERVER then
+                    for name, mod in pairs(SMH.Modifiers) do
+                        table.insert(timelinemods[1], name)
+                    end
+                else
+                    for name, mod in pairs(SMH.UI.GetModifiers()) do
+                        table.insert(timelinemods[1], name)
+                    end
+                end
+
                 sEntity.Properties = {
                     Name = sEntity.Model,
+                    Timelines = 1,
+                    TimelineMods = table.Copy(timelinemods),
+                    Old = true,
                 }
 
                 return sEntity.Frames, sEntity.Properties
             end
         else
             if sEntity.Properties.Name == modelName then
+                if not sEntity.Properties.TimelineMods then -- i've had some previous version of properties have only entity naming, but no timeline modifiers. so now i gotta make a check for this occassion as well
+                    local timelinemods = {}
+                    timelinemods[1] = { KeyColor = Color(0, 200, 0) }
+
+                    if SERVER then
+                        for name, mod in pairs(SMH.Modifiers) do
+                            table.insert(timelinemods[1], name)
+                        end
+                    else
+                        for name, mod in pairs(SMH.UI.GetModifiers()) do
+                            table.insert(timelinemods[1], name)
+                        end
+                    end
+
+                    sEntity.Properties.Timelines = 1
+                    sEntity.Properties.TimelineMods = table.Copy(timelinemods)
+                    sEntity.Properties.Old = true
+                else
+                    for timeline, value in pairs(sEntity.Properties.TimelineMods) do
+                        local color = value.KeyColor
+                        color = Color(color.r, color.g, color.b)
+                        value.KeyColor = color
+                    end
+                end
                 return sEntity.Frames, sEntity.Properties
             end
         end
@@ -106,6 +147,8 @@ function MGR.Serialize(keyframes, properties)
                 Model = mdl,
                 Properties = {
                     Name = properties[entity].Name,
+                    Timelines = properties[entity].Timelines,
+                    TimelineMods = table.Copy(properties[entity].TimelineMods),
                 },
                 Frames = {},
             }
@@ -116,6 +159,7 @@ function MGR.Serialize(keyframes, properties)
             EaseIn = keyframe.EaseIn,
             EaseOut = keyframe.EaseOut,
             EntityData = table.Copy(keyframe.Modifiers),
+            Modifier = keyframe.Modifier
         })
     end
 
@@ -155,6 +199,40 @@ function MGR.Delete(path)
     if file.Exists(path, "DATA") then
         file.Delete(path)
     end
+end
+
+function MGR.SaveProperties(timeline, player)
+    if next(timeline) == nil then return end
+
+    if not file.Exists(SettingsDir, "DATA") or not file.IsDir(SettingsDir, "DATA") then
+        file.CreateDir(SettingsDir)
+    end
+
+    local template = {
+        Timelines = timeline.Timelines,
+        TimelineMods = table.Copy(timeline.TimelineMods),
+    }
+
+    path = SettingsDir .. "timelineinfo_" .. player:GetName() .. ".txt"
+    local json = util.TableToJSON(template)
+    file.Write(path, json)
+end
+
+function MGR.GetPreferences(player)
+    path = SettingsDir .. "timelineinfo_" .. player:GetName() .. ".txt"
+    if not file.Exists(path, "DATA") then return nil end
+
+    local json = file.Read(path)
+    local template = util.JSONToTable(json)
+    if not template then
+        error("SMH settings file load failure")
+    end
+
+    for i = 1, template.Timelines do
+        local color = template.TimelineMods[i].KeyColor
+        template.TimelineMods[i].KeyColor = Color(color.r, color.g, color.b)
+    end
+    return template
 end
 
 SMH.Saves = MGR

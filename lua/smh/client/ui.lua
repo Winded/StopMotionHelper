@@ -6,48 +6,69 @@ local PropertiesMenu = nil
 local FrameToKeyframe = {}
 local KeyframePointers = {}
 local KeyframeEasingData = {}
+local LastID = 0
 local ClickerEntity = nil
+local KeyColor = Color(0, 200, 0)
 
-local function CreateCopyPointer(keyframeId)
+local function CreateCopyPointer(keyframeId, mods)
     local pointer = WorldClicker.MainMenu.FramePanel:CreateFramePointer(
-        Color(0, 200, 0),
+        KeyColor,
         WorldClicker.MainMenu.FramePanel:GetTall() / 4 * 2.2,
         false
     )
     pointer:OnMousePressed(MOUSE_LEFT)
     pointer.OnPointerReleased = function(_, frame)
-        SMH.Controller.CopyKeyframe(keyframeId, frame)
         WorldClicker.MainMenu.FramePanel:DeleteFramePointer(pointer)
-        for id, pointer in pairs(KeyframePointers) do
-            if id == keyframeId + 1 then continue end
-            if pointer:GetFrame() == frame then
-                SMH.Controller.DeleteKeyframe(id)
+        local counter = 1
+        for mod, idm in pairs(mods) do
+            SMH.Controller.CopyKeyframe(idm, frame)
+
+            for id, pointer in pairs(KeyframePointers) do
+                if id == LastID + counter then continue end
+                if pointer:GetFrame() == frame and mod == pointer:GetMod() then
+                    SMH.Controller.DeleteKeyframe(id)
+                end
             end
+            counter = counter + 1
         end
     end
 end
 
-local function NewKeyframePointer(keyframeId)
+local function NewKeyframePointer(keyframeId, modname)
+    if keyframeId > LastID then LastID = keyframeId end
+
     local pointer = WorldClicker.MainMenu.FramePanel:CreateFramePointer(
-        Color(0, 200, 0),
+        KeyColor,
         WorldClicker.MainMenu.FramePanel:GetTall() / 4 * 2.2,
         false
     )
+    pointer:SetMod(modname)
 
     pointer.OnPointerReleased = function(_, frame)
         SMH.Controller.UpdateKeyframe(keyframeId, { Frame = frame })
         for id, pointer in pairs(KeyframePointers) do
             if id == keyframeId then continue end
-            if pointer:GetFrame() == frame then
+            if pointer:GetFrame() == frame and pointer:GetMod() == modname then
                 SMH.Controller.DeleteKeyframe(id)
             end
         end
     end
     pointer.OnCustomMousePressed = function(_, mousecode)
+        local frame = pointer:GetFrame()
         if mousecode == MOUSE_RIGHT and not input.IsKeyDown(KEY_LCONTROL) then
-            SMH.Controller.DeleteKeyframe(keyframeId)
+            for id, kpointer in pairs(KeyframePointers) do
+                if kpointer:GetFrame() == frame then
+                    SMH.Controller.DeleteKeyframe(id)
+                end
+            end
         elseif mousecode == MOUSE_MIDDLE or (mousecode == MOUSE_RIGHT and input.IsKeyDown(KEY_LCONTROL)) then
-            CreateCopyPointer(keyframeId)
+            local mods = {}
+            for id, kpointer in pairs(KeyframePointers) do
+                if kpointer:GetFrame() == frame then
+                    mods[kpointer:GetMod()] = id
+                end
+            end
+            CreateCopyPointer(keyframeId, mods)
         end
     end
 
@@ -67,8 +88,10 @@ local function AddCallbacks()
         SMH.Controller.UpdateState(newState)
     end
     WorldClicker.MainMenu.OnRequestKeyframeUpdate = function(_, newKeyframeData)
-        if FrameToKeyframe[SMH.State.Frame] then
-            SMH.Controller.UpdateKeyframe(FrameToKeyframe[SMH.State.Frame], newKeyframeData)
+        for id, pointer in pairs(KeyframePointers) do
+            if pointer:GetFrame() == SMH.State.Frame then
+                SMH.Controller.UpdateKeyframe(id, newKeyframeData)
+            end
         end
     end
     WorldClicker.MainMenu.OnRequestOpenPropertiesMenu = function()
@@ -140,6 +163,29 @@ local function AddCallbacks()
         SMH.Controller.ApplyEntityName(ent, name)
     end
 
+    PropertiesMenu.SelectEntity = function(_, ent)
+        SMH.Controller.SelectEntity(ent)
+        LoadMenu:UpdateSelectedEnt(ent)
+        PropertiesMenu:UpdateSelectedEnt(ent)
+        ClickerEntity = ent
+    end
+
+    PropertiesMenu.OnAddTimelineRequested = function()
+        SMH.Controller.AddTimeline()
+    end
+    
+    PropertiesMenu.OnRemoveTimelineRequested = function()
+        SMH.Controller.RemoveTimeline()
+    end
+
+    PropertiesMenu.OnUpdateModifierRequested = function(_, i, mod, check)
+        SMH.Controller.UpdateModifier(i, mod, check)
+    end
+
+    PropertiesMenu.OnUpdateKeyframeColorRequested = function(_, color, timeline)
+        SMH.Controller.UpdateKeyframeColor(color, timeline)
+    end
+
 end
 
 hook.Add("EntityRemoved", "SMHWorldClickerEntityRemoved", function(entity)
@@ -157,7 +203,7 @@ hook.Add("InitPostEntity", "SMHMenuSetup", function()
     WorldClicker.MainMenu = vgui.Create("SMHMenu", WorldClicker)
 
     WorldClicker.Settings = vgui.Create("SMHSettings", WorldClicker)
-    WorldClicker.Settings:SetPos(ScrW() - 250, ScrH() - 75 - 225)
+    WorldClicker.Settings:SetPos(ScrW() - 250, ScrH() - 90 - 225)
     WorldClicker.Settings:SetVisible(false)
 
     SaveMenu = vgui.Create("SMHSave")
@@ -173,6 +219,8 @@ hook.Add("InitPostEntity", "SMHMenuSetup", function()
     PropertiesMenu:SetVisible(false)
 
     AddCallbacks()
+
+    SMH.Controller.RequestModifiers() -- needed to initialize properties menu
 
     WorldClicker.MainMenu:SetInitialState(SMH.State)
 
@@ -215,17 +263,32 @@ function MGR.SetKeyframes(keyframes)
     for _, pointer in pairs(KeyframePointers) do
         WorldClicker.MainMenu.FramePanel:DeleteFramePointer(pointer)
     end
+
+    local propertymods = PropertiesMenu:GetCurrentModifiers()
+
+    if not propertymods.KeyColor then
+        KeyColor = Color(0, 200, 0)
+    else
+        KeyColor = propertymods.KeyColor
+    end
+
+    local Modifiers = {}
+    for _, name in ipairs(propertymods) do
+        Modifiers[name] = true
+    end
     KeyframePointers = {}
     FrameToKeyframe = {}
 
     for _, keyframe in pairs(keyframes) do
-        KeyframePointers[keyframe.ID] = NewKeyframePointer(keyframe.ID)
-        KeyframePointers[keyframe.ID]:SetFrame(keyframe.Frame)
-        FrameToKeyframe[keyframe.Frame] = keyframe.ID
-        KeyframeEasingData[keyframe.ID] = {
-            EaseIn = keyframe.EaseIn,
-            EaseOut = keyframe.EaseOut,
-        }
+        if Modifiers[keyframe.Modifier] then
+            KeyframePointers[keyframe.ID] = NewKeyframePointer(keyframe.ID, keyframe.Modifier)
+            KeyframePointers[keyframe.ID]:SetFrame(keyframe.Frame)
+            FrameToKeyframe[keyframe.Frame] = keyframe.ID
+            KeyframeEasingData[keyframe.ID] = {
+                EaseIn = keyframe.EaseIn,
+                EaseOut = keyframe.EaseOut,
+            }
+        end
     end
 end
 
@@ -236,7 +299,7 @@ function MGR.UpdateKeyframe(keyframe)
     }
 
     if not KeyframePointers[keyframe.ID] then
-        KeyframePointers[keyframe.ID] = NewKeyframePointer(keyframe.ID)
+        KeyframePointers[keyframe.ID] = NewKeyframePointer(keyframe.ID, keyframe.Modifier)
 
         -- TODO should this logic exist? Where should it be?
         -- if FrameToKeyframe[keyframe.Frame] and KeyframePointers[FrameToKeyframe[keyframe.Frame]] then
@@ -274,6 +337,43 @@ function MGR.DeleteKeyframe(keyframeId)
     end
 end
 
+function MGR.AssignFrames(pointer)
+    local frame = pointer:GetFrame()
+    local keyID
+    for id, kpointer in pairs(KeyframePointers) do
+        if pointer == kpointer then
+            keyID = id
+            break
+        end
+    end
+
+    if not keyID then return end
+
+    for id, kpointer in pairs(KeyframePointers) do
+        if keyID == id then continue end
+        if kpointer:GetFrame() == frame then
+            kpointer:SetParentPointer(pointer)
+        end
+    end
+end
+
+function MGR.MoveChildren(pointer, frame)
+    for id, kpointer in pairs(KeyframePointers) do
+        if kpointer:GetParentKeyframe() == pointer then
+            kpointer:SetFrame(frame)
+        end
+    end
+end
+
+function MGR.ClearFrames(pointer)
+    for id, kpointer in pairs(KeyframePointers) do
+        if kpointer:GetParentKeyframe() == pointer then
+            kpointer:OnPointerReleased(kpointer:GetFrame())
+            kpointer:ClearParentPointer()
+        end
+    end
+end
+
 function MGR.SetServerSaves(saves)
     LoadMenu:SetSaves(saves)
     SaveMenu:SetSaves(saves)
@@ -303,9 +403,38 @@ function MGR.RemoveSaveFile(path)
     SaveMenu:RemoveSave(path)
 end
 
+function MGR.InitModifiers(list)
+    PropertiesMenu:InitModifiers(list)
+end
+
+function MGR.SetTimeline(timeline)
+    WorldClicker.MainMenu:UpdateTimelines(timeline)
+    PropertiesMenu:UpdateTimelineInfo(timeline)
+end
+
 function MGR.UpdateState(newState)
     WorldClicker.MainMenu:UpdatePositionLabel(newState.Frame, newState.PlaybackLength)
     WorldClicker.MainMenu.FramePanel:UpdateFrameCount(newState.PlaybackLength)
+end
+
+function MGR.UpdateModifier(timelineinfo, changed)
+    PropertiesMenu:UpdateModifiersInfo(timelineinfo, changed)
+end
+
+function MGR.UpdateKeyColor(timelineinfo)
+    PropertiesMenu:UpdateColor(timelineinfo)
+end
+
+function MGR.PaintKeyframes(color)
+    KeyColor = color
+
+    for _, pointer in pairs(KeyframePointers) do
+        pointer.Color = KeyColor
+    end
+end
+
+function MGR.GetModifiers()
+    return PropertiesMenu:GetModifiers()
 end
 
 SMH.UI = MGR

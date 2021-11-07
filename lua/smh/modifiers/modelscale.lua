@@ -10,6 +10,10 @@ function MOD:LoadGhost(entity, ghost, data)
     self:Load(ghost, data);
 end
 
+function MOD:LoadGhostBetween(entity, ghost, data1, data2, percentage)
+    self:LoadBetween(ghost, data1, data2, percentage);
+end
+
 function MOD:Load(entity, data)
     entity:SetModelScale(data.ModelScale);
 end

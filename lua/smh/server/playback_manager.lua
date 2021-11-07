@@ -8,28 +8,18 @@ function MGR.SetFrame(player, newFrame, settings)
     end
 
     for entity, keyframes in pairs(SMH.KeyframeData.Players[player].Entities) do
-        local prevKeyframe, nextKeyframe, lerpMultiplier = SMH.GetClosestKeyframes(keyframes, newFrame)
-        if not prevKeyframe then
-            continue
-        end
+        for name, mod in pairs(SMH.Modifiers) do
+            local prevKeyframe, nextKeyframe, lerpMultiplier = SMH.GetClosestKeyframes(keyframes, newFrame, false, name)
+            if not prevKeyframe then
+                continue
+            end
 
-        if lerpMultiplier <= 0 or settings.TweenDisable then
-            for name, mod in pairs(SMH.Modifiers) do
-                if prevKeyframe.Modifiers[name] then
-                    mod:Load(entity, prevKeyframe.Modifiers[name], settings);
-                end
-            end
-        elseif lerpMultiplier >= 1 then
-            for name, mod in pairs(SMH.Modifiers) do
-                if nextKeyframe.Modifiers[name] then
-                    mod:Load(entity, nextKeyframe.Modifiers[name], settings);
-                end
-            end
-        else
-            for name, mod in pairs(SMH.Modifiers) do
-                if prevKeyframe.Modifiers[name] and nextKeyframe.Modifiers[name] then
-                    mod:LoadBetween(entity, prevKeyframe.Modifiers[name], nextKeyframe.Modifiers[name], lerpMultiplier, settings);
-                end
+            if lerpMultiplier <= 0 or settings.TweenDisable then
+                mod:Load(entity, prevKeyframe.Modifiers[name], settings);
+            elseif lerpMultiplier >= 1 then
+                mod:Load(entity, nextKeyframe.Modifiers[name], settings);
+            else
+                mod:LoadBetween(entity, prevKeyframe.Modifiers[name], nextKeyframe.Modifiers[name], lerpMultiplier, settings);
             end
         end
     end

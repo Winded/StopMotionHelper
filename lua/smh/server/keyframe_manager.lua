@@ -1,11 +1,11 @@
-local function GetExistingKeyframe(player, entity, frame)
+local function GetExistingKeyframe(player, entity, frame, modname)
     if not SMH.KeyframeData.Players[player] or not SMH.KeyframeData.Players[player].Entities[entity] then
         return nil
     end
 
     local keyframes = SMH.KeyframeData.Players[player].Entities[entity]
     for _, keyframe in pairs(keyframes) do
-        if keyframe.Frame == frame then
+        if keyframe.Frame == frame and keyframe.Modifier == modname then
             return keyframe
         end
     end
@@ -13,9 +13,13 @@ local function GetExistingKeyframe(player, entity, frame)
     return nil
 end
 
-local function Record(keyframe, player, entity)
+local function Record(keyframe, player, entity, modname)
     for name, mod in pairs(SMH.Modifiers) do
-        keyframe.Modifiers[name] = mod:Save(entity)
+        if modname == name then
+            keyframe.Modifiers[name] = mod:Save(entity)
+            keyframe.Modifier = name
+            break
+        end
     end
 end
 
@@ -57,18 +61,25 @@ function MGR.GetAllForEntity(player, entity)
     return table.Copy(SMH.KeyframeData.Players[player].Entities[entity])
 end
 
-function MGR.Create(player, entity, frame)
-    local keyframe = GetExistingKeyframe(player, entity, frame)
+function MGR.Create(player, entity, frame, timeline)
+    local keyframes = {}
 
-    if keyframe ~= nil then
-        Record(keyframe, player, entity)
-        return keyframe
+    for _, name in ipairs(SMH.Properties.Players[player].Entities[entity].TimelineMods[timeline]) do
+        local keyframe = GetExistingKeyframe(player, entity, frame, name)
+
+        if keyframe ~= nil then
+            Record(keyframe, player, entity, name)
+            table.insert(keyframes, keyframe)
+            continue
+        end
+
+        keyframe = SMH.KeyframeData:New(player, entity)
+        keyframe.Frame = frame
+        Record(keyframe, player, entity, name)
+        table.insert(keyframes, keyframe)
     end
 
-    keyframe = SMH.KeyframeData:New(player, entity)
-    keyframe.Frame = frame
-    Record(keyframe, player, entity)
-    return keyframe
+    return keyframes
 end
 
 function MGR.Update(player, keyframeId, updateData)
@@ -103,16 +114,19 @@ function MGR.Copy(player, keyframeId, frame)
     copiedKeyframe.EaseIn = keyframe.EaseIn
     copiedKeyframe.EaseOut = keyframe.EaseOut
     copiedKeyframe.Modifiers = table.Copy(keyframe.Modifiers)
+    copiedKeyframe.Modifier = keyframe.Modifier
 
     return copiedKeyframe
 end
 
 function MGR.Delete(player, keyframeId)
+    local entity = SMH.KeyframeData.Players[player].Keyframes[keyframeId].Entity
     if not SMH.KeyframeData.Players[player] or not SMH.KeyframeData.Players[player].Keyframes[keyframeId] then
         error("Invalid keyframe ID")
     end
 
     SMH.KeyframeData:Delete(player, keyframeId)
+    return entity
 end
 
 function MGR.ImportSave(player, entity, serializedKeyframes, entityProperties)
@@ -123,14 +137,31 @@ function MGR.ImportSave(player, entity, serializedKeyframes, entityProperties)
         end
     end
 
-    SMH.PropertiesManager.SetName(player, entity, entityProperties.Name)
+    SMH.PropertiesManager.SetProperties(player, entity, entityProperties)
 
-    for _, skf in pairs(serializedKeyframes) do
-        local keyframe = SMH.KeyframeData:New(player, entity)
-        keyframe.Frame = skf.Position
-        keyframe.EaseIn = skf.EaseIn
-        keyframe.EaseOut = skf.EaseOut
-        keyframe.Modifiers = skf.EntityData
+    if SMH.Properties.Players[player].Entities[entity].Old then -- should make it compatible with older saves
+        SMH.Properties.Players[player].Entities[entity].Old = nil
+        for _, skf in pairs(serializedKeyframes) do
+            for name, mod in pairs(SMH.Modifiers) do
+                if skf.EntityData[name] ~= nil then
+                    local keyframe = SMH.KeyframeData:New(player, entity)
+                    keyframe.Frame = skf.Position
+                    keyframe.EaseIn = skf.EaseIn
+                    keyframe.EaseOut = skf.EaseOut
+                    keyframe.Modifiers[name] = skf.EntityData[name]
+                    keyframe.Modifier = name
+                end
+            end
+        end
+    else
+        for _, skf in pairs(serializedKeyframes) do
+            local keyframe = SMH.KeyframeData:New(player, entity)
+            keyframe.Frame = skf.Position
+            keyframe.EaseIn = skf.EaseIn
+            keyframe.EaseOut = skf.EaseOut
+            keyframe.Modifiers = skf.EntityData
+            keyframe.Modifier = skf.Modifier
+        end
     end
 end
 
