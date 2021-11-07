@@ -294,7 +294,7 @@ hook.Add("InitPostEntity", "SMHMenuSetup", function()
     WorldClicker.MainMenu = vgui.Create("SMHMenu", WorldClicker)
 
     WorldClicker.Settings = vgui.Create("SMHSettings", WorldClicker)
-    WorldClicker.Settings:SetPos(ScrW() - 250, ScrH() - 90 - 225)
+    WorldClicker.Settings:SetPos(ScrW() - 250, ScrH() - 90 - 245)
     WorldClicker.Settings:SetVisible(false)
 
     SaveMenu = vgui.Create("SMHSave")

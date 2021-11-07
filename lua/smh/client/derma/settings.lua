@@ -42,6 +42,7 @@ function PANEL:Init()
     self.GhostNextFrame = CreateCheckBox("GhostNextFrame", "Ghost next frame")
     self.GhostAllEntities = CreateCheckBox("GhostAllEntities", "Ghost all entities")
     self.TweenDisable = CreateCheckBox("TweenDisable", "Disable tweening")
+    self.SmoothPlayback = CreateCheckBox("SmoothPlayback", "Smooth playback")
     self.GhostTransparency = CreateSlider("GhostTransparency", "Ghost transparency", 0, 1, 2)
 
     self.HelpButton = vgui.Create("DButton", self)
@@ -50,7 +51,7 @@ function PANEL:Init()
         self:OnRequestOpenHelp()
     end
 
-    self:SetSize(250, 225)
+    self:SetSize(250, 245)
 
     self._changingSettings = false
 
@@ -72,10 +73,12 @@ function PANEL:PerformLayout(width, height)
 
     self.TweenDisable:SetPos(5, 145)
 
-    self.GhostTransparency:SetPos(5, 165)
+    self.SmoothPlayback:SetPos(5, 165)
+
+    self.GhostTransparency:SetPos(5, 185)
     self.GhostTransparency:SetSize(self:GetWide() - 5 - 5, 25)
 
-    self.HelpButton:SetPos(5, 200)
+    self.HelpButton:SetPos(5, 210)
     self.HelpButton:SetSize(self:GetWide() - 5 - 5, 20)
 
 end
@@ -91,6 +94,7 @@ function PANEL:ApplySettings(settings)
         "GhostNextFrame",
         "GhostAllEntities",
         "TweenDisable",
+        "SmoothPlayback",
     }
 
     for _, key in pairs(checkBoxes) do
