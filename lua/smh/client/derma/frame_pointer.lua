@@ -24,7 +24,8 @@ function PANEL:Init()
 
     self._frame = 0
     self._dragging = false
-    self._mod = "nil"    self._selected = false
+    self._mod = "nil"
+    self._selected = false
     self._maxoffset = 0
     self._minoffset = 0
 
@@ -121,6 +122,7 @@ function PANEL:OnMousePressed(mousecode)
     self:MouseCapture(true)
     self._dragging = true
 
+    SMH.UI.AssignFrames(self)
     SMH.UI.SetOffsets(self)
 end
 
@@ -138,7 +140,8 @@ end
 
 function PANEL:SetOffsets(minimum, maximum)
     self._minoffset = minimum
-    self._maxoffset = maximumend
+    self._maxoffset = maximum
+end
 
 function PANEL:SetParentPointer(ppointer)
     self.parent = ppointer
