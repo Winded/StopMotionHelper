@@ -1,5 +1,26 @@
 local INT_BITCOUNT = 32
 
+local function ReceiveKeyframes()
+    local entity = net.ReadEntity()
+    local framecount = net.ReadUInt(INT_BITCOUNT)
+    for i = 1, framecount do
+        SMH.TableSplit.AKeyframes(net.ReadUInt(INT_BITCOUNT), entity, net.ReadUInt(INT_BITCOUNT), net.ReadFloat(), net.ReadFloat(), nil, net.ReadString())
+    end
+    return SMH.TableSplit.GetKeyframes(), entity
+end
+
+local function ReceiveProperties()
+    local Timelines = SMH.TableSplit.StartAProperties(net.ReadString(), net.ReadUInt(INT_BITCOUNT))
+    for i=1, Timelines do
+        net.ReadUInt(4)
+        SMH.TableSplit.AProperties(i, nil, net.ReadColor())
+        for j=1, net.ReadUInt(INT_BITCOUNT) do
+            SMH.TableSplit.AProperties(i, net.ReadString())
+        end
+    end
+    return SMH.TableSplit.GetProperties()
+end
+
 local CTRL = {}
 
 function CTRL.SetFrame(frame)
@@ -257,25 +278,11 @@ local function SetFrameResponse(msgLength)
 end
 
 local function SelectEntityResponse(msgLength)
-    local entity = net.ReadEntity()
+    local keyframes, entity = ReceiveKeyframes()
     local timeline = {}
 
-    local framecount = net.ReadUInt(INT_BITCOUNT)
-    for i = 1, framecount do
-        SMH.TableSplit.AKeyframes(net.ReadUInt(INT_BITCOUNT), entity, net.ReadUInt(INT_BITCOUNT), net.ReadFloat(), net.ReadFloat(), nil, net.ReadString())
-    end
-    local keyframes = SMH.TableSplit.GetKeyframes()
-
     if net.ReadBool() then
-        local Timelines = SMH.TableSplit.StartAProperties(net.ReadString(), net.ReadUInt(INT_BITCOUNT))
-        for i=1, Timelines do
-            net.ReadUInt(4)
-            SMH.TableSplit.AProperties(i, nil, net.ReadColor())
-            for j=1, net.ReadUInt(INT_BITCOUNT) do
-                SMH.TableSplit.AProperties(i, net.ReadString())
-            end
-        end
-        timeline = SMH.TableSplit.GetProperties()
+        timeline = ReceiveProperties()
     end
 
     SMH.State.Entity = entity
@@ -284,13 +291,7 @@ local function SelectEntityResponse(msgLength)
 end
 
 local function UpdateKeyframeResponse(msgLength)
-    local entity = net.ReadEntity()
-
-    local framecount = net.ReadUInt(INT_BITCOUNT)
-    for i = 1, framecount do
-        SMH.TableSplit.AKeyframes(net.ReadUInt(INT_BITCOUNT), entity, net.ReadUInt(INT_BITCOUNT), net.ReadFloat(), net.ReadFloat(), nil, net.ReadString())
-    end
-    local keyframes = SMH.TableSplit.GetKeyframes()
+    local keyframes = ReceiveKeyframes()
 
     for num, keyframe in ipairs(keyframes) do
         if keyframe.Entity == SMH.State.Entity then
@@ -299,15 +300,8 @@ local function UpdateKeyframeResponse(msgLength)
     end
 
     if net.ReadBool() then
-        local Timelines = SMH.TableSplit.StartAProperties(net.ReadString(), net.ReadUInt(INT_BITCOUNT))
-        for i=1, Timelines do
-            net.ReadUInt(4)
-            SMH.TableSplit.AProperties(i, nil, net.ReadColor())
-            for j=1, net.ReadUInt(INT_BITCOUNT) do
-                SMH.TableSplit.AProperties(i, net.ReadString())
-            end
-        end
-        SMH.UI.SetTimeline(SMH.TableSplit.GetProperties())
+        local timeline = ReceiveProperties()
+        SMH.UI.SetTimeline(timeline)
     end
 end
 
@@ -346,23 +340,8 @@ local function GetServerEntitiesResponse(msgLength)
 end
 
 local function LoadResponse(msgLength)
-    local entity = net.ReadEntity()
-
-    local framecount = net.ReadUInt(INT_BITCOUNT)
-    for i = 1, framecount do
-        SMH.TableSplit.AKeyframes(net.ReadUInt(INT_BITCOUNT), entity, net.ReadUInt(INT_BITCOUNT), net.ReadFloat(), net.ReadFloat(), nil, net.ReadString())
-    end
-    local keyframes = SMH.TableSplit.GetKeyframes()
-
-    local Timelines = SMH.TableSplit.StartAProperties(net.ReadString(), net.ReadUInt(INT_BITCOUNT))
-    for i=1, Timelines do
-        net.ReadUInt(4)
-        SMH.TableSplit.AProperties(i, nil, net.ReadColor())
-        for j=1, net.ReadUInt(INT_BITCOUNT) do
-            SMH.TableSplit.AProperties(i, net.ReadString())
-        end
-    end
-    local timeline = SMH.TableSplit.GetProperties()
+    local keyframes, entity = ReceiveKeyframes()
+    local timeline = ReceiveProperties()
 
     if entity == SMH.State.Entity then
         SMH.UI.SetTimeline(timeline)
@@ -401,13 +380,7 @@ local function ApplyEntityNameResponse(msgLength)
 end
 
 local function UpdateTimelineResponse(msgLength)
-    local entity = net.ReadEntity()
-
-    local framecount = net.ReadUInt(INT_BITCOUNT)
-    for i = 1, framecount do
-        SMH.TableSplit.AKeyframes(net.ReadUInt(INT_BITCOUNT), entity, net.ReadUInt(INT_BITCOUNT), net.ReadFloat(), net.ReadFloat(), nil, net.ReadString())
-    end
-    local keyframes = SMH.TableSplit.GetKeyframes()
+    local keyframes = ReceiveKeyframes()
 
     SMH.UI.SetKeyframes(keyframes)
 end
@@ -419,23 +392,8 @@ local function RequestModifiersResponse(msgLength)
 end
 
 local function UpdateTimelineInfoResponse(msgLength)
-    local Timelines = SMH.TableSplit.StartAProperties(net.ReadString(), net.ReadUInt(INT_BITCOUNT))
-    for i=1, Timelines do
-        net.ReadUInt(4)
-        SMH.TableSplit.AProperties(i, nil, net.ReadColor())
-        for j=1, net.ReadUInt(INT_BITCOUNT) do
-            SMH.TableSplit.AProperties(i, net.ReadString())
-        end
-    end
-    local timeline = SMH.TableSplit.GetProperties()
-
-    local entity = net.ReadEntity()
-
-    local framecount = net.ReadUInt(INT_BITCOUNT)
-    for i = 1, framecount do
-        SMH.TableSplit.AKeyframes(net.ReadUInt(INT_BITCOUNT), entity, net.ReadUInt(INT_BITCOUNT), net.ReadFloat(), net.ReadFloat(), nil, net.ReadString())
-    end
-    local keyframes = SMH.TableSplit.GetKeyframes()
+    local timeline = ReceiveProperties()
+    local keyframes = ReceiveKeyframes()
 
     SMH.UI.SetTimeline(timeline)
     SMH.UI.SetKeyframes(keyframes)
@@ -443,39 +401,15 @@ end
 
 local function UpdateModifierResponse(msgLength)
     local changed = net.ReadString()
-    local Timelines = SMH.TableSplit.StartAProperties(net.ReadString(), net.ReadUInt(INT_BITCOUNT))
-        for i=1, Timelines do
-            net.ReadUInt(4)
-            SMH.TableSplit.AProperties(i, nil, net.ReadColor())
-            for j=1, net.ReadUInt(INT_BITCOUNT) do
-                SMH.TableSplit.AProperties(i, net.ReadString())
-            end
-        end
-    local timeline = SMH.TableSplit.GetProperties()
-
-    local entity = net.ReadEntity()
-
-    local framecount = net.ReadUInt(INT_BITCOUNT)
-    for i = 1, framecount do
-        SMH.TableSplit.AKeyframes(net.ReadUInt(INT_BITCOUNT), entity, net.ReadUInt(INT_BITCOUNT), net.ReadFloat(), net.ReadFloat(), nil, net.ReadString())
-    end
-    local keyframes = SMH.TableSplit.GetKeyframes()
-
+    local timeline = ReceiveProperties()
+    local keyframes = ReceiveKeyframes()
 
     SMH.UI.UpdateModifier(timeline, changed)
     SMH.UI.SetKeyframes(keyframes)
 end
 
 local function UpdateKeyframeColorResponse(msgLength)
-    local Timelines = SMH.TableSplit.StartAProperties(net.ReadString(), net.ReadUInt(INT_BITCOUNT))
-    for i=1, Timelines do
-        net.ReadUInt(4)
-        SMH.TableSplit.AProperties(i, nil, net.ReadColor())
-        for j=1, net.ReadUInt(INT_BITCOUNT) do
-            SMH.TableSplit.AProperties(i, net.ReadString())
-            end
-    end
-    local timelineinfo = SMH.TableSplit.GetProperties()
+    local timelineinfo = ReceiveProperties()
 
     SMH.UI.UpdateKeyColor(timelineinfo)
 end
