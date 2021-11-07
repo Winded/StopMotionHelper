@@ -47,7 +47,10 @@ local function CreateCopyPointer(keyframeId, mods)
                 for id, pointer in pairs(KeyframePointers) do
                     if id == LastID + counter then continue end
                     if pointer:GetFrame() == frame then
-                        table.insert(KeysToDelete, id)
+						if not pointer.todelete then
+							pointer.todelete = true
+							table.insert(KeysToDelete, id)
+						end
                     end
                 end
             end
@@ -86,7 +89,10 @@ local function CreateCopyPointer(keyframeId, mods)
         for id, pointer in pairs(KeyframePointers) do
             if id == LastID + counter then continue end
             if pointer:GetFrame() == frame then
-                table.insert(KeysToDelete, id)
+				if not pointer.todelete then
+					pointer.todelete = true
+					table.insert(KeysToDelete, id)
+				end
             end
         end
         counter = counter + 1
@@ -95,9 +101,11 @@ local function CreateCopyPointer(keyframeId, mods)
             SMH.Controller.CopyKeyframe(idm, frame)
             for id, pointer in pairs(KeyframePointers) do
                 if id == LastID + counter then continue end
-                if pointer:GetFrame() == frame and mod == pointer:GetMod() then
-                    SMH.Controller.DeleteKeyframe(id)
-                    table.insert(KeysToDelete, id)
+                if pointer:GetFrame() == frame and mod == pointer:GetMod() then	
+                    if not pointer.todelete then
+						pointer.todelete = true
+						table.insert(KeysToDelete, id)
+					end
                 end
             end
             counter = counter + 1
