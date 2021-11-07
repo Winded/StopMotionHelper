@@ -40,13 +40,13 @@ local function RenderTick()
 
 end
 
-function MGR.Start(useScreenshot)
+function MGR.Start(useScreenshot, StartFrame)
     UseScreenshot = useScreenshot
 
     IsRendering = true
     SMH.Controller.SetRendering(IsRendering)
 
-    SMH.Controller.SetFrame(0)
+    SMH.Controller.SetFrame(StartFrame)
 
     LocalPlayer():EmitSound("buttons/blip1.wav")
 

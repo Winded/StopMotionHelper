@@ -197,7 +197,8 @@ function PANEL:SetInitialState(state)
 end
 
 function PANEL:UpdatePositionLabel(frame, totalFrames)
-    self.PositionLabel:SetText("Position: " .. frame .. " / " .. totalFrames)
+    local offset = GetConVar("smh_startatone"):GetInt()
+    self.PositionLabel:SetText("Position: " .. frame + offset .. " / " .. totalFrames - (1 - offset))
     self.PositionLabel:SizeToContents()
 end
 

@@ -38,14 +38,38 @@ concommand.Add("smh_quicksave", function()
     SMH.Controller.QuickSave()
 end)
 
-concommand.Add("smh_makejpeg", function()
-    SMH.Controller.ToggleRendering(false)
+concommand.Add("smh_makejpeg", function(pl, cmd, args)
+    local startframe
+    if args[1] then
+        startframe = args[1] - GetConVar("smh_startatone"):GetInt()
+    else
+        startframe = 0
+    end
+    if startframe < 0 then startframe = 0 end
+    if startframe < SMH.State.PlaybackLength then
+        SMH.Controller.ToggleRendering(false, startframe)
+    else
+        print("Specified starting frame is outside of the current Frame Count!")
+    end
 end)
 
-concommand.Add("smh_makescreenshot", function()
-    SMH.Controller.ToggleRendering(true)
+concommand.Add("smh_makescreenshot", function(pl, cmd, args)
+    local startframe
+    if args[1] then
+        startframe = args[1] - GetConVar("smh_startatone"):GetInt()
+    else
+        startframe = 0
+    end
+    if startframe < 0 then startframe = 0 end
+    if startframe < SMH.State.PlaybackLength then
+        SMH.Controller.ToggleRendering(true, startframe)
+    else
+        print("Specified starting frame is outside of the current Frame Count!")
+    end
 end)
 
 concommand.Add("smh_savepreset", function()
     SMH.Controller.SaveProperties()
 end)
+
+CreateClientConVar("smh_startatone", 0, true, false, nil, 0, 1)
