@@ -3,7 +3,7 @@ local ActivePlaybacks = {}
 local MGR = {}
 
 local function PlaybackSmooth(player, playback, settings)
-	if not SMH.KeyframeData.Players[player] then
+    if not SMH.KeyframeData.Players[player] then
         return
     end
 
@@ -18,24 +18,24 @@ local function PlaybackSmooth(player, playback, settings)
     end
 
     for entity, keyframes in pairs(SMH.KeyframeData.Players[player].Entities) do
-		for name, mod in pairs(SMH.Modifiers) do
-			local prevKeyframe, nextKeyframe, _ = SMH.GetClosestKeyframes(keyframes, playback.CurrentFrame, false, name)
+        for name, mod in pairs(SMH.Modifiers) do
+            local prevKeyframe, nextKeyframe, _ = SMH.GetClosestKeyframes(keyframes, playback.CurrentFrame, false, name)
 
-			if not prevKeyframe then continue end
+            if not prevKeyframe then continue end
 
-			if prevKeyframe.Frame == nextKeyframe.Frame then
-				if prevKeyframe.Modifiers[name] and nextKeyframe.Modifiers[name] then
-					mod:Load(entity, prevKeyframe.Modifiers[name], settings);
-				end
-			else
-				local lerpMultiplier = ((playback.Timer + playback.StartFrame * timePerFrame) - prevKeyframe.Frame * timePerFrame) / ((nextKeyframe.Frame - prevKeyframe.Frame) * timePerFrame)
-				lerpMultiplier = math.EaseInOut(lerpMultiplier, prevKeyframe.EaseOut, nextKeyframe.EaseIn)
+            if prevKeyframe.Frame == nextKeyframe.Frame then
+                if prevKeyframe.Modifiers[name] and nextKeyframe.Modifiers[name] then
+                    mod:Load(entity, prevKeyframe.Modifiers[name], settings);
+                end
+            else
+                local lerpMultiplier = ((playback.Timer + playback.StartFrame * timePerFrame) - prevKeyframe.Frame * timePerFrame) / ((nextKeyframe.Frame - prevKeyframe.Frame) * timePerFrame)
+                lerpMultiplier = math.EaseInOut(lerpMultiplier, prevKeyframe.EaseOut, nextKeyframe.EaseIn)
 
-				if prevKeyframe.Modifiers[name] and nextKeyframe.Modifiers[name] then
-					mod:LoadBetween(entity, prevKeyframe.Modifiers[name], nextKeyframe.Modifiers[name], lerpMultiplier, settings);
-				end
-			end
-		end
+                if prevKeyframe.Modifiers[name] and nextKeyframe.Modifiers[name] then
+                    mod:LoadBetween(entity, prevKeyframe.Modifiers[name], nextKeyframe.Modifiers[name], lerpMultiplier, settings);
+                end
+            end
+        end
     end
 end
 
