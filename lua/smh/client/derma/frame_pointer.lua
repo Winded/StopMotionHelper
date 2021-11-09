@@ -24,7 +24,8 @@ function PANEL:Init()
 
     self._frame = 0
     self._dragging = false
-    self._mod = "nil"
+    self._ids = {}
+    self._mods = {}
     self._selected = false
     self._maxoffset = 0
     self._minoffset = 0
@@ -105,12 +106,22 @@ function PANEL:GetSelected()
     return self._selected
 end
 
-function PANEL:GetMod()
-    return self._mod
+function PANEL:GetIDs()
+    return self._ids
 end
 
-function PANEL:SetMod(mod)
-    self._mod = mod
+function PANEL:GetMods()
+    return self._mods
+end
+
+function PANEL:RemoveID(id)
+    self._mods[self._ids[id]] = nil
+    self._ids[id] = nil
+end
+
+function PANEL:AddID(id, mod)
+    self._ids[id] = mod
+    self._mods[mod] = id
 end
 
 function PANEL:OnMousePressed(mousecode)
@@ -122,7 +133,6 @@ function PANEL:OnMousePressed(mousecode)
     self:MouseCapture(true)
     self._dragging = true
 
-    SMH.UI.AssignFrames(self)
     SMH.UI.SetOffsets(self)
 end
 
