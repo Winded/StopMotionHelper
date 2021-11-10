@@ -18,21 +18,21 @@ local ClickerEntity = nil
 
 local function DeleteEmptyKeyframe(pointer)
     for id, kpointer in pairs(KeyframePointers) do
-		if pointer == kpointer then
-			if KeyframePointers[id] == LastSelectedKeyframe then LastSelectedKeyframe = nil end
-			SelectedPointers[id] = nil
-			WorldClicker.MainMenu.FramePanel:DeleteFramePointer(kpointer)
-			KeyframePointers[id] = nil
-			KeyframeEasingData[id] = nil
+        if pointer == kpointer then
+            if KeyframePointers[id] == LastSelectedKeyframe then LastSelectedKeyframe = nil end
+            SelectedPointers[id] = nil
+            WorldClicker.MainMenu.FramePanel:DeleteFramePointer(kpointer)
+            KeyframePointers[id] = nil
+            KeyframeEasingData[id] = nil
 
-			for frame, kid in pairs(FrameToKeyframe) do
-				if kid == id then
-					FrameToKeyframe[frame] = nil
-					break
-				end
-			end
-		end
-	end
+            for frame, kid in pairs(FrameToKeyframe) do
+                if kid == id then
+                    FrameToKeyframe[frame] = nil
+                    break
+                end
+            end
+        end
+    end
 end
 
 local function CreateCopyPointer(keyframeId)
@@ -169,9 +169,9 @@ local function NewKeyframePointer(keyframeId)
                         pointer:AddID(id, mod)
                         KeyframeIDs[id] = KeyframeIDs[keyframeId]
                         kpointer:RemoveID(id)
-						if not next(kpointer:GetIDs()) then
-							DeleteEmptyKeyframe(kpointer)
-						end
+                        if not next(kpointer:GetIDs()) then
+                            DeleteEmptyKeyframe(kpointer)
+                        end
                     end
                 end
 
