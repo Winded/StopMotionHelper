@@ -130,8 +130,12 @@ function MOD:LoadBetween(entity, data1, data2, percentage, settings)
         local Pos = SMH.LerpLinearVector(d1.Pos, d2.Pos, percentage);
         local Ang = SMH.LerpLinearAngle(d1.Ang, d2.Ang, percentage);
 
-        pb:EnableMotion(false);
-            pb:SetPos(Pos);
+        if settings.FreezeAll then
+            pb:EnableMotion(false);
+        else
+            pb:EnableMotion(d1.Moveable);
+        end
+        pb:SetPos(Pos);
         pb:SetAngles(Ang);
 
         pb:Wake();
