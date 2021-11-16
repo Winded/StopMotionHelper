@@ -142,6 +142,7 @@ end
 
 function MGR.SetOffsetMode(set, player)
     MGR.OffsetMode[player] = set
+    SMH.GhostsManager.RefreshSpawnPreview(player)
 end
 
 function MGR.SetPosOffset(Pos, player)

@@ -253,6 +253,17 @@ function MGR.SetSpawnPreview(class, modelpath, data, settings, player)
     end
 end
 
+function MGR.RefreshSpawnPreview(player)
+    if not IsValid(SpawnGhost[player]) then return end
+
+    for name, mod in pairs(SMH.Modifiers) do
+        if name == "color" then continue end
+        if SpawnGhostData[player][name] then
+            mod:Load(SpawnGhost[player], SpawnGhostData[player][name].Modifiers, GhostSettings[player])
+        end
+    end
+end
+
 function MGR.SpawnClear(player)
     if IsValid(SpawnGhost[player]) then
         SpawnGhost[player]:Remove()
@@ -264,7 +275,7 @@ SMH.GhostsManager = MGR
 
 hook.Add("Think", "SMHGhostSpawnOffsetPreview", function()
     for player, data in pairs(SMH.Spawner.OriginData) do
-        if SMH.Spawner.OffsetMode[player] and SpawnGhost[player] then
+        if SMH.Spawner.OffsetMode[player] and IsValid(SpawnGhost[player]) then
             for name, mod in pairs(SMH.Modifiers) do
                 if name == "color" then continue end
                 if SpawnGhostData[player][name] and data[name] and (name == "physbones" or name == "position") then
