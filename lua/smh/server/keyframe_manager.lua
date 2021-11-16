@@ -13,7 +13,7 @@ local function GetExistingKeyframe(player, entity, frame, modname)
     return nil
 end
 
-local function Record(keyframe, player, entity, modname)
+local function Record(keyframe, player, entity, modname)    
     for name, mod in pairs(SMH.Modifiers) do
         if modname == name then
             keyframe.Modifiers[name] = mod:Save(entity)

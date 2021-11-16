@@ -379,6 +379,77 @@ local function SaveProperties(msgLength, player)
     SMH.Saves.SaveProperties(timeline, player)
 end
 
+local function SetPreviewEntity(msgLength, player)
+    local path = net.ReadString()
+    local model = net.ReadString()
+    local settings = net.ReadTable()
+    settings.FreezeAll = true
+
+    SMH.Spawner.SetPreviewEntity(path, model, settings, player)
+end
+
+local function SetSpawnGhost(msgLength, player)
+    local state = net.ReadBool()
+    SMH.Spawner.SetGhost(state, player)
+end
+
+local function SpawnEntity(msgLength, player)
+    local path = net.ReadString()
+    local modelName = net.ReadString()
+    local settings = net.ReadTable()
+    settings.FreezeAll = true
+
+    local entity, offset = SMH.Spawner.Spawn(path, modelName, settings, player)
+    if not entity then return end
+    local serializedKeyframes, entityProperties
+
+    serializedKeyframes, entityProperties = SMH.Saves.LoadForEntity(path, modelName)
+
+    SMH.PropertiesManager.AddEntity(player, entity)
+    SMH.KeyframeManager.ImportSave(player, entity, serializedKeyframes, entityProperties)
+
+    if offset then
+        SMH.Spawner.OffsetKeyframes(player, entity)
+    end
+
+    local timeline = SMH.PropertiesManager.GetAllEntityProperties(player, entity)
+    local Name, Timelines, KeyColor, ModCount, Modifiers = SMH.TableSplit.DProperties(timeline)
+
+    local keyframes = SMH.KeyframeManager.GetAllForEntity(player, entity)
+    local framecount, IDs, ents, Frame, In, Out, _, Modifier = SMH.TableSplit.DKeyframes(keyframes)
+
+    net.Start(SMH.MessageTypes.LoadResponse)
+    SendKeyframes(framecount, IDs, entity, Frame, In, Out, Modifier)
+    SendProperties(Name, Timelines, KeyColor, ModCount, Modifiers)
+    net.Send(player)
+end
+
+local function SpawnReset(msgLength, player)
+    SMH.Spawner.SpawnReset(player)
+end
+
+local function SetSpawnOffsetMode(msgLength, player)
+    local set = net.ReadBool()
+    SMH.Spawner.SetOffsetMode(set, player)
+end
+
+local function SetSpawnOrigin(msgLength, player)
+    local path = net.ReadString()
+    local model = net.ReadString()
+
+    SMH.Spawner.SetOrigin(path, model, player)
+end
+
+local function OffsetPos(msgLength, player)
+    local Pos = net.ReadVector()
+    SMH.Spawner.SetPosOffset(Pos, player)
+end
+
+local function OffsetAng(msgLength, player)
+    local Ang = net.ReadAngle()
+    SMH.Spawner.SetAngleOffset(Ang, player)
+end
+
 local function RequestWorldData(msgLength, player)
     local frame = net.ReadUInt(INT_BITCOUNT)
     local console, push, release = SMH.KeyframeManager.GetWorldData(player, frame)
@@ -432,6 +503,15 @@ net.Receive(SMH.MessageTypes.AddTimeline, AddTimeline)
 net.Receive(SMH.MessageTypes.RemoveTimeline, RemoveTimeline)
 net.Receive(SMH.MessageTypes.UpdateModifier, UpdateModifier)
 net.Receive(SMH.MessageTypes.UpdateKeyframeColor, UpdateKeyframeColor)
+
+net.Receive(SMH.MessageTypes.SetPreviewEntity, SetPreviewEntity)
+net.Receive(SMH.MessageTypes.SetSpawnGhost, SetSpawnGhost)
+net.Receive(SMH.MessageTypes.SpawnEntity, SpawnEntity)
+net.Receive(SMH.MessageTypes.SpawnReset, SpawnReset)
+net.Receive(SMH.MessageTypes.SetSpawnOffsetMode, SetSpawnOffsetMode)
+net.Receive(SMH.MessageTypes.SetSpawnOrigin, SetSpawnOrigin)
+net.Receive(SMH.MessageTypes.OffsetPos, OffsetPos)
+net.Receive(SMH.MessageTypes.OffsetAng, OffsetAng)
 
 net.Receive(SMH.MessageTypes.SaveProperties, SaveProperties)
 

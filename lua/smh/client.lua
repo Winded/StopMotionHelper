@@ -9,6 +9,7 @@ include("client/derma/properties.lua")
 include("client/derma/save.lua")
 include("client/derma/settings.lua")
 include("client/derma/smh_menu.lua")
+include("client/derma/spawn.lua")
 include("client/derma/world_clicker.lua")
 
 include("client/concommands.lua")

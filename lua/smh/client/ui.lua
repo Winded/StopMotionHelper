@@ -298,6 +298,8 @@ local function AddCallbacks()
 
     LoadMenu.OnModelListRequested = function(_, path, loadFromClient)
         SMH.Controller.GetModelList(path, loadFromClient)
+        SMH.Controller.SpawnReset()
+        WorldClicker.SpawnMenu:SetSaveFile(path)
     end
     LoadMenu.OnLoadRequested = function(_, path, modelName, loadFromClient)
         SMH.Controller.Load(path, modelName, loadFromClient)
@@ -305,30 +307,46 @@ local function AddCallbacks()
     LoadMenu.OnModelInfoRequested = function(_, path, modelName, loadFromClient)
         SMH.Controller.GetModelInfo(path, modelName, loadFromClient)
     end
+    LoadMenu.OpenSpawnMenu = function()
+        LoadMenu:Close()
+        WorldClicker.SpawnMenu:SetVisible(true)
+        SMH.Controller.SetSpawnGhost(true)
+    end
+
+    WorldClicker.SpawnMenu.OnClose = function()
+        SMH.Controller.SetSpawnGhost(false)
+    end
+    WorldClicker.SpawnMenu.OnOriginRequested = function(_, path, model, loadFromClient)
+        SMH.Controller.SetSpawnOrigin(path, model, loadFromClient)
+    end
+    WorldClicker.SpawnMenu.OnModelRequested = function(_, path, model, loadFromClient)
+        SMH.Controller.SetPreviewEntity(path, model, loadFromClient)
+    end
+    WorldClicker.SpawnMenu.OnSpawnRequested = function(_, path, model, loadFromClient)
+        SMH.Controller.SpawnEntity(path, model, loadFromClient)
+    end
+    WorldClicker.SpawnMenu.SetOffsetMode = function(_, set)
+        SMH.Controller.SetSpawnOffsetMode(set)
+    end
 
     PropertiesMenu.ApplyName = function(_, ent, name)
         SMH.Controller.ApplyEntityName(ent, name)
     end
-
     PropertiesMenu.SelectEntity = function(_, ent)
         SMH.Controller.SelectEntity(ent)
         LoadMenu:UpdateSelectedEnt(ent)
         PropertiesMenu:UpdateSelectedEnt(ent)
         ClickerEntity = ent
     end
-
     PropertiesMenu.OnAddTimelineRequested = function()
         SMH.Controller.AddTimeline()
     end
-    
     PropertiesMenu.OnRemoveTimelineRequested = function()
         SMH.Controller.RemoveTimeline()
     end
-
     PropertiesMenu.OnUpdateModifierRequested = function(_, i, mod, check)
         SMH.Controller.UpdateModifier(i, mod, check)
     end
-
     PropertiesMenu.OnUpdateKeyframeColorRequested = function(_, color, timeline)
         SMH.Controller.UpdateKeyframeColor(color, timeline)
     end
@@ -371,6 +389,10 @@ hook.Add("InitPostEntity", "SMHMenuSetup", function()
     LoadMenu = vgui.Create("SMHLoad")
     LoadMenu:MakePopup()
     LoadMenu:SetVisible(false)
+
+    WorldClicker.SpawnMenu = vgui.Create("SMHSpawn", WorldClicker)
+    WorldClicker.SpawnMenu:SetPos(0, ScrH() - 405 - 90)
+    WorldClicker.SpawnMenu:SetVisible(false)
 
     PropertiesMenu = vgui.Create("SMHProperties")
     PropertiesMenu:MakePopup()
@@ -662,6 +684,7 @@ end
 
 function MGR.SetModelList(models, map)
     LoadMenu:SetEntities(models, map)
+    WorldClicker.SpawnMenu:SetEntities(models)
 end
 
 function MGR.SetEntityList(entities)

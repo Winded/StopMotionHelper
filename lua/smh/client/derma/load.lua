@@ -33,6 +33,12 @@ function PANEL:Init()
         self:LoadSelected()
     end
 
+    self.Spawn = vgui.Create("DButton", self)
+    self.Spawn:SetText("Spawn")
+    self.Spawn.DoClick = function()
+        self:OpenSpawnMenu()
+    end
+
     self.SaveEntity = vgui.Create("DLabel", self)
     self.SaveEntity:SetText("Save's model: " .. "nil")
 
@@ -55,16 +61,19 @@ function PANEL:PerformLayout(width, height)
     self.EntityList:SetSize(self:GetWide() / 2 - 5 - 5, 150 * (self:GetTall() / 210))
 
     self.SaveEntity:SetPos(5, 30 + self.FileList:GetTall() + 5 )
-    self.SaveEntity:SetSize(self:GetWide() * 2 / 3, 15)
+    self.SaveEntity:SetSize(self:GetWide() - 135, 15)
 
     self.SaveMap:SetPos(5, 30 + self.FileList:GetTall() + 25 )
-    self.SaveMap:SetSize(self:GetWide() * 2 / 3, 15)
+    self.SaveMap:SetSize(self:GetWide() - 135, 15)
 
     self.SelectedEnt:SetPos(5, 30 + self.FileList:GetTall() + 45 )
-    self.SelectedEnt:SetSize(self:GetWide() * 2 / 3, 15)
+    self.SelectedEnt:SetSize(self:GetWide() - 135, 15)
 
     self.Load:SetPos(self:GetWide() - 60 - 5, self:GetTall() - 28)
     self.Load:SetSize(60, 20)
+
+    self.Spawn:SetPos(self:GetWide() - 65 - 5 - 60, self:GetTall() - 28)
+    self.Spawn:SetSize(60, 20)
 
 end
 
@@ -100,6 +109,7 @@ function PANEL:LoadSelected()
     self:OnLoadRequested(selectedSave:GetValue(1), selectedEntity:GetValue(1), false)
 end
 
+function PANEL:OpenSpawnMenu() end
 function PANEL:OnModelListRequested(path, loadFromClient) end
 function PANEL:OnLoadRequested(path, modelName, loadFromClient) end
 function PANEL:OnModelInfoRequested(path, modelname, loadFromClient) end

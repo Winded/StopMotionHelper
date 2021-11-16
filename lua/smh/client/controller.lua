@@ -269,6 +269,58 @@ function CTRL.SaveProperties()
     net.SendToServer()
 end
 
+function CTRL.SetPreviewEntity(path, model, loadFromClient)
+    net.Start(SMH.MessageTypes.SetPreviewEntity)
+    net.WriteString(path)
+    net.WriteString(model)
+    net.WriteTable(SMH.Settings.GetAll())
+    net.SendToServer()
+end
+
+function CTRL.SetSpawnGhost(state)
+    net.Start(SMH.MessageTypes.SetSpawnGhost)
+    net.WriteBool(state)
+    net.SendToServer()
+end
+
+function CTRL.SpawnEntity(path, model, loadFromClient)
+    net.Start(SMH.MessageTypes.SpawnEntity)
+    net.WriteString(path)
+    net.WriteString(model)
+    net.WriteTable(SMH.Settings.GetAll())
+    net.SendToServer()
+end
+
+function CTRL.SpawnReset()
+    net.Start(SMH.MessageTypes.SpawnReset)
+    net.SendToServer()
+end
+
+function CTRL.SetSpawnOffsetMode(set)
+    net.Start(SMH.MessageTypes.SetSpawnOffsetMode)
+    net.WriteBool(set)
+    net.SendToServer()
+end
+
+function CTRL.SetSpawnOrigin(path, model, loadFromClient)
+    net.Start(SMH.MessageTypes.SetSpawnOrigin)
+    net.WriteString(path)
+    net.WriteString(model)
+    net.SendToServer()
+end
+
+function CTRL.OffsetPos(Pos)
+    net.Start(SMH.MessageTypes.OffsetPos)
+    net.WriteVector(Pos)
+    net.SendToServer()
+end
+
+function CTRL.OffsetAng(Ang)
+    net.Start(SMH.MessageTypes.OffsetAng)
+    net.WriteAngle(Ang)
+    net.SendToServer()
+end
+
 function CTRL.RequestWorldData(frame)
     net.Start(SMH.MessageTypes.RequestWorldData)
     net.WriteUInt(frame, INT_BITCOUNT)

@@ -53,6 +53,15 @@ SMH.MessageTypes = {
     "UpdateKeyframeColor",
     "UpdateKeyframeColorResponse",
 
+    "SetPreviewEntity",
+    "SetSpawnGhost",
+    "SpawnEntity",
+    "SpawnReset",
+    "SetSpawnOffsetMode",
+    "SetSpawnOrigin",
+    "OffsetPos",
+    "OffsetAng",
+
     "SaveProperties",
 
     "RequestWorldData",
