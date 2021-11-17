@@ -66,6 +66,8 @@ function MGR.Spawn(path, model, settings, player)
         return
     end
 
+    if IsValid(player) and not player:CheckLimit("smhentity") then return end
+
     if class == "prop_ragdoll" and not data["physbones"] then
         player:ChatPrint("Stop Motion Helper: Can't spawn the ragdoll as the save doesn't have Physical Bones modifier!")
         return
@@ -79,6 +81,9 @@ function MGR.Spawn(path, model, settings, player)
 
     entity:SetModel(modelpath)
     entity:Spawn()
+
+    player:AddCount("smhentity", entity)
+    player:AddCleanup("smhentity", entity)
 
     undo.Create("SMH Spawned entity")
         undo.AddEntity(entity)

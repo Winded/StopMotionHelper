@@ -73,5 +73,8 @@ for key, val in pairs(SMH.MessageTypes) do
     SMH.MessageTypes[val] = prefixVal
 end
 
+cleanup.Register("smhentity")
+CreateConVar("sbox_maxsmhentity", 20, FCVAR_NOTIFY)
+
 include("shared/saves.lua")
 include("shared/tablesplit.lua")
