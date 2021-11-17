@@ -1,4 +1,4 @@
-local PANEL = {} -- what we need 1 frame amount to record, 2 fps (can use state one), 3 delay before we start recording, 4 record interval
+local PANEL = {}
 
 function PANEL:Init()
 
