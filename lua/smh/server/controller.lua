@@ -39,6 +39,20 @@ local function SetFrame(msgLength, player)
     net.Send(player)
 end
 
+local function SetFramePhys(msgLength, player)
+    local newFrame = net.ReadUInt(INT_BITCOUNT)
+    local settings = net.ReadTable()
+    local timeline = net.ReadUInt(INT_BITCOUNT)
+    local entity = net.ReadEntity()
+
+    SMH.PlaybackManager.SetFrameIgnore(player, newFrame, settings, entity)
+    SMH.GhostsManager.UpdateState(player, newFrame, settings, timeline)
+
+    net.Start(SMH.MessageTypes.SetFrameResponse)
+    net.WriteUInt(newFrame, INT_BITCOUNT)
+    net.Send(player)
+end
+
 local function SelectEntity(msgLength, player)
     local entity = net.ReadEntity()
     if player ~= entity then
@@ -474,6 +488,7 @@ for _, message in pairs(SMH.MessageTypes) do
 end
 
 net.Receive(SMH.MessageTypes.SetFrame, SetFrame)
+net.Receive(SMH.MessageTypes.SetFramePhys, SetFramePhys)
 
 net.Receive(SMH.MessageTypes.SelectEntity, SelectEntity)
 

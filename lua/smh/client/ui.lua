@@ -285,6 +285,9 @@ local function AddCallbacks()
             end
         end
     end
+    WorldClicker.Settings.OnRequestOpenPhysRecorder = function()
+        WorldClicker.PhysRecorder:SetVisible(true)
+    end
     WorldClicker.Settings.OnRequestOpenHelp = function()
         SMH.Controller.OpenHelp()
     end
@@ -379,8 +382,12 @@ hook.Add("InitPostEntity", "SMHMenuSetup", function()
     WorldClicker.MainMenu = vgui.Create("SMHMenu", WorldClicker)
 
     WorldClicker.Settings = vgui.Create("SMHSettings", WorldClicker)
-    WorldClicker.Settings:SetPos(ScrW() - 250, ScrH() - 90 - 265)
+    WorldClicker.Settings:SetPos(ScrW() - 250, ScrH() - 90 - 290)
     WorldClicker.Settings:SetVisible(false)
+
+    WorldClicker.PhysRecorder = vgui.Create("SMHPhysRecord", WorldClicker)
+    WorldClicker.PhysRecorder:SetPos(ScrW() - 250 - 250, ScrH() - 90 - 150)
+    WorldClicker.PhysRecorder:SetVisible(false)
 
     SaveMenu = vgui.Create("SMHSave")
     SaveMenu:MakePopup()
