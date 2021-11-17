@@ -55,7 +55,8 @@ local ConVars = {
     GhostTransparency = CreateTypedConVar(ConVarType.Float, "smh_ghosttransparency", 0.5),
     OnionSkin = CreateTypedConVar(ConVarType.Bool, "smh_onionskin", false),
     TweenDisable = CreateTypedConVar(ConVarType.Bool, "smh_tweendisable", false),
-    SmoothPlayback = CreateTypedConVar(ConVarType.Bool, "smh_smoothplayback", false)
+    SmoothPlayback = CreateTypedConVar(ConVarType.Bool, "smh_smoothplayback", false),
+    EnableWorld = CreateTypedConVar(ConVarType.Bool, "smh_enableworldkeyframes", false),
 }
 
 local MGR = {}

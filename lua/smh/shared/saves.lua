@@ -123,14 +123,14 @@ function MGR.LoadForEntity(path, modelName)
                         value.KeyColor = color
                     end
                 end
-                return sEntity.Frames, sEntity.Properties
+                return sEntity.Frames, sEntity.Properties, sEntity.Properties.IsWorld
             end
         end
     end
     return nil
 end
 
-function MGR.Serialize(keyframes, properties)
+function MGR.Serialize(keyframes, properties, player)
     local entityMappedKeyframes = {}
     local usedModelNames = {}
 
@@ -140,20 +140,36 @@ function MGR.Serialize(keyframes, properties)
             continue
         end
 
-        if not entityMappedKeyframes[entity] then
-            local mdl = GetModelName(entity, usedModelNames)
+        if entity ~= player then
+            if not entityMappedKeyframes[entity] then
+                local mdl = GetModelName(entity, usedModelNames)
 
-            entityMappedKeyframes[entity] = {
-                Model = mdl,
-                Properties = {
-                    Name = properties[entity].Name,
-                    Timelines = properties[entity].Timelines,
-                    TimelineMods = table.Copy(properties[entity].TimelineMods),
-                },
-                Frames = {},
-            }
+                entityMappedKeyframes[entity] = {
+                    Model = mdl,
+                    Properties = {
+                        Name = properties[entity].Name,
+                        Timelines = properties[entity].Timelines,
+                        TimelineMods = table.Copy(properties[entity].TimelineMods),
+                    },
+                    Frames = {},
+                }
+            end
+        else
+            if not entityMappedKeyframes[entity] then
+                local mdl = "world"
+
+                entityMappedKeyframes[entity] = {
+                    Model = mdl,
+                    Properties = {
+                        Name = properties[entity].Name,
+                        Timelines = properties[entity].Timelines,
+                        TimelineMods = table.Copy(properties[entity].TimelineMods),
+                        IsWorld = true,
+                    },
+                    Frames = {},
+                }
+            end
         end
-
         table.insert(entityMappedKeyframes[entity].Frames, {
             Position = keyframe.Frame,
             EaseIn = keyframe.EaseIn,

@@ -135,27 +135,39 @@ function MGR.AddEntity(player, entity)
     end
 
     if not SMH.Properties.Players[player].Entities[entity] then
-        local template = SMH.Saves.GetPreferences(player)
-        local timelines
-        local timelinemods = {}
-        if not template then
-            timelines = 1
+        if player ~= entity then
+            local template = SMH.Saves.GetPreferences(player)
+            local timelines
+            local timelinemods = {}
+            if not template then
+                timelines = 1
+
+                timelinemods[1] = { KeyColor = Color(0, 200, 0) }
+
+                for name, mod in pairs(SMH.Modifiers) do
+                    table.insert(timelinemods[1], name)
+                end
+            else
+                timelines = template.Timelines
+
+                timelinemods = table.Copy(template.TimelineMods)
+            end
+            SMH.Properties.Players[player].Entities[entity] = {
+                Name = SetUniqueName(player, entity, GetModelName(entity)),
+                Timelines = timelines,
+                TimelineMods = timelinemods
+            }
+        else
+            local timelinemods = {}
 
             timelinemods[1] = { KeyColor = Color(0, 200, 0) }
 
-            for name, mod in pairs(SMH.Modifiers) do
-                table.insert(timelinemods[1], name)
-            end
-        else
-            timelines = template.Timelines
-
-            timelinemods = table.Copy(template.TimelineMods)
+            SMH.Properties.Players[player].Entities[entity] = {
+                Name = SetUniqueName(player, entity, "world"),
+                Timelines = 1,
+                TimelineMods = timelinemods,
+            }
         end
-        SMH.Properties.Players[player].Entities[entity] = {
-            Name = SetUniqueName(player, entity, GetModelName(entity)),
-            Timelines = timelines,
-            TimelineMods = timelinemods
-        }
     end
     usednames[SMH.Properties.Players[player].Entities[entity].Name] = true
 end

@@ -41,7 +41,11 @@ end
 
 local function SelectEntity(msgLength, player)
     local entity = net.ReadEntity()
-    SMH.GhostsManager.SelectEntity(player, entity)
+    if player ~= entity then
+        SMH.GhostsManager.SelectEntity(player, entity)
+    else
+        SMH.GhostsManager.SelectEntity(player, nil)
+    end
 
     local keyframes = SMH.KeyframeManager.GetAllForEntity(player, entity)
     local framecount, IDs, ents, Frame, In, Out, _, Modifier = SMH.TableSplit.DKeyframes(keyframes)
@@ -196,14 +200,16 @@ local function Load(msgLength, player)
     local entity = net.ReadEntity()
     local loadFromClient = net.ReadBool()
 
-    local serializedKeyframes, entityProperties
+    local serializedKeyframes, entityProperties, isWorld
     if loadFromClient then
         serializedKeyframes = net.ReadTable()
     else
         local path = net.ReadString()
         local modelName = net.ReadString()
-        serializedKeyframes, entityProperties = SMH.Saves.LoadForEntity(path, modelName)
+        serializedKeyframes, entityProperties, isWorld = SMH.Saves.LoadForEntity(path, modelName)
     end
+
+    if isWorld then entity = player end
 
     SMH.PropertiesManager.AddEntity(player, entity)
     SMH.KeyframeManager.ImportSave(player, entity, serializedKeyframes, entityProperties)
@@ -236,7 +242,7 @@ local function Save(msgLength, player)
 
     local properties = SMH.PropertiesManager.GetAllProperties(player)
     local keyframes = SMH.KeyframeManager.GetAll(player)
-    local serializedKeyframes = SMH.Saves.Serialize(keyframes, properties)
+    local serializedKeyframes = SMH.Saves.Serialize(keyframes, properties, player)
 
     if not saveToClient then
         SMH.Saves.Save(path, serializedKeyframes)
@@ -367,10 +373,29 @@ end
 
 local function SaveProperties(msgLength, player)
     local entity = net.ReadEntity()
-    if not entity then return end
+    if not entity or player == entity then return end
     local timeline = SMH.PropertiesManager.GetAllEntityProperties(player, entity)
 
     SMH.Saves.SaveProperties(timeline, player)
+end
+
+local function RequestWorldData(msgLength, player)
+    local frame = net.ReadUInt(INT_BITCOUNT)
+    local console, push, release = SMH.KeyframeManager.GetWorldData(player, frame)
+
+    net.Start(SMH.MessageTypes.RequestWorldDataResponse)
+    net.WriteString(console)
+    net.WriteString(push)
+    net.WriteString(release)
+    net.Send(player)
+end
+
+local function UpdateWorld(msgLength, player)
+    local str = net.ReadString()
+    local key = net.ReadString()
+    local frame = net.ReadUInt(INT_BITCOUNT)
+
+    SMH.KeyframeManager.UpdateWorldKeyframe(player, frame, str, key)
 end
 
 for _, message in pairs(SMH.MessageTypes) do
@@ -409,3 +434,6 @@ net.Receive(SMH.MessageTypes.UpdateModifier, UpdateModifier)
 net.Receive(SMH.MessageTypes.UpdateKeyframeColor, UpdateKeyframeColor)
 
 net.Receive(SMH.MessageTypes.SaveProperties, SaveProperties)
+
+net.Receive(SMH.MessageTypes.RequestWorldData, RequestWorldData)
+net.Receive(SMH.MessageTypes.UpdateWorld, UpdateWorld)

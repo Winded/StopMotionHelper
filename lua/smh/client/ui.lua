@@ -325,6 +325,17 @@ local function AddCallbacks()
         SMH.Controller.UpdateKeyframeColor(color, timeline)
     end
 
+    PropertiesMenu.SelectWorld = function()
+        SMH.Controller.SelectEntity(LocalPlayer())
+        LoadMenu:UpdateSelectedEnt(LocalPlayer())
+        PropertiesMenu:UpdateSelectedEnt(LocalPlayer())
+        ClickerEntity = LocalPlayer()
+    end
+
+    PropertiesMenu.SetData = function(_, str, key)
+        SMH.Controller.UpdateWorld(str, key)
+    end
+
 end
 
 hook.Add("EntityRemoved", "SMHWorldClickerEntityRemoved", function(entity)
@@ -342,7 +353,7 @@ hook.Add("InitPostEntity", "SMHMenuSetup", function()
     WorldClicker.MainMenu = vgui.Create("SMHMenu", WorldClicker)
 
     WorldClicker.Settings = vgui.Create("SMHSettings", WorldClicker)
-    WorldClicker.Settings:SetPos(ScrW() - 250, ScrH() - 90 - 245)
+    WorldClicker.Settings:SetPos(ScrW() - 250, ScrH() - 90 - 265)
     WorldClicker.Settings:SetVisible(false)
 
     SaveMenu = vgui.Create("SMHSave")
@@ -386,15 +397,23 @@ function MGR.SetFrame(frame)
 
     WorldClicker.MainMenu:UpdatePositionLabel(frame, SMH.State.PlaybackLength)
 
-    if FrameToKeyframe[frame] ~= nil then
-        local data = KeyframeEasingData[FrameToKeyframe[frame]]
-        if data then
-            WorldClicker.MainMenu:ShowEasingControls(data.EaseIn, data.EaseOut)
+    if not PropertiesMenu:GetUsingWorld() then
+        if FrameToKeyframe[frame] ~= nil then
+            local data = KeyframeEasingData[FrameToKeyframe[frame]]
+            if data then
+                WorldClicker.MainMenu:ShowEasingControls(data.EaseIn, data.EaseOut)
+            else
+                WorldClicker.MainMenu:ShowEasingControls(0, 0)
+            end
         else
-            WorldClicker.MainMenu:ShowEasingControls(0, 0)
+            WorldClicker.MainMenu:HideEasingControls()
         end
     else
-        WorldClicker.MainMenu:HideEasingControls()
+        if FrameToKeyframe[frame] ~= nil then
+            SMH.Controller.RequestWorldData(frame)
+        else
+            PropertiesMenu:HideWorldSettings()
+        end
     end
 end
 
@@ -421,8 +440,29 @@ function MGR.SetKeyframes(keyframes)
     KeyframeIDs = {}
     LastSelectedKeyframe = nil
 
-    for _, keyframe in pairs(keyframes) do
-        if Modifiers[keyframe.Modifier] then
+    if not PropertiesMenu:GetUsingWorld() then
+        for _, keyframe in pairs(keyframes) do
+            if Modifiers[keyframe.Modifier] then
+                if not FrameToKeyframe[keyframe.Frame] then
+                    KeyframePointers[LocalIDs] = NewKeyframePointer(LocalIDs)
+                    KeyframePointers[LocalIDs]:SetFrame(keyframe.Frame)
+                    KeyframePointers[LocalIDs]:AddID(keyframe.ID, keyframe.Modifier)
+                    FrameToKeyframe[keyframe.Frame] = LocalIDs
+                    KeyframeEasingData[LocalIDs] = {
+                        EaseIn = keyframe.EaseIn,
+                        EaseOut = keyframe.EaseOut,
+                    }
+                    KeyframeIDs[keyframe.ID] = LocalIDs
+                    LocalIDs = LocalIDs + 1
+                else
+                    local pointer = KeyframePointers[FrameToKeyframe[keyframe.Frame]]
+                    pointer:AddID(keyframe.ID, keyframe.Modifier)
+                    KeyframeIDs[keyframe.ID] = FrameToKeyframe[keyframe.Frame]
+                end
+            end
+        end
+    else
+        for _, keyframe in pairs(keyframes) do
             if not FrameToKeyframe[keyframe.Frame] then
                 KeyframePointers[LocalIDs] = NewKeyframePointer(LocalIDs)
                 KeyframePointers[LocalIDs]:SetFrame(keyframe.Frame)
@@ -674,6 +714,19 @@ end
 
 function MGR.GetModifiers()
     return PropertiesMenu:GetModifiers()
+end
+
+function MGR.SetUsingWorld(set)
+    PropertiesMenu:SetUsingWorld(set)
+    if set then
+        WorldClicker.MainMenu:HideEasingControls()
+    else
+        PropertiesMenu:HideWorldSettings()
+    end
+end
+
+function MGR.SetWorldData(console, push, release)
+    PropertiesMenu:ShowWorldSettings(console, push, release)
 end
 
 SMH.UI = MGR

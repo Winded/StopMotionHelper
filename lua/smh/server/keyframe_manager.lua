@@ -64,18 +64,34 @@ end
 function MGR.Create(player, entity, frame, timeline)
     local keyframes = {}
 
-    for _, name in ipairs(SMH.Properties.Players[player].Entities[entity].TimelineMods[timeline]) do
-        local keyframe = GetExistingKeyframe(player, entity, frame, name)
+    if player ~= entity then
+        for _, name in ipairs(SMH.Properties.Players[player].Entities[entity].TimelineMods[timeline]) do
+            local keyframe = GetExistingKeyframe(player, entity, frame, name)
 
-        if keyframe ~= nil then
+            if keyframe ~= nil then
+                Record(keyframe, player, entity, name)
+                table.insert(keyframes, keyframe)
+                continue
+            end
+
+            keyframe = SMH.KeyframeData:New(player, entity)
+            keyframe.Frame = frame
             Record(keyframe, player, entity, name)
             table.insert(keyframes, keyframe)
-            continue
         end
+    else
+        local keyframe = GetExistingKeyframe(player, entity, frame, "world")
+
+        if keyframe ~= nil then return {keyframe} end
 
         keyframe = SMH.KeyframeData:New(player, entity)
         keyframe.Frame = frame
-        Record(keyframe, player, entity, name)
+        keyframe.Modifiers["world"] = {
+            Console = "",
+            Push = "",
+            Release = "",
+        }
+        keyframe.Modifier = "world"
         table.insert(keyframes, keyframe)
     end
 
@@ -163,6 +179,19 @@ function MGR.ImportSave(player, entity, serializedKeyframes, entityProperties)
             keyframe.Modifier = skf.Modifier
         end
     end
+end
+
+function MGR.GetWorldData(player, frame)
+    local keyframe = GetExistingKeyframe(player, player, frame, "world")
+    local modifiers = keyframe.Modifiers["world"]
+
+    return modifiers.Console, modifiers.Push, modifiers.Release
+end
+
+function MGR.UpdateWorldKeyframe(player, frame, str, key)
+    local keyframe = GetExistingKeyframe(player, player, frame, "world")
+    if not keyframe then return end
+    keyframe.Modifiers["world"][key] = str
 end
 
 SMH.KeyframeManager = MGR

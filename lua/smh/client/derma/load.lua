@@ -69,7 +69,7 @@ function PANEL:PerformLayout(width, height)
 end
 
 function PANEL:UpdateSelectedEnt(ent)
-    local SelectedName = IsValid(ent) and ent:GetModel() or "nil"
+    local SelectedName = ent == LocalPlayer() and "world" or IsValid(ent) and ent:GetModel() or "nil"
     self.SelectedEnt:SetText("Selected model: " .. SelectedName)
 end
 
