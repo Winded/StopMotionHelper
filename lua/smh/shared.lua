@@ -4,6 +4,7 @@ end
 
 SMH.MessageTypes = {
     "SetFrame",
+    "SetFramePhys",
     "SetFrameResponse",
 
     "SelectEntity",

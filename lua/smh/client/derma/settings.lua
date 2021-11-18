@@ -46,13 +46,19 @@ function PANEL:Init()
     self.EnableWorld = CreateCheckBox("EnableWorld", "Enable World keyframes")
     self.GhostTransparency = CreateSlider("GhostTransparency", "Ghost transparency", 0, 1, 2)
 
+    self.PhysButton = vgui.Create("DButton", self)
+    self.PhysButton:SetText("Physics Recorder")
+    self.PhysButton.DoClick = function()
+        self:OnRequestOpenPhysRecorder()
+    end
+
     self.HelpButton = vgui.Create("DButton", self)
     self.HelpButton:SetText("Help")
     self.HelpButton.DoClick = function()
         self:OnRequestOpenHelp()
     end
 
-    self:SetSize(250, 265)
+    self:SetSize(250, 290)
 
     self._changingSettings = false
 
@@ -81,7 +87,10 @@ function PANEL:PerformLayout(width, height)
     self.GhostTransparency:SetPos(5, 205)
     self.GhostTransparency:SetSize(self:GetWide() - 5 - 5, 25)
 
-    self.HelpButton:SetPos(5, 230)
+    self.PhysButton:SetPos(5, 230)
+    self.PhysButton:SetSize(self:GetWide() - 10, 20)
+
+    self.HelpButton:SetPos(5, 255)
     self.HelpButton:SetSize(self:GetWide() - 5 - 5, 20)
 
 end
@@ -116,5 +125,6 @@ end
 
 function PANEL:OnSettingsUpdated(settings) end
 function PANEL:OnRequestOpenHelp() end
+function PANEL:OnRequestOpenPhysRecorder() end
 
 vgui.Register("SMHSettings", PANEL, "DFrame")

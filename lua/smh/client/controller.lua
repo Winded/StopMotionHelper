@@ -31,6 +31,15 @@ function CTRL.SetFrame(frame)
     net.SendToServer()
 end
 
+function CTRL.SetFramePhys(frame)
+    net.Start(SMH.MessageTypes.SetFramePhys)
+    net.WriteUInt(frame, INT_BITCOUNT)
+    net.WriteTable(SMH.Settings.GetAll())
+    net.WriteUInt(SMH.State.Timeline, INT_BITCOUNT)
+    net.WriteEntity(SMH.State.Entity)
+    net.SendToServer()
+end
+
 function CTRL.SelectEntity(entity)
     net.Start(SMH.MessageTypes.SelectEntity)
     net.WriteEntity(entity)

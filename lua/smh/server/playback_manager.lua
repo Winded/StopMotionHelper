@@ -74,6 +74,30 @@ function MGR.SetFrame(player, newFrame, settings)
     end
 end
 
+function MGR.SetFrameIgnore(player, newFrame, settings, ignoredentity)
+    if not SMH.KeyframeData.Players[player] then
+        return
+    end
+
+    for entity, keyframes in pairs(SMH.KeyframeData.Players[player].Entities) do
+        if ignoredentity == entity then continue end
+        for name, mod in pairs(SMH.Modifiers) do
+            local prevKeyframe, nextKeyframe, lerpMultiplier = SMH.GetClosestKeyframes(keyframes, newFrame, false, name)
+            if not prevKeyframe then
+                continue
+            end
+
+            if lerpMultiplier <= 0 or settings.TweenDisable then
+                mod:Load(entity, prevKeyframe.Modifiers[name], settings);
+            elseif lerpMultiplier >= 1 then
+                mod:Load(entity, nextKeyframe.Modifiers[name], settings);
+            else
+                mod:LoadBetween(entity, prevKeyframe.Modifiers[name], nextKeyframe.Modifiers[name], lerpMultiplier, settings);
+            end
+        end
+    end
+end
+
 function MGR.StartPlayback(player, startFrame, endFrame, playbackRate, settings)
     ActivePlaybacks[player] = {
         StartFrame = startFrame,
