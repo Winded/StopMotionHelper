@@ -234,8 +234,16 @@ local function AddCallbacks()
         end
     end
     WorldClicker.MainMenu.OnRequestOpenPropertiesMenu = function()
+        local frame = SMH.State.Frame
+
         PropertiesMenu:SetVisible(true)
         SMH.Controller.GetServerEntities()
+
+        if FrameToKeyframe[frame] ~= nil and PropertiesMenu:GetUsingWorld() then
+            SMH.Controller.RequestWorldData(frame)
+        else
+            PropertiesMenu:HideWorldSettings()
+        end
     end
     WorldClicker.MainMenu.OnRequestRecord = function()
         SMH.Controller.Record()
@@ -407,12 +415,6 @@ function MGR.SetFrame(frame)
             end
         else
             WorldClicker.MainMenu:HideEasingControls()
-        end
-    else
-        if FrameToKeyframe[frame] ~= nil then
-            SMH.Controller.RequestWorldData(frame)
-        else
-            PropertiesMenu:HideWorldSettings()
         end
     end
 end
