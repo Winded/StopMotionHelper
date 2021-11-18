@@ -157,7 +157,9 @@ function MGR.AddEntity(player, entity)
             SMH.Properties.Players[player].Entities[entity] = {
                 Name = SetUniqueName(player, entity, GetModelName(entity)),
                 Timelines = timelines,
-                TimelineMods = timelinemods
+                TimelineMods = timelinemods,
+                Class = entity:GetClass(),
+                Model = entity:GetModel(),
             }
         else
             local timelinemods = {}
@@ -170,13 +172,6 @@ function MGR.AddEntity(player, entity)
                 TimelineMods = timelinemods,
             }
         end
-        SMH.Properties.Players[player].Entities[entity] = {
-            Name = SetUniqueName(player, entity, GetModelName(entity)),
-            Timelines = timelines,
-            TimelineMods = timelinemods,
-            Class = entity:GetClass(),
-            Model = entity:GetModel(),
-        }
     end
     usednames[SMH.Properties.Players[player].Entities[entity].Name] = true
 end

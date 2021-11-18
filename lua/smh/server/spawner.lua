@@ -38,7 +38,7 @@ function MGR.SetPreviewEntity(path, model, settings, player)
     local serializedKeyframes = SMH.Saves.Load(path)
     local class, modelpath, data = GetPosData(serializedKeyframes, model)
     if not class then
-        player:ChatPrint("Stop Motion Helper: Failed to get entity info. Probably you're trying to use save from older SMH version!")
+        player:ChatPrint("Stop Motion Helper: Failed to get entity info. Probably you're trying to load world entity, or the save is from older SMH version!")
         return
     end
 
@@ -62,7 +62,7 @@ function MGR.Spawn(path, model, settings, player)
     local serializedKeyframes = SMH.Saves.Load(path)
     local class, modelpath, data = GetPosData(serializedKeyframes, model)
     if not class then
-        player:ChatPrint("Stop Motion Helper: Failed to get entity info. Probably you're trying to use save from older SMH version!")
+        player:ChatPrint("Stop Motion Helper: Failed to get entity info. Probably you're trying to load world entity, or the save is from older SMH version!")
         return
     end
 
@@ -134,7 +134,7 @@ function MGR.SetOrigin(path, model, player)
     local serializedKeyframes = SMH.Saves.Load(path)
     local class, modelpath, data = GetPosData(serializedKeyframes, model)
     if not class then
-        player:ChatPrint("Stop Motion Helper: Failed to get entity info. Probably you're trying to use save from older SMH version!")
+        player:ChatPrint("Stop Motion Helper: Failed to get entity info. Probably you're trying to load world entity, or the save is from older SMH version!")
         return
     end
 
