@@ -141,14 +141,14 @@ function MGR.AddEntity(player, entity)
             local template = SMH.Saves.GetPreferences(player)
             local timelines
             local timelinemods = {}
-			local class = entity:GetClass()
-			local model
+            local class = entity:GetClass()
+            local model
 
-			if class == "prop_effect" and IsValid(entity.AttachedEntity) then
-				model = entity.AttachedEntity:GetModel()
-			else
-				model = entity:GetModel()
-			end
+            if class == "prop_effect" and IsValid(entity.AttachedEntity) then
+                model = entity.AttachedEntity:GetModel()
+            else
+                model = entity:GetModel()
+            end
 
             if not template then
                 timelines = 1
