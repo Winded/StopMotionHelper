@@ -18,22 +18,28 @@ local function PlaybackSmooth(player, playback, settings)
     end
 
     for entity, keyframes in pairs(SMH.KeyframeData.Players[player].Entities) do
-        for name, mod in pairs(SMH.Modifiers) do
-            local prevKeyframe, nextKeyframe, _ = SMH.GetClosestKeyframes(keyframes, playback.CurrentFrame, false, name)
+        if entity ~= player then
+            for name, mod in pairs(SMH.Modifiers) do
+                local prevKeyframe, nextKeyframe, _ = SMH.GetClosestKeyframes(keyframes, playback.CurrentFrame, false, name)
 
-            if not prevKeyframe then continue end
+                if not prevKeyframe then continue end
 
-            if prevKeyframe.Frame == nextKeyframe.Frame then
-                if prevKeyframe.Modifiers[name] and nextKeyframe.Modifiers[name] then
-                    mod:Load(entity, prevKeyframe.Modifiers[name], settings);
+                if prevKeyframe.Frame == nextKeyframe.Frame then
+                    if prevKeyframe.Modifiers[name] and nextKeyframe.Modifiers[name] then
+                        mod:Load(entity, prevKeyframe.Modifiers[name], settings);
+                    end
+                else
+                    local lerpMultiplier = ((playback.Timer + playback.StartFrame * timePerFrame) - prevKeyframe.Frame * timePerFrame) / ((nextKeyframe.Frame - prevKeyframe.Frame) * timePerFrame)
+                    lerpMultiplier = math.EaseInOut(lerpMultiplier, prevKeyframe.EaseOut, nextKeyframe.EaseIn)
+
+                    if prevKeyframe.Modifiers[name] and nextKeyframe.Modifiers[name] then
+                        mod:LoadBetween(entity, prevKeyframe.Modifiers[name], nextKeyframe.Modifiers[name], lerpMultiplier, settings);
+                    end
                 end
-            else
-                local lerpMultiplier = ((playback.Timer + playback.StartFrame * timePerFrame) - prevKeyframe.Frame * timePerFrame) / ((nextKeyframe.Frame - prevKeyframe.Frame) * timePerFrame)
-                lerpMultiplier = math.EaseInOut(lerpMultiplier, prevKeyframe.EaseOut, nextKeyframe.EaseIn)
-
-                if prevKeyframe.Modifiers[name] and nextKeyframe.Modifiers[name] then
-                    mod:LoadBetween(entity, prevKeyframe.Modifiers[name], nextKeyframe.Modifiers[name], lerpMultiplier, settings);
-                end
+            end
+        else
+            if settings.EnableWorld then
+                SMH.WorldKeyframesManager.Load(player, math.Round(playback.CurrentFrame), keyframes)
             end
         end
     end
@@ -45,18 +51,24 @@ function MGR.SetFrame(player, newFrame, settings)
     end
 
     for entity, keyframes in pairs(SMH.KeyframeData.Players[player].Entities) do
-        for name, mod in pairs(SMH.Modifiers) do
-            local prevKeyframe, nextKeyframe, lerpMultiplier = SMH.GetClosestKeyframes(keyframes, newFrame, false, name)
-            if not prevKeyframe then
-                continue
-            end
+        if entity ~= player then
+            for name, mod in pairs(SMH.Modifiers) do
+                local prevKeyframe, nextKeyframe, lerpMultiplier = SMH.GetClosestKeyframes(keyframes, newFrame, false, name)
+                if not prevKeyframe then
+                    continue
+                end
 
-            if lerpMultiplier <= 0 or settings.TweenDisable then
-                mod:Load(entity, prevKeyframe.Modifiers[name], settings);
-            elseif lerpMultiplier >= 1 then
-                mod:Load(entity, nextKeyframe.Modifiers[name], settings);
-            else
-                mod:LoadBetween(entity, prevKeyframe.Modifiers[name], nextKeyframe.Modifiers[name], lerpMultiplier, settings);
+                if lerpMultiplier <= 0 or settings.TweenDisable then
+                    mod:Load(entity, prevKeyframe.Modifiers[name], settings);
+                elseif lerpMultiplier >= 1 then
+                    mod:Load(entity, nextKeyframe.Modifiers[name], settings);
+                else
+                    mod:LoadBetween(entity, prevKeyframe.Modifiers[name], nextKeyframe.Modifiers[name], lerpMultiplier, settings);
+                end
+            end
+        else
+            if settings.EnableWorld then
+                SMH.WorldKeyframesManager.Load(player, newFrame, keyframes)
             end
         end
     end

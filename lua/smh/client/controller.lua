@@ -140,7 +140,7 @@ function CTRL.Save(path, saveToClient)
 end
 
 function CTRL.QuickSave()
-    local nick = container:_GetPlayer():Nick()
+    local nick = LocalPlayer():Nick()
     local qs1 = "quicksave_" .. nick
     local qs2 = "quicksave_" .. nick .. "_backup"
 
@@ -269,6 +269,20 @@ function CTRL.SaveProperties()
     net.SendToServer()
 end
 
+function CTRL.RequestWorldData(frame)
+    net.Start(SMH.MessageTypes.RequestWorldData)
+    net.WriteUInt(frame, INT_BITCOUNT)
+    net.SendToServer()
+end
+
+function CTRL.UpdateWorld(str, key)
+    net.Start(SMH.MessageTypes.UpdateWorld)
+    net.WriteString(str)
+    net.WriteString(key)
+    net.WriteUInt(SMH.State.Frame, INT_BITCOUNT)
+    net.SendToServer()
+end
+
 SMH.Controller = CTRL
 
 local function SetFrameResponse(msgLength)
@@ -286,6 +300,7 @@ local function SelectEntityResponse(msgLength)
     end
 
     SMH.State.Entity = entity
+    SMH.UI.SetUsingWorld(entity == LocalPlayer())
     SMH.UI.SetTimeline(timeline)
     SMH.UI.SetKeyframes(keyframes)
 end
@@ -414,6 +429,14 @@ local function UpdateKeyframeColorResponse(msgLength)
     SMH.UI.UpdateKeyColor(timelineinfo)
 end
 
+local function RequestWorldDataResponse(msgLength)
+    local console = net.ReadString()
+    local push = net.ReadString()
+    local release = net.ReadString()
+
+    SMH.UI.SetWorldData(console, push, release)
+end
+
 local function Setup()
     net.Receive(SMH.MessageTypes.SetFrameResponse, SetFrameResponse)
 
@@ -436,6 +459,8 @@ local function Setup()
     net.Receive(SMH.MessageTypes.UpdateTimelineInfoResponse, UpdateTimelineInfoResponse)
     net.Receive(SMH.MessageTypes.UpdateModifierResponse, UpdateModifierResponse)
     net.Receive(SMH.MessageTypes.UpdateKeyframeColorResponse, UpdateKeyframeColorResponse)
+
+    net.Receive(SMH.MessageTypes.RequestWorldDataResponse, RequestWorldDataResponse)
 end
 
 Setup()

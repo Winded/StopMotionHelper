@@ -4,6 +4,7 @@ local PropertyTable = {}
 local ModifierList = {}
 local Fallback = "none"
 local selectedEntity = nil
+local UsingWorld = false
 
 local function GetModelName(entity)
     local mdl = string.Split(entity:GetModel(), "/");
@@ -90,11 +91,17 @@ function PANEL:Init()
 
     self.AddTimeButton = vgui.Create("DButton", self.TimelinesPanel)
     self.AddTimeButton:SetText("Add Timeline")
-    self.AddTimeButton.DoClick = function() self:ButtonTimeline(true) end
+    self.AddTimeButton.DoClick = function()
+        if UsingWorld then return end
+        self:ButtonTimeline(true)
+    end
 
     self.RemoveTimeButton = vgui.Create("DButton", self.TimelinesPanel)
     self.RemoveTimeButton:SetText("Remove Timeline")
-    self.RemoveTimeButton.DoClick = function() self:ButtonTimeline(false) end
+    self.RemoveTimeButton.DoClick = function()
+        if UsingWorld then return end
+        self:ButtonTimeline(false)
+    end
 
     self.TimelinesCList = vgui.Create("DCategoryList", self.TimelinesPanel)
 
@@ -116,9 +123,43 @@ function PANEL:Init()
         self:OnUpdateKeyframeColorRequested(col, self.ColorPicker.Timeline)
         if self.ColorPicker.Timeline == SMH.State.Timeline then SMH.UI.PaintKeyframes(col) end
     end
- 
+
     self.ColorPreview = vgui.Create("DPanel", self.ColorPanel)
     self.ColorPreview:SetBackgroundColor(self.ColorPicker:GetColor())
+
+    self.SelectWorldButton = vgui.Create("DButton", self.ColorPanel)
+    self.SelectWorldButton:SetText("Select World")
+    self.SelectWorldButton.DoClick = function()
+        self:SelectWorld()
+    end
+
+    self.WorldParent = vgui.Create("Panel", self.ColorPanel)
+
+    self.ConsoleEnter = vgui.Create("DTextEntry", self.WorldParent)
+    self.ConsoleEnter.OnLoseFocus = function(sel)
+        self:SetData(sel:GetValue(), "Console")
+    end
+        self.ConsoleEnter.Label = vgui.Create("DLabel", self.WorldParent)
+        self.ConsoleEnter.Label:SetText("Console command:")
+        self.ConsoleEnter.Label:SizeToContents()
+
+    self.ButtonPressEnter = vgui.Create("DTextEntry", self.WorldParent)
+    self.ButtonPressEnter.OnLoseFocus = function(sel)
+        self:SetData(sel:GetValue(), "Push")
+    end
+        self.ButtonPressEnter.Label = vgui.Create("DLabel", self.WorldParent)
+        self.ButtonPressEnter.Label:SetText("Keys to press:")
+        self.ButtonPressEnter.Label:SizeToContents()
+
+    self.ButtonReleaseEnter = vgui.Create("DTextEntry", self.WorldParent)
+    self.ButtonReleaseEnter.OnLoseFocus = function(sel)
+        self:SetData(sel:GetValue(), "Release")
+    end
+        self.ButtonReleaseEnter.Label = vgui.Create("DLabel", self.WorldParent)
+        self.ButtonReleaseEnter.Label:SetText("Keys to release:")
+        self.ButtonReleaseEnter.Label:SizeToContents()
+
+    self.WorldParent:SetVisible(false)
 
 end
 
@@ -162,10 +203,28 @@ function PANEL:PerformLayout(width, height)
     self.ColorPreview:SetPos(5, 165 + 5)
     self.ColorPreview:SetSize(105, 15)
 
+    self.SelectWorldButton:SetPos(5, 185 + 10)
+    self.SelectWorldButton:SetSize(self.ColorPanel:GetWide() - 10, 20)
+
+    self.WorldParent:SetPos(0, 225)
+    self.WorldParent:SetSize(self.ColorPanel:GetWide(), self.ColorPanel:GetTall() - 225)
+
+    self.ConsoleEnter:SetPos(5, 15)
+    self.ConsoleEnter:SetSize(self.WorldParent:GetWide() - 10, 20)
+        self.ConsoleEnter.Label:SetRelativePos(self.ConsoleEnter, 2, -5 - self.ConsoleEnter.Label:GetTall())
+
+    self.ButtonPressEnter:SetPos(5, 55)
+    self.ButtonPressEnter:SetSize(self.WorldParent:GetWide() - 10, 20)
+        self.ButtonPressEnter.Label:SetRelativePos(self.ButtonPressEnter, 2, -5 - self.ButtonPressEnter.Label:GetTall())
+
+    self.ButtonReleaseEnter:SetPos(5, 95)
+    self.ButtonReleaseEnter:SetSize(self.WorldParent:GetWide() - 10, 20)
+        self.ButtonReleaseEnter.Label:SetRelativePos(self.ButtonReleaseEnter, 2, -5 - self.ButtonReleaseEnter.Label:GetTall())
+
 end
 
 function PANEL:UpdateSelectedEnt(ent)
-    local modelname = IsValid(ent) and ent:GetModel() or "none"
+    local modelname = ent == LocalPlayer() and "world" or IsValid(ent) and ent:GetModel() or "none"
     self.SelectedEntityLabel:SetText("Selected model: " .. modelname)
 
     selectedEntity = ent
@@ -224,7 +283,10 @@ function PANEL:BuildTimelineinfo()
             self.TimelinesUI[i].Contents.Checker[mod] = vgui.Create("DCheckBoxLabel", self.TimelinesUI[i].Contents)
             self.TimelinesUI[i].Contents.Checker[mod]:SetText(name)
             self.TimelinesUI[i].Contents.Checker[mod]:SetTextColor(Color(25, 25, 25))
-            self.TimelinesUI[i].Contents.Checker[mod].OnChange = function(_, check) self:OnUpdateModifierRequested(i, mod, check) end
+            self.TimelinesUI[i].Contents.Checker[mod].OnChange = function(_, check)
+                if UsingWorld then return end
+                self:OnUpdateModifierRequested(i, mod, check)
+            end
             self.TimelinesUI[i].Contents.Checker[mod]:DockMargin(0, 0, 0, 2)
             self.TimelinesUI[i].Contents.Checker[mod]:Dock(TOP)
         end
@@ -279,6 +341,14 @@ function PANEL:GetModifiers()
     return ModifierList
 end
 
+function PANEL:SetUsingWorld(set)
+    UsingWorld = set
+end
+
+function PANEL:GetUsingWorld()
+    return UsingWorld
+end
+
 function PANEL:UpdateColor(timelineinfo)
     PropertyTable = table.Copy(timelineinfo)
 end
@@ -296,11 +366,24 @@ function PANEL:ButtonTimeline(add)
     end
 end
 
+function PANEL:ShowWorldSettings(console, push, release)
+    self.ConsoleEnter:SetValue(console)
+    self.ButtonPressEnter:SetValue(push)
+    self.ButtonReleaseEnter:SetValue(release)
+    self.WorldParent:SetVisible(true)
+end
+
+function PANEL:HideWorldSettings()
+    self.WorldParent:SetVisible(false)
+end
+
 function PANEL:ApplyName(ent, name) end
 function PANEL:SelectEntity(entity) end
+function PANEL:SelectWorld() end
 function PANEL:OnAddTimelineRequested() end
 function PANEL:OnRemoveTimelineRequested() end
 function PANEL:OnUpdateModifierRequested(i, mod, check) end
 function PANEL:OnUpdateKeyframeColorRequested(color, timeline) end
+function PANEL:SetData(str, key) end
 
 vgui.Register("SMHProperties", PANEL, "DFrame")

@@ -54,6 +54,10 @@ SMH.MessageTypes = {
     "UpdateKeyframeColorResponse",
 
     "SaveProperties",
+
+    "RequestWorldData",
+    "RequestWorldDataResponse",
+    "UpdateWorld",
 }
 for key, val in pairs(SMH.MessageTypes) do
     local prefixVal = "SMH" .. val
