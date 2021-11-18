@@ -1,6 +1,9 @@
 local GhostData = {}
 local LastFrame = 0
 local LastTimeline = 1
+local SpawnGhost = {}
+local SpawnGhostData = {}
+local GhostSettings = {}
 
 local function CreateGhost(player, entity, color, frame)
     for _, ghost in ipairs(GhostData[player].Ghosts) do
@@ -209,4 +212,80 @@ function MGR.UpdateSettings(player, settings)
     MGR.UpdateState(player, LastFrame, settings, LastTimeline)
 end
 
+function MGR.SetSpawnPreview(class, modelpath, data, settings, player)
+    if IsValid(SpawnGhost[player]) then
+        SpawnGhost[player]:Remove()
+    end
+    SpawnGhost[player] = nil
+    SpawnGhostData[player] = nil
+
+    if class == "prop_ragdoll" and not data["physbones"] then
+        player:ChatPrint("Stop Motion Helper: Can't set preview for the ragdoll as the save doesn't have Physical Bones modifier!")
+        return
+    end
+    if not data["physbones"] and not data["position"] then
+        player:ChatPrint("Stop Motion Helper: Can't set preview for the entity as the save doesn't have Physical Bones or Position and Rotation modifiers!")
+        return
+    end
+
+    SpawnGhostData[player] = data
+    GhostSettings[player] = settings
+
+    if class == "prop_ragdoll" then
+        SpawnGhost[player] = ents.Create("prop_ragdoll")
+    else
+        SpawnGhost[player] = ents.Create("prop_dynamic")
+    end
+    local alpha = settings.GhostTransparency * 255
+
+    SpawnGhost[player]:SetModel(modelpath)
+    SpawnGhost[player]:SetRenderMode(RENDERMODE_TRANSCOLOR)
+    SpawnGhost[player]:SetCollisionGroup(COLLISION_GROUP_NONE)
+    SpawnGhost[player]:SetNotSolid(true)
+    SpawnGhost[player]:SetColor(Color(255, 255, 255, alpha))
+    SpawnGhost[player]:Spawn()
+
+    for name, mod in pairs(SMH.Modifiers) do
+        if name == "color" then continue end
+        if data[name] then
+            mod:Load(SpawnGhost[player], data[name].Modifiers, settings)
+        end
+    end
+end
+
+function MGR.RefreshSpawnPreview(player)
+    if not IsValid(SpawnGhost[player]) then return end
+
+    for name, mod in pairs(SMH.Modifiers) do
+        if name == "color" then continue end
+        if SpawnGhostData[player][name] then
+            mod:Load(SpawnGhost[player], SpawnGhostData[player][name].Modifiers, GhostSettings[player])
+        end
+    end
+end
+
+function MGR.SpawnClear(player)
+    if IsValid(SpawnGhost[player]) then
+        SpawnGhost[player]:Remove()
+        SpawnGhost[player] = nil
+    end
+end
+
 SMH.GhostsManager = MGR
+
+hook.Add("Think", "SMHGhostSpawnOffsetPreview", function()
+    for player, data in pairs(SMH.Spawner.OriginData) do
+        if SMH.Spawner.OffsetMode[player] and IsValid(SpawnGhost[player]) then
+            for name, mod in pairs(SMH.Modifiers) do
+                if name == "color" then continue end
+                if SpawnGhostData[player][name] and data[name] and (name == "physbones" or name == "position") then
+                    local offsetpos = SMH.Spawner.OffsetPos[player] or Vector(0, 0, 0)
+                    local offsetang = SMH.Spawner.OffsetAng[player] or Angle(0, 0, 0)
+
+                    offsetdata = mod:Offset(SpawnGhostData[player][name].Modifiers, data[name].Modifiers, offsetpos, offsetang, player:GetEyeTraceNoCursor().HitPos)
+                    mod:Load(SpawnGhost[player], offsetdata, GhostSettings[player])
+                end
+            end
+        end
+    end
+end)

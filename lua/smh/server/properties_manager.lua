@@ -95,6 +95,8 @@ function MGR.GetAllProperties(player)
             Name = value.Name,
             Timelines = value.Timelines,
             TimelineMods = table.Copy(value.TimelineMods),
+            Class = value.Class,
+            Model = value.Model,
         }
     end
 
@@ -155,7 +157,9 @@ function MGR.AddEntity(player, entity)
             SMH.Properties.Players[player].Entities[entity] = {
                 Name = SetUniqueName(player, entity, GetModelName(entity)),
                 Timelines = timelines,
-                TimelineMods = timelinemods
+                TimelineMods = timelinemods,
+                Class = entity:GetClass(),
+                Model = entity:GetModel(),
             }
         else
             local timelinemods = {}

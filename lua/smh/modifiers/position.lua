@@ -34,3 +34,13 @@ function MOD:LoadBetween(entity, data1, data2, percentage)
     entity:SetAngles(Ang);
 
 end
+
+function MOD:Offset(data, origindata, worldvector, worldangle, hitpos)
+
+    local datanew = {};
+    local Pos, Ang = WorldToLocal(data.Pos, data.Ang, origindata.Pos, origindata.Ang);
+    datanew.Pos, datanew.Ang = LocalToWorld(Pos, Ang, worldvector, worldangle);
+    datanew.Pos = datanew.Pos + hitpos
+    return datanew;
+
+end

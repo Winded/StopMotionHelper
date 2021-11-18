@@ -142,3 +142,27 @@ function MOD:LoadBetween(entity, data1, data2, percentage, settings)
     end
 
 end
+
+function MOD:Offset(data, origindata, worldvector, worldangle, hitpos)
+
+    local newdata = {};
+
+    for id, kdata in pairs(data) do
+
+        local d = {};
+        local Pos, Ang = WorldToLocal(kdata.Pos, kdata.Ang, origindata[0].Pos, origindata[0].Ang);
+        d.Pos, d.Ang = LocalToWorld(Pos, Ang, worldvector, worldangle);
+        d.Pos = d.Pos + hitpos
+
+        if kdata.LocalPos and kdata.LocalAng then -- those shouldn't change
+            d.LocalPos, d.LocalAng = kdata.LocalPos, kdata.LocalAng;
+        end
+
+        d.Moveable = kdata.Moveable;
+
+        newdata[id] = d;
+    end
+
+    return newdata;
+
+end

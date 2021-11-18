@@ -150,6 +150,8 @@ function MGR.Serialize(keyframes, properties, player)
                         Name = properties[entity].Name,
                         Timelines = properties[entity].Timelines,
                         TimelineMods = table.Copy(properties[entity].TimelineMods),
+                        Class = properties[entity].Class,
+                        Model = properties[entity].Model,
                     },
                     Frames = {},
                 }

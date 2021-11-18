@@ -53,6 +53,15 @@ SMH.MessageTypes = {
     "UpdateKeyframeColor",
     "UpdateKeyframeColorResponse",
 
+    "SetPreviewEntity",
+    "SetSpawnGhost",
+    "SpawnEntity",
+    "SpawnReset",
+    "SetSpawnOffsetMode",
+    "SetSpawnOrigin",
+    "OffsetPos",
+    "OffsetAng",
+
     "SaveProperties",
 
     "RequestWorldData",
@@ -63,6 +72,9 @@ for key, val in pairs(SMH.MessageTypes) do
     local prefixVal = "SMH" .. val
     SMH.MessageTypes[val] = prefixVal
 end
+
+cleanup.Register("smhentity")
+CreateConVar("sbox_maxsmhentity", 20, FCVAR_NOTIFY)
 
 include("shared/saves.lua")
 include("shared/tablesplit.lua")
