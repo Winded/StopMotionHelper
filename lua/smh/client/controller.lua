@@ -154,7 +154,7 @@ function CTRL.QuickSave()
     local qs2 = "quicksave_" .. nick .. "_backup"
 
     SMH.Saves.CopyIfExists(qs1, qs2)
-    CTRL.Save(qs1, true)
+    CTRL.Save(qs1, false)
 end
 
 function CTRL.DeleteSave(path, deleteFromClient)

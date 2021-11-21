@@ -116,7 +116,7 @@ end
 
 hook.Add("Think", "SMHPlaybackManagerThink", function()
     for player, playback in pairs(ActivePlaybacks) do
-        if not playback.Settings.SmoothPlayback then
+        if not playback.Settings.SmoothPlayback or playback.Settings.TweenDisable then
             playback.Timer = playback.Timer + FrameTime()
             local timePerFrame = 1 / playback.PlaybackRate
             if playback.Timer >= timePerFrame then

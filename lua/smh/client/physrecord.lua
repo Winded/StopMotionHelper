@@ -64,7 +64,7 @@ function MGR.RecordToggle()
                     Active = false
                     Waiting = 0
                     timer.Remove(SMHRecorderID)
-                    LocalPlayer():ChatPrint( "SMH Physics Recoder stopped.")
+                    LocalPlayer():ChatPrint( "SMH Physics Recorder stopped.")
 
                 else
                     NextFrame()
@@ -76,7 +76,7 @@ function MGR.RecordToggle()
         Active = false
         Waiting = 0
         timer.Remove(SMHRecorderID)
-        LocalPlayer():ChatPrint( "SMH Physics Recoder stopped.")
+        LocalPlayer():ChatPrint( "SMH Physics Recorder stopped.")
     end
 
 end
