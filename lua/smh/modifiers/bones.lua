@@ -1,5 +1,5 @@
 
-MOD.Name = "Bones";
+MOD.Name = "Nonphysical Bones";
 
 function MOD:Save(entity)
 
