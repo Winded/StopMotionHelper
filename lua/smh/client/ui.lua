@@ -548,6 +548,9 @@ function MGR.UpdateKeyframe(keyframe)
         end
     end
     FrameToKeyframe[keyframe.Frame] = KeyframeIDs[keyframe.ID]
+    if keyframe.Frame == SMH.State.Frame then
+        WorldClicker.MainMenu:ShowEasingControls(keyframe.EaseIn, keyframe.EaseOut)
+    end
 end
 
 function MGR.DeleteKeyframe(keyframeId)
@@ -564,6 +567,9 @@ function MGR.DeleteKeyframe(keyframeId)
 
         for frame, kid in pairs(FrameToKeyframe) do
             if kid == KeyframeIDs[keyframeId] then
+                if frame == SMH.State.Frame then
+                    WorldClicker.MainMenu:HideEasingControls()
+                end
                 FrameToKeyframe[frame] = nil
                 break
             end
