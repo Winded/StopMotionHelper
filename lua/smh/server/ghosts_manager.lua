@@ -16,6 +16,12 @@ local function CreateGhost(player, entity, color, frame)
     local g
     if class == "prop_ragdoll" then
         g = ents.Create("prop_ragdoll")
+
+        local flags = entity:GetSaveTable().spawnflags or 0
+        if flags % (2 * 32768) >= 32768 then
+            g:SetKeyValue("spawnflags",32768)
+            g:SetSaveValue("m_ragdoll.allowStretch", true)
+        end
     else
         g = ents.Create("prop_dynamic")
 
