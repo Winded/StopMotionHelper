@@ -492,6 +492,18 @@ function MGR.SetKeyframes(keyframes)
                 end
             end
         end
+
+        if FrameToKeyframe[SMH.State.Frame] ~= nil then
+            local data = KeyframeEasingData[FrameToKeyframe[SMH.State.Frame]]
+            if data then
+                WorldClicker.MainMenu:ShowEasingControls(data.EaseIn, data.EaseOut)
+            else
+                WorldClicker.MainMenu:ShowEasingControls(0, 0)
+            end
+        else
+            WorldClicker.MainMenu:HideEasingControls()
+        end
+
     else
         for _, keyframe in pairs(keyframes) do
             if not FrameToKeyframe[keyframe.Frame] then
