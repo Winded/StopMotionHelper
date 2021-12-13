@@ -55,6 +55,11 @@ end
 
 local function SelectEntity(msgLength, player)
     local entity = net.ReadEntity()
+
+    if entity.SMHGhost then
+        entity = entity.Entity
+    end
+
     if player ~= entity then
         SMH.GhostsManager.SelectEntity(player, entity)
     else

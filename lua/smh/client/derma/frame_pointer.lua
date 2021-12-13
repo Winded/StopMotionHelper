@@ -34,7 +34,7 @@ end
 
 function PANEL:Paint(width, height)
     local parent = self:GetParent()
-    if self._frame < parent.ScrollOffset or self._frame > (parent.ScrollOffset + parent.Zoom) then
+    if self._frame < parent.ScrollOffset or self._frame > (parent.ScrollOffset + parent.Zoom - 1) then
         return
     end
 
@@ -84,7 +84,7 @@ function PANEL:SetFrame(frame)
 
     local frameAreaWidth = endX - startX
     local offsetFrame = frame - parent.ScrollOffset
-    local x = startX + (offsetFrame / parent.Zoom) * frameAreaWidth
+    local x = startX + (offsetFrame / (parent.Zoom - 1)) * frameAreaWidth
 
     self:SetPos(x - self:GetWide() / 2, height - self:GetTall() / 2)
     self._frame = frame
@@ -201,7 +201,7 @@ function PANEL:OnCursorMoved()
     local targetX = cursorX - startX
     local width = endX - startX
 
-    local targetPos = math.Round(parent.ScrollOffset + (targetX / width) * parent.Zoom)
+    local targetPos = math.Round(parent.ScrollOffset + (targetX / width) * (parent.Zoom - 1))
     targetPos = targetPos < 0 - self._minoffset and 0 - self._minoffset or (targetPos >= parent.TotalFrames - self._maxoffset and parent.TotalFrames - 1 - self._maxoffset or targetPos)
 
     if targetPos ~= self._frame then

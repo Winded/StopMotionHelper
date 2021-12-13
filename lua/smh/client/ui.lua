@@ -215,9 +215,6 @@ local function AddCallbacks()
 
     WorldClicker.OnEntitySelected = function(_, entity)
         SMH.Controller.SelectEntity(entity)
-        LoadMenu:UpdateSelectedEnt(entity)
-        PropertiesMenu:UpdateSelectedEnt(entity)
-        ClickerEntity = entity
     end
 
     WorldClicker.MainMenu.OnRequestStateUpdate = function(_, newState)
@@ -337,9 +334,6 @@ local function AddCallbacks()
     end
     PropertiesMenu.SelectEntity = function(_, ent)
         SMH.Controller.SelectEntity(ent)
-        LoadMenu:UpdateSelectedEnt(ent)
-        PropertiesMenu:UpdateSelectedEnt(ent)
-        ClickerEntity = ent
     end
     PropertiesMenu.OnAddTimelineRequested = function()
         SMH.Controller.AddTimeline()
@@ -356,9 +350,6 @@ local function AddCallbacks()
 
     PropertiesMenu.SelectWorld = function()
         SMH.Controller.SelectEntity(LocalPlayer())
-        LoadMenu:UpdateSelectedEnt(LocalPlayer())
-        PropertiesMenu:UpdateSelectedEnt(LocalPlayer())
-        ClickerEntity = LocalPlayer()
     end
 
     PropertiesMenu.SetData = function(_, str, key)
@@ -700,6 +691,12 @@ function MGR.ToggleSelect(pointer)
         if kpointer == pointer then continue end
         if kpointer == LastSelectedKeyframe then LastSelectedKeyframe = nil end
     end
+end
+
+function MGR.SetSelectedEntity(entity)
+    LoadMenu:UpdateSelectedEnt(entity)
+    PropertiesMenu:UpdateSelectedEnt(entity)
+    ClickerEntity = entity
 end
 
 function MGR.SetServerSaves(saves)

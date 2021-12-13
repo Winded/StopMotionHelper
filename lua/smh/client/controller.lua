@@ -361,6 +361,7 @@ local function SelectEntityResponse(msgLength)
     end
 
     SMH.State.Entity = entity
+    SMH.UI.SetSelectedEntity(entity)
     SMH.UI.SetUsingWorld(entity == LocalPlayer())
     SMH.UI.SetTimeline(timeline)
     SMH.UI.SetKeyframes(keyframes)
