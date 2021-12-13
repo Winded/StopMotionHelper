@@ -63,10 +63,10 @@ end
 function PANEL:Paint(width, height)
 
     local startX, endX = unpack(self.FrameArea)
-    local frameWidth = (endX - startX) / self.Zoom
+    local frameWidth = (endX - startX) / (self.Zoom - 1)
 
     surface.SetDrawColor(255, 255, 255, 255)
-    for i = 0, self.Zoom do
+    for i = 0, self.Zoom - 1 do
         if self.ScrollOffset + i < self.TotalFrames then
             local x = startX + frameWidth * i
             surface.DrawLine(x, 6, x, height - 6)
@@ -147,7 +147,7 @@ function PANEL:OnMousePressed(mousecode)
 
     local targetX = posX - startX
     local width = endX - startX
-    local framePosition = math.Round(self.ScrollOffset + (targetX / width) * self.Zoom)
+    local framePosition = math.Round(self.ScrollOffset + (targetX / width) * (self.Zoom - 1))
     framePosition = framePosition < 0 and 0 or (framePosition >= self.TotalFrames and self.TotalFrames - 1 or framePosition)
 
     self:OnFramePressed(framePosition)

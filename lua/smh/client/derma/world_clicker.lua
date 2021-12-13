@@ -30,9 +30,9 @@ function PANEL:OnMousePressed(mousecode)
     end
 
     local trace = util.TraceLine(util.GetPlayerTrace(LocalPlayer()))
-    if IsValid(trace.Entity) then
-        self:OnEntitySelected(trace.Entity)
-    end
+    if not IsValid(trace.Entity) then return end
+
+    self:OnEntitySelected(trace.Entity)
 end
 
 function PANEL:OnEntitySelected(entity) end
