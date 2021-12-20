@@ -4,7 +4,6 @@ end
 
 SMH.MessageTypes = {
     "SetFrame",
-    "SetFramePhys",
     "SetFrameResponse",
 
     "SelectEntity",
@@ -68,6 +67,10 @@ SMH.MessageTypes = {
     "RequestWorldData",
     "RequestWorldDataResponse",
     "UpdateWorld",
+
+    "StartPhysicsRecord",
+    "StopPhysicsRecord",
+    "StopPhysicsRecordResponse",
 }
 for key, val in pairs(SMH.MessageTypes) do
     local prefixVal = "SMH" .. val

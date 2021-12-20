@@ -377,7 +377,7 @@ hook.Add("InitPostEntity", "SMHMenuSetup", function()
     WorldClicker.Settings:SetVisible(false)
 
     WorldClicker.PhysRecorder = vgui.Create("SMHPhysRecord", WorldClicker)
-    WorldClicker.PhysRecorder:SetPos(ScrW() - 250 - 250, ScrH() - 90 - 150)
+    WorldClicker.PhysRecorder:SetPos(ScrW() - 250 - 250, ScrH() - 90 - 170)
     WorldClicker.PhysRecorder:SetVisible(false)
 
     SaveMenu = vgui.Create("SMHSave")
@@ -696,6 +696,7 @@ end
 function MGR.SetSelectedEntity(entity)
     LoadMenu:UpdateSelectedEnt(entity)
     PropertiesMenu:UpdateSelectedEnt(entity)
+    WorldClicker.PhysRecorder:UpdateSelectedEnt(entity)
     ClickerEntity = entity
 end
 
