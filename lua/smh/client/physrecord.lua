@@ -22,14 +22,6 @@ surface.CreateFont( "smh_font", {
 
 local MGR = {}
 
-local function NextFrame()
-    local pos = SMH.State.Frame + 1
-    if pos >= SMH.State.PlaybackLength then
-        pos = 0
-    end
-    SMH.Controller.SetFramePhys(pos, MGR.SelectedEntities)
-end
-
 MGR.FrameCount, MGR.RecordInterval, MGR.StartDelay = 100, 0, 3
 MGR.SelectedEntities = {}
 
