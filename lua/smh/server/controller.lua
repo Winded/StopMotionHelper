@@ -39,20 +39,6 @@ local function SetFrame(msgLength, player)
     net.Send(player)
 end
 
-local function SetFramePhys(msgLength, player)
-    local newFrame = net.ReadUInt(INT_BITCOUNT)
-    local settings = net.ReadTable()
-    local timeline = net.ReadUInt(INT_BITCOUNT)
-    local entity = net.ReadEntity()
-
-    SMH.PlaybackManager.SetFrameIgnore(player, newFrame, settings, entity)
-    SMH.GhostsManager.UpdateState(player, newFrame, settings, timeline)
-
-    net.Start(SMH.MessageTypes.SetFrameResponse)
-    net.WriteUInt(newFrame, INT_BITCOUNT)
-    net.Send(player)
-end
-
 local function SelectEntity(msgLength, player)
     local entity = net.ReadEntity()
 
@@ -488,12 +474,45 @@ local function UpdateWorld(msgLength, player)
     SMH.KeyframeManager.UpdateWorldKeyframe(player, frame, str, key)
 end
 
+local function StartPhysicsRecord(msgLength, player)
+    local framecount = net.ReadUInt(INT_BITCOUNT)
+    local interval = net.ReadUInt(INT_BITCOUNT)
+    local frame = net.ReadUInt(INT_BITCOUNT)
+    local playbackrate = net.ReadUInt(INT_BITCOUNT)
+    local totalframes = net.ReadUInt(INT_BITCOUNT)
+    local entities = {}
+
+    for i = 1, net.ReadUInt(INT_BITCOUNT) do
+        local entity = net.ReadEntity()
+        local timeline = net.ReadUInt(INT_BITCOUNT)
+
+        if not IsValid(entity) then continue end
+        entities[entity] = timeline
+    end
+
+    local settings = net.ReadTable()
+
+    SMH.PhysRecord.RecordStart(player, framecount, interval, frame, playbackrate, totalframes, entities, settings)
+end
+
+local function StopPhysicsRecord(msgLength, player)
+    SMH.PhysRecord.RecordStop(player)
+end
+
+local MGR = {}
+
+function MGR.StopPhysicsRecordResponse(player)
+    net.Start(SMH.MessageTypes.StopPhysicsRecordResponse)
+    net.Send(player)
+end
+
+SMH.Controller = MGR
+
 for _, message in pairs(SMH.MessageTypes) do
     util.AddNetworkString(message)
 end
 
 net.Receive(SMH.MessageTypes.SetFrame, SetFrame)
-net.Receive(SMH.MessageTypes.SetFramePhys, SetFramePhys)
 
 net.Receive(SMH.MessageTypes.SelectEntity, SelectEntity)
 
@@ -537,3 +556,6 @@ net.Receive(SMH.MessageTypes.SaveProperties, SaveProperties)
 
 net.Receive(SMH.MessageTypes.RequestWorldData, RequestWorldData)
 net.Receive(SMH.MessageTypes.UpdateWorld, UpdateWorld)
+
+net.Receive(SMH.MessageTypes.StartPhysicsRecord, StartPhysicsRecord)
+net.Receive(SMH.MessageTypes.StopPhysicsRecord, StopPhysicsRecord)

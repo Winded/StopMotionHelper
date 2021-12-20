@@ -20,21 +20,23 @@ surface.CreateFont( "smh_font", {
     outline = false
 } )
 
+local MGR = {}
+
 local function NextFrame()
     local pos = SMH.State.Frame + 1
     if pos >= SMH.State.PlaybackLength then
         pos = 0
     end
-    SMH.Controller.SetFramePhys(pos)
+    SMH.Controller.SetFramePhys(pos, MGR.SelectedEntities)
 end
 
-local MGR = {}
-
 MGR.FrameCount, MGR.RecordInterval, MGR.StartDelay = 100, 0, 3
+MGR.SelectedEntities = {}
 
 function MGR.RecordToggle()
 
     if not Active then
+        SMH.Controller.SelectEntity(nil)
         Active = true
         local wait = MGR.StartDelay
         Waiting = wait
@@ -43,42 +45,32 @@ function MGR.RecordToggle()
             Waiting = Waiting - 1 
         end)
 
-        timer.Simple(wait, function()
+        timer.Create(SMHRecorderID .. 1, wait, 1, function()
             Waiting = 0
-            local fps = SMH.State.PlaybackRate
-            local i = MGR.RecordInterval
+            SMH.Controller.StartPhysicsRecord(MGR.FrameCount, MGR.RecordInterval, MGR.SelectedEntities)
             timer.Remove(SMHRecorderID)
-            local counter = -1
-            SMH.Controller.Record()
-
-            timer.Create(SMHRecorderID, 1 / fps , MGR.FrameCount, function()
-                counter = counter + 1
-
-                if i == 0 or (counter / i) == math.Round(counter / i)  then 
-                    SMH.Controller.Record()
-                end
-
-                if counter >= MGR.FrameCount - 1 or SMH.State.Frame + 1 > SMH.State.PlaybackLength - 1  then
-
-                    SMH.Controller.Record()
-                    Active = false
-                    Waiting = 0
-                    timer.Remove(SMHRecorderID)
-                    LocalPlayer():ChatPrint( "SMH Physics Recorder stopped.")
-
-                else
-                    NextFrame()
-                end
-            end)
-
         end)
     else
         Active = false
         Waiting = 0
+        SMH.Controller.StopPhysicsRecord()
         timer.Remove(SMHRecorderID)
-        LocalPlayer():ChatPrint( "SMH Physics Recorder stopped.")
+        timer.Remove(SMHRecorderID .. 1)
+        MGR.SelectedEntities = {}
     end
 
+end
+
+function MGR.Stop()
+    Active = false
+    Waiting = 0
+    timer.Remove(SMHRecorderID)
+    timer.Remove(SMHRecorderID .. 1)
+    MGR.SelectedEntities = {}
+end
+
+function MGR.IsActive()
+    return Active
 end
 
 SMH.PhysRecord = MGR

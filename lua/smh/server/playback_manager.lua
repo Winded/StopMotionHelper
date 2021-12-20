@@ -74,13 +74,13 @@ function MGR.SetFrame(player, newFrame, settings)
     end
 end
 
-function MGR.SetFrameIgnore(player, newFrame, settings, ignoredentity)
+function MGR.SetFrameIgnore(player, newFrame, settings, ignored)
     if not SMH.KeyframeData.Players[player] then
         return
     end
 
     for entity, keyframes in pairs(SMH.KeyframeData.Players[player].Entities) do
-        if ignoredentity == entity then continue end
+        if ignored[entity] then continue end
         for name, mod in pairs(SMH.Modifiers) do
             local prevKeyframe, nextKeyframe, lerpMultiplier = SMH.GetClosestKeyframes(keyframes, newFrame, false, name)
             if not prevKeyframe then
