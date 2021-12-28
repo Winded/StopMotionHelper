@@ -417,6 +417,12 @@ local function DeleteKeyframeResponse(msgLength)
     end
 end
 
+local function GetAllKeyframes(msgLength)
+    local keyframes = ReceiveKeyframes()
+
+    SMH.UI.SetKeyframes(keyframes, true)
+end
+
 local function GetServerSavesResponse(msgLength)
     for i=1, net.ReadUInt(INT_BITCOUNT) do
         SMH.TableSplit.AList(net.ReadString(), net.ReadString())
@@ -536,6 +542,7 @@ local function Setup()
 
     net.Receive(SMH.MessageTypes.UpdateKeyframeResponse, UpdateKeyframeResponse)
     net.Receive(SMH.MessageTypes.DeleteKeyframeResponse, DeleteKeyframeResponse)
+    net.Receive(SMH.MessageTypes.GetAllKeyframes, GetAllKeyframes)
 
     net.Receive(SMH.MessageTypes.GetServerSavesResponse, GetServerSavesResponse)
     net.Receive(SMH.MessageTypes.GetModelListResponse, GetModelListResponse)
