@@ -439,28 +439,31 @@ function MGR.SetFrame(frame)
     end
 end
 
-function MGR.SetKeyframes(keyframes)
-    for _, pointer in pairs(KeyframePointers) do
-        WorldClicker.MainMenu.FramePanel:DeleteFramePointer(pointer)
-    end
-
+function MGR.SetKeyframes(keyframes, isreceiving)
     local propertymods = PropertiesMenu:GetCurrentModifiers()
 
-    if not propertymods.KeyColor then
-        KeyColor = Color(0, 200, 0)
-    else
-        KeyColor = propertymods.KeyColor
+    if not isreceiving then
+        for _, pointer in pairs(KeyframePointers) do
+            WorldClicker.MainMenu.FramePanel:DeleteFramePointer(pointer)
+        end
+
+        if not propertymods.KeyColor then
+            KeyColor = Color(0, 200, 0)
+        else
+            KeyColor = propertymods.KeyColor
+        end
+
+        KeyframePointers = {}
+        FrameToKeyframe = {}
+        SelectedPointers = {}
+        KeyframeIDs = {}
+        LastSelectedKeyframe = nil
     end
 
     local Modifiers = {}
     for _, name in ipairs(propertymods) do
         Modifiers[name] = true
     end
-    KeyframePointers = {}
-    FrameToKeyframe = {}
-    SelectedPointers = {}
-    KeyframeIDs = {}
-    LastSelectedKeyframe = nil
 
     if not PropertiesMenu:GetUsingWorld() then
         for _, keyframe in pairs(keyframes) do

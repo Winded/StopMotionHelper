@@ -15,6 +15,7 @@ SMH.MessageTypes = {
     "UpdateKeyframeResponse",
     "DeleteKeyframe",
     "DeleteKeyframeResponse",
+    "GetAllKeyframes",
 
     "StartPlayback",
     "StopPlayback",
