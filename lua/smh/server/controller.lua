@@ -31,7 +31,7 @@ local function SendProperties(Name, Timelines, KeyColor, ModCount, Modifiers)
     end
 end
 
-local function SendLeftoverKeyframes(framecount, IDs, entity, Frame, In, Out, Modifier)
+local function SendLeftoverKeyframes(player, framecount, IDs, entity, Frame, In, Out, Modifier)
     if framecount < 0 then return end
 
     for i = 1, math.ceil(framecount / KFRAMES_PER_MSG) do
@@ -84,7 +84,7 @@ local function SelectEntity(msgLength, player)
     end
     net.Send(player)
 
-    SendLeftoverKeyframes(framecount, IDs, entity, Frame, In, Out, Modifier)
+    SendLeftoverKeyframes(player, framecount, IDs, entity, Frame, In, Out, Modifier)
 end
 
 local function CreateKeyframe(msgLength, player)
@@ -247,7 +247,7 @@ local function Load(msgLength, player)
     SendProperties(Name, Timelines, KeyColor, ModCount, Modifiers)
     net.Send(player)
 
-    SendLeftoverKeyframes(framecount, IDs, entity, Frame, In, Out, Modifier)
+    SendLeftoverKeyframes(player, framecount, IDs, entity, Frame, In, Out, Modifier)
 end
 
 local function GetModelInfo(msgLength, player)
@@ -317,7 +317,7 @@ local function UpdateTimeline(msgLength, player)
     framecount = SendKeyframes(framecount, IDs, entity, Frame, In, Out, Modifier)
     net.Send(player)
 
-    SendLeftoverKeyframes(framecount, IDs, entity, Frame, In, Out, Modifier)
+    SendLeftoverKeyframes(player, framecount, IDs, entity, Frame, In, Out, Modifier)
 end
 
 local function RequestModifiers(msgLength, player)
@@ -347,7 +347,7 @@ local function AddTimeline(msgLength, player)
     framecount = SendKeyframes(framecount, IDs, entity, Frame, In, Out, Modifier)
     net.Send(player)
 
-    SendLeftoverKeyframes(framecount, IDs, entity, Frame, In, Out, Modifier)
+    SendLeftoverKeyframes(player, framecount, IDs, entity, Frame, In, Out, Modifier)
 end
 
 local function RemoveTimeline(msgLength, player)
@@ -365,7 +365,7 @@ local function RemoveTimeline(msgLength, player)
     framecount = SendKeyframes(framecount, IDs, entity, Frame, In, Out, Modifier)
     net.Send(player)
 
-    SendLeftoverKeyframes(framecount, IDs, entity, Frame, In, Out, Modifier)
+    SendLeftoverKeyframes(player, framecount, IDs, entity, Frame, In, Out, Modifier)
 end
 
 local function UpdateModifier(msgLength, player)
@@ -387,7 +387,7 @@ local function UpdateModifier(msgLength, player)
     framecount = SendKeyframes(framecount, IDs, entity, Frame, In, Out, Modifier)
     net.Send(player)
 
-    SendLeftoverKeyframes(framecount, IDs, entity, Frame, In, Out, Modifier)
+    SendLeftoverKeyframes(player, framecount, IDs, entity, Frame, In, Out, Modifier)
 end
 
 local function UpdateKeyframeColor(msgLength, player)
@@ -456,7 +456,7 @@ local function SpawnEntity(msgLength, player)
     SendProperties(Name, Timelines, KeyColor, ModCount, Modifiers)
     net.Send(player)
 
-    SendLeftoverKeyframes(framecount, IDs, entity, Frame, In, Out, Modifier)
+    SendLeftoverKeyframes(player, framecount, IDs, entity, Frame, In, Out, Modifier)
 end
 
 local function SpawnReset(msgLength, player)
