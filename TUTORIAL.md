@@ -3,7 +3,7 @@ Stop Motion Helper tutorial
 
 ## Video tutorial
 
-You can find a video tutorial covering the basics [here](http://www.youtube.com/embed/bei2e-uDfuE).
+You can find a video tutorial covering the basics [here](https://www.youtube.com/embed/9RBynRzBdhk).
 
 ## How things basically work
 
@@ -44,6 +44,9 @@ After a recorded frame has been created, it is shown as a green rectangle in the
 mouse button to move the frame to another position. You can remove the frame by right clicking the rectangle. You can click and hold it with
 your middle mouse button to make a copy of the frame to another position. Copying can also be done by holding down Ctrl and right clicking.
 
+You can select multiple keyframes by selecting them with left click and Ctrl one by one, or with left click and Shift on 2 keyframes will
+select those keyframes and all keyframes between them. All selected  can be unselected by left clicking on any keyframe.
+
 **NOTE:** Moving a frame on top of another frame will remove the frame that is not being moved. Be careful.
 
 ## Adding or reducing frames
@@ -57,6 +60,64 @@ visible on the timeline as well as playback and rendering, which we will discuss
 
 There is a scroll bar at the bottom of the frame timeline. Drag it to scroll through frames that are outside of the current view.
 If you want to see less or more frames in the timeline at once, you can zoom in and out by using your mouse wheel.
+
+## Properties
+
+Properties menu allows you to name and select already recorded entities and manage timelines for the selected entity.
+
+For editing timelines, you can add up to 10 timelines for an entity, and select up to 13 modifiers between those timelines that could be 
+manipulated by SMH.
+
+Modifiers:
+
+`Nonphysical Bones` — Model bones that can not be manipulated by the Physics gun, like fingers.
+
+`Color` — Color from the Color tool.
+
+`Bodygroup` — Bodygroups that can be usually changed through Context Menu.
+
+`Model scale`
+
+`Soft Lamps` — Properties of lamp entities from Soft Lamps addon.
+
+`Pose parameters` — Animates pose parameters, those can be edited with the Easy Animation Tool addon.
+
+`Eye target` — Eyes that can be manipulated with Eye Poser.
+
+`Skin` — Skins that can be usually changed through Context Menu.
+
+`Facial flexes` — Facial flexes that are manipulated with the Faceposer.
+
+`Advanced Cameras` — Properties of cameras from Advanced Cameras addon.
+
+`Physical Bones` — Anything that obeys physics and can be manipulated by Physics Gun.
+
+`Position and Rotation` — Records position of the entity, however it doesn't seem to do anything for ragdolls, and on physics 
+props its position will be overriden by `Physical Bones` modifier. However, it is still recommended to record this modifier on them.
+
+`Advanced Lights` — Properties of light entities from Advanced Light Entities addon.
+
+**NOTE:** Recording new entity will create 1 timeline with all modifiers enabled on it, but if you want to use specific timeline setup, you 
+can use `smh_savepreset` console command to save timeline setup on your selected entity to use for newly recorded ones. You can
+access settings files by navigating to `garrysmod/data/smhsettings`.
+
+## World keyframes
+
+Pressing "Select World" button in the Properties menu to select world, on which you can record special keyframes that you can edit in the
+Properies window. Those keyframes can execute console commands, which can be entered just as you would enter them in console, and those
+keyframes also can trigger specific gmod entities that can be activated through keypresses, like thrusters or wheels.
+
+For using keypress functions, make sure that you have 2 keyframes, one for pressing a certain button, and another to release it later. You 
+also can't press and release a key in 1 frame. Keypress function uses following keynames, and they must be separated with spaces if you 
+want to activate multiple:
+
+0 , 1 , 2 , 3 , 4 , 5 , 6 , 7 , 8 , 9 , a , b , c , d , e , f , g , h , i , j , k , l , m , n , o , p , q , r , s , t , u , v , w , x , y , z , 
+Numpad_0 , Numpad_1 , Numpad_2 , Numpad_3 , Numpad_4 , Numpad_5 , Numpad_6 , Numpad_7 , Numpad_8 , Numpad_9 , Numpad_/ , Numpad_* , Numpad_- , 
+Numpad_+ , Numpad_Enter , Numpad_. , [ , ] , SEMICOLON , ' , ` , , , . , / , \ , - , = , ENTER , SPACE , BACKSPACE , TAB , CAPSLOCK , NUMLOCK ,
+ESCAPE , SCROLLLOCK , INS , DEL , HOME , END , PGUP , PGDN , PAUSE , SHIFT , RSHIFT , ALT , RALT , CTRL , RCTRL , LWIN , RWIN , APP , UPARROW ,
+LEFTARROW , DOWNARROW , RIGHTARROW , F1 , F2 , F3 , F4 , F5 , F6 , F7 , F8 , F9 , F10 , F11 , F12 , CAPSLOCKTOGGLE , NUMLOCKTOGGLE , SCROLLLOCKTOGGLE
+
+**NOTE:** Some console commands can't be used since they are [blocked](https://wiki.facepunch.com/gmod/Blocked_ConCommands) due to safety reasons.
 
 ## Animation playback
 
@@ -72,6 +133,8 @@ set up your camera and stuff, and fire away. After the rendering is complete, th
 Alternatively, you can use `smh_makescreenshot`, which is the same as `smh_makejpeg`, but uses the `screenshot`command internally.
 This allows you to render TGA images instead of JPEG.
 
+You can optionally input a number in those commands to start render from a certain frame.
+
 ## Saving
 
 You might want to continue animating later, or save your finished scene, just in case you want to come back and change things. You can
@@ -80,13 +143,21 @@ saves, and then hit the save button. And you scene is saved!
 
 ## Deleting saves
 
-You can also delete saves from the Save menu, or by navigatingto `garrysmod/data/smh` and deleting files there.
+You can also delete saves from the Save menu, or by navigating to `garrysmod/data/smh` and deleting files there.
 
 ## Loading
 
 When you want to load your saved frames, you will need to do this individually for all entities. When you have selected an entity with SMH,
-open the load menu. Select your previously saved scene. You will then see a list of saved entities, identified by their model name. Select
-the right entity and then hit load, and the entity should now have all the frames that were saved.
+open the load menu. Select your previously saved scene. You will then see a list of saved entities, identified by their model name or the name
+they were given in the Properties menu. Select the right entity and then hit load, and the entity should now have all the frames that were saved.
+
+## Spawning
+
+In load menu, after you have selected a save, you can press Spawn button which will open the Spawn menu in SMH's main menu. From there you can select
+a saved entity from the right column, and it will spawn a preview ghost in its position it was recorded on first frame. Clicking spawn button there will
+spawn that entity, and apply saved keyframes to it. You also can offset entity's position to your viewpoint, while using position of some other saved 
+entity from the left column as a reference point, if they have recorded keyframes with `Physical Bones` or `Rotation and Position` modifiers, 
+and adjust its rotation and position and spawn it somewhere else.
 
 ## Backing up saves
 
@@ -98,14 +169,17 @@ else if they take up space in the save list.
 It's always good practice to frequently save your scene, as there are many unexpected things that can happen. Garry's mod might crash,
 SMH might error out, your computer may crash or you have to lock down your house in case of a zombie apocalypse. Saving your scene
 manually might not be the most ideal thing to do. That's why there's the `smh_quicksave` command. Bind a key into this command and
-your scene will be saved with the name `quicksave` when you press it.
+your scene will be saved with the name `quicksave_[your nickname]` when you press it.
 
 ## Settings menu
 
-There are two options you can change in the settings menu; `Freeze all` and `Don't animate phys bones`. The first option will keep all
-physical bones of a ragdoll frozen when positioning to a frame, even if they were not frozen when the frame was recorded. The second option
-will disable the animation of physical bones entirely. This can be used for puppeteering while playing a facial animation, for example. This might
-not be usable in stop motion, so you'd have to use recording software, like Fraps.
+There are several options you can change in the settings menu:
+`Freeze all` will keep all physical bones of a ragdoll frozen when positioning to a frame, even if they were not frozen when the frame was recorded. 
+`Don't animate phys bones` will disable the animation of physical bones entirely. This can be used for puppeteering while playing a facial animation, 
+for example. This might not be usable in stop motion, so you'd have to use recording software, like OBS Studio.
+`Disable Tweening` will disable SMH's automatic tweening between keyframes, which can be useful for blocking animation.
+`Smooth Playback` will try to run playback smoother, although it may be more performance heavy.
+`Enable world keyframes` will allow world keyframes to execute their commands and keypresses.
 
 ## Ghosts
 
@@ -119,6 +193,13 @@ and not just the selected entity. `Ghost transparency` can be used to change the
 Onion skinning will display ghost-like objects representing all frames of an entity. This might be useful to visualize the animation flow of your prop or ragdoll.
 To use onion skinning, bind a key to command `smh_onionskin`. You can then toggle onion skinning on and off. The option `Ghost all entities`
 in the options menu applies to onion skinning as well, so enabling that will let you see all frames of all entities at the same time.
+
+## Physics recorder
+
+Physics recorder menu can be accessed through settings menu, which would allow you to add the selected entity for the physics recorder, set up the settings for the
+physics recording and toggle the physics recorder.
+
+**NOTE:** As long as physics recorder is working, you will not be able to select any entity.
 
 ## That's all!
 
