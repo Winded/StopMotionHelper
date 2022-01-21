@@ -126,6 +126,8 @@ end
 
 function PANEL:OnMousePressed(mousecode)
     if mousecode ~= MOUSE_LEFT then
+	    self:MouseCapture(false)
+        self._dragging = false
         self:OnCustomMousePressed(mousecode)
         return
     end
@@ -177,7 +179,7 @@ function PANEL:OnMouseReleased(mousecode)
     SMH.UI.ClearFrames(self)
     self:OnPointerReleased(self._frame)
 
-    if mousecode == MOUSE_LEFT then
+    if mousecode == MOUSE_LEFT and not self.PointyBottom then
         if input.IsKeyDown(KEY_LSHIFT) then
             SMH.UI.ShiftSelect(self)
         elseif input.IsKeyDown(KEY_LCONTROL) then
