@@ -126,7 +126,7 @@ end
 
 function PANEL:OnMousePressed(mousecode)
     if mousecode ~= MOUSE_LEFT then
-	    self:MouseCapture(false)
+        self:MouseCapture(false)
         self._dragging = false
         self:OnCustomMousePressed(mousecode)
         return
