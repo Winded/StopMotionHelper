@@ -46,7 +46,7 @@ local function CreateTypedConVar(type, name, defaultValue, helptext)
 end
 
 local ConVars = {
-    FreezeAll = CreateTypedConVar(ConVarType.Bool, "smh_freezeall", false),
+    FreezeAll = CreateTypedConVar(ConVarType.Bool, "smh_freezeall", true),
     LocalizePhysBones = CreateTypedConVar(ConVarType.Bool, "smh_localizephysbones", false),
     IgnorePhysBones = CreateTypedConVar(ConVarType.Bool, "smh_ignorephysbones", false),
     GhostPrevFrame = CreateTypedConVar(ConVarType.Bool, "smh_ghostprevframe", false),
