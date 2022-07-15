@@ -54,7 +54,7 @@ function PANEL:PerformLayout(width, height)
     self.Save:SetPos(self:GetWide() - 60 - 5, self:GetTall() - 31)
     self.Save:SetSize(60, 20)
 
-    self.Delete:SetPos(self:GetWide() - 60 - 5 - 60 - 5, self:GetTall() - 31)
+    self.Delete:SetPos(self:GetWide() - 245, self:GetTall() - 31)
     self.Delete:SetSize(60, 20)
 
 end
