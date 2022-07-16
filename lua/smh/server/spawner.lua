@@ -115,15 +115,14 @@ end
 
 function MGR.OffsetKeyframes(player, entity)
     for id, keyframe in pairs(SMH.KeyframeData.Players[player].Entities[entity]) do
-        if keyframe.Modifier ~= "physbones" and keyframe.Modifier ~= "position" then continue end
-        local name = keyframe.Modifier
+        if not keyframe.Modifiers["physbones"] and not keyframe.Modifiers["position"] then continue end
         local offsetpos = MGR.OffsetPos[player] or Vector(0, 0, 0)
         local offsetang = MGR.OffsetAng[player] or Angle(0, 0, 0)
 
         for modname, mod in pairs(SMH.Modifiers) do
-            if modname == name then
+            if modname == "physbones" or modname == "position" then
+                local name = modname == "physbones" and "physbones" or "position"
                 keyframe.Modifiers[name] = mod:Offset(keyframe.Modifiers[name], MGR.OriginData[player][name].Modifiers, offsetpos, offsetang, player:GetEyeTraceNoCursor().HitPos)
-                break
             end
         end
     end

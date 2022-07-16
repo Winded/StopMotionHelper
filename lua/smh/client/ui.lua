@@ -71,15 +71,13 @@ local function CreateCopyPointer(keyframeId)
                 for id, pointer in pairs(KeyframePointers) do
                     if id == LocalIDs + counter then continue end
                     if pointer:GetFrame() == frame then
-                        for mod, id in pairs(pointer:GetMods()) do
-                            if not kpointer:GetMods()[mod] then
+                        for ent, id in pairs(pointer:GetEnts()) do
+                            if not kpointer:GetEnts()[ent] then
                                 SMH.Controller.CopyKeyframe(id, frame)
                             end
                         end
 
-                        for id, _ in pairs(pointer:GetIDs()) do
-                            table.insert(KeysToDelete, id)
-                        end
+                        table.insert(KeysToDelete, pointer)
                     end
                 end
             end
@@ -116,26 +114,24 @@ local function CreateCopyPointer(keyframeId)
         WorldClicker.MainMenu.FramePanel:DeleteFramePointer(pointer)
         if frame < 0 then return end
 
-        for id, mod in pairs(KeyframePointers[keyframeId]:GetIDs()) do
+        for id, ent in pairs(KeyframePointers[keyframeId]:GetIDs()) do
             SMH.Controller.CopyKeyframe(id, frame)
         end
 
         for id, pointer in pairs(KeyframePointers) do
             if id == LocalIDs + counter then continue end
             if pointer:GetFrame() == frame then
-                for mod, id in pairs(pointer:GetMods()) do
-                    if not KeyframePointers[keyframeId]:GetMods()[mod] then
+                for ent, id in pairs(pointer:GetEnts()) do
+                    if not KeyframePointers[keyframeId]:GetEnts()[ent] then
                         SMH.Controller.CopyKeyframe(id, frame)
                     end
                 end
 
-                for id, _ in pairs(pointer:GetIDs()) do
-                    table.insert(KeysToDelete, id)
-                end
+                table.insert(KeysToDelete, pointer)
             end
         end
-        for _, id in ipairs(KeysToDelete) do
-            SMH.Controller.DeleteKeyframe(id)
+        for _, dpointer in ipairs(KeysToDelete) do
+            DeleteEmptyKeyframe(dpointer)
         end
     end
 end
@@ -164,20 +160,14 @@ local function NewKeyframePointer(keyframeId)
             if id == keyframeId then continue end
 
             if kpointer:GetFrame() == frame then
-                for mod, id in pairs(kpointer:GetMods()) do
-                    if not pointer:GetMods()[mod] then
-                        pointer:AddID(id, mod)
+                for ent, id in pairs(kpointer:GetEnts()) do
+                    if not pointer:GetEnts()[ent] then
+                        pointer:AddID(id, ent) -- gonna leave this logic in for the future stuff
                         KeyframeIDs[id] = KeyframeIDs[keyframeId]
                         kpointer:RemoveID(id)
-                        if not next(kpointer:GetIDs()) then
-                            DeleteEmptyKeyframe(kpointer)
-                        end
                     end
                 end
-
-                for id, _ in pairs(kpointer:GetIDs()) do
-                    SMH.Controller.DeleteKeyframe(id)
-                end
+                DeleteEmptyKeyframe(kpointer)
             end
         end
     end
@@ -467,22 +457,25 @@ function MGR.SetKeyframes(keyframes, isreceiving)
 
     if not PropertiesMenu:GetUsingWorld() then
         for _, keyframe in pairs(keyframes) do
-            if Modifiers[keyframe.Modifier] then
-                if not FrameToKeyframe[keyframe.Frame] then
-                    KeyframePointers[LocalIDs] = NewKeyframePointer(LocalIDs)
-                    KeyframePointers[LocalIDs]:SetFrame(keyframe.Frame)
-                    KeyframePointers[LocalIDs]:AddID(keyframe.ID, keyframe.Modifier)
-                    FrameToKeyframe[keyframe.Frame] = LocalIDs
-                    KeyframeEasingData[LocalIDs] = {
-                        EaseIn = keyframe.EaseIn,
-                        EaseOut = keyframe.EaseOut,
-                    }
-                    KeyframeIDs[keyframe.ID] = LocalIDs
-                    LocalIDs = LocalIDs + 1
-                else
-                    local pointer = KeyframePointers[FrameToKeyframe[keyframe.Frame]]
-                    pointer:AddID(keyframe.ID, keyframe.Modifier)
-                    KeyframeIDs[keyframe.ID] = FrameToKeyframe[keyframe.Frame]
+            for name, _ in pairs(keyframe.Modifiers) do
+                if Modifiers[name] then
+                    if not FrameToKeyframe[keyframe.Frame] then
+                        KeyframePointers[LocalIDs] = NewKeyframePointer(LocalIDs)
+                        KeyframePointers[LocalIDs]:SetFrame(keyframe.Frame)
+                        KeyframePointers[LocalIDs]:AddID(keyframe.ID, keyframe.Entity)
+                        FrameToKeyframe[keyframe.Frame] = LocalIDs
+                        KeyframeEasingData[LocalIDs] = {
+                            EaseIn = keyframe.EaseIn[name],
+                            EaseOut = keyframe.EaseOut[name],
+                        }
+                        KeyframeIDs[keyframe.ID] = LocalIDs
+                        LocalIDs = LocalIDs + 1
+                    else
+                        local pointer = KeyframePointers[FrameToKeyframe[keyframe.Frame]]
+                        pointer:AddID(keyframe.ID, keyframe.Entity)
+                        KeyframeIDs[keyframe.ID] = FrameToKeyframe[keyframe.Frame]
+                    end
+                    break
                 end
             end
         end
@@ -503,17 +496,17 @@ function MGR.SetKeyframes(keyframes, isreceiving)
             if not FrameToKeyframe[keyframe.Frame] then
                 KeyframePointers[LocalIDs] = NewKeyframePointer(LocalIDs)
                 KeyframePointers[LocalIDs]:SetFrame(keyframe.Frame)
-                KeyframePointers[LocalIDs]:AddID(keyframe.ID, keyframe.Modifier)
+                KeyframePointers[LocalIDs]:AddID(keyframe.ID, keyframe.Entity)
                 FrameToKeyframe[keyframe.Frame] = LocalIDs
                 KeyframeEasingData[LocalIDs] = {
-                    EaseIn = keyframe.EaseIn,
-                    EaseOut = keyframe.EaseOut,
+                    EaseIn = keyframe.EaseIn["world"],
+                    EaseOut = keyframe.EaseOut["world"],
                 }
                 KeyframeIDs[keyframe.ID] = LocalIDs
                 LocalIDs = LocalIDs + 1
             else
                 local pointer = KeyframePointers[FrameToKeyframe[keyframe.Frame]]
-                pointer:AddID(keyframe.ID, keyframe.Modifier)
+                pointer:AddID(keyframe.ID, keyframe.Entity)
                 KeyframeIDs[keyframe.ID] = FrameToKeyframe[keyframe.Frame]
             end
         end
@@ -524,12 +517,12 @@ function MGR.UpdateKeyframe(keyframe)
     if not KeyframeIDs[keyframe.ID] then
         if not FrameToKeyframe[keyframe.Frame] then
             KeyframePointers[LocalIDs] = NewKeyframePointer(LocalIDs)
-            KeyframePointers[LocalIDs]:AddID(keyframe.ID, keyframe.Modifier)
+            KeyframePointers[LocalIDs]:AddID(keyframe.ID, keyframe.Entity)
             KeyframeIDs[keyframe.ID] = LocalIDs
             LocalIDs = LocalIDs + 1
         else
             local pointer = KeyframePointers[FrameToKeyframe[keyframe.Frame]]
-            pointer:AddID(keyframe.ID, keyframe.Modifier)
+            pointer:AddID(keyframe.ID, keyframe.Entity)
             KeyframeIDs[keyframe.ID] = FrameToKeyframe[keyframe.Frame]
         end
         -- TODO should this logic exist? Where should it be?
@@ -539,10 +532,11 @@ function MGR.UpdateKeyframe(keyframe)
         --     WorldClicker.MainMenu.FramePanel:DeleteFramePointer(pointer)
         -- end
     end
+    local name = next(keyframe.Modifiers)
 
     KeyframeEasingData[KeyframeIDs[keyframe.ID]] = {
-        EaseIn = keyframe.EaseIn,
-        EaseOut = keyframe.EaseOut,
+        EaseIn = keyframe.EaseIn[name],
+        EaseOut = keyframe.EaseOut[name],
     }
 
     KeyframePointers[KeyframeIDs[keyframe.ID]]:SetFrame(keyframe.Frame)
@@ -555,7 +549,7 @@ function MGR.UpdateKeyframe(keyframe)
     end
     FrameToKeyframe[keyframe.Frame] = KeyframeIDs[keyframe.ID]
     if keyframe.Frame == SMH.State.Frame then
-        WorldClicker.MainMenu:ShowEasingControls(keyframe.EaseIn, keyframe.EaseOut)
+        WorldClicker.MainMenu:ShowEasingControls(keyframe.EaseIn[name], keyframe.EaseOut[name])
     end
 end
 

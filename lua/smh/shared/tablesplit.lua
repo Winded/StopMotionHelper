@@ -5,7 +5,7 @@ local listAssembling = {}
 local MGR = {} -- btw D stands for "deconstruct", A for "Assemble"
 
 function MGR.DKeyframes(keyframes)
-    local IDs, ent, Frame, In, Out, Modifiers, Modifier = {}, {}, {}, {}, {}, {}, {}
+    local IDs, ent, Frame, In, Out, ModCount, Modifiers = {}, {}, {}, {}, {}, {}, {}
     local i = 0
     for _, keyframe in pairs(keyframes) do
         i = i + 1
@@ -13,26 +13,27 @@ function MGR.DKeyframes(keyframes)
         IDs[i] = keyframe.ID
         Frame[i] = keyframe.Frame
         ent = keyframe.Entity -- We won't be using keyframes from multiple entities with these functions anyway
-        In[i] = keyframe.EaseIn
-        Out[i] = keyframe.EaseOut
-        Modifiers[i] = keyframe.Modifiers
-        Modifier[i] = keyframe.Modifier
+        Modifiers[i], In[i], Out[i] = {}, {}, {}
+        ModCount[i] = 0
+        for name, data in pairs(keyframe.Modifiers) do
+            ModCount[i] = ModCount[i] + 1
+            Modifiers[i][ModCount[i]] = name
+            In[i][ModCount[i]] = keyframe.EaseIn[name]
+            Out[i][ModCount[i]] = keyframe.EaseOut[name]
+        end
     end
 
-    return i, IDs, ent, Frame, In, Out, Modifiers, Modifier
+    return i, IDs, ent, Frame, In, Out, ModCount, Modifiers
 end
 
-function MGR.AKeyframes(ID, entity, Frame, In, Out, Modifiers, Modifier)
+function MGR.AKeyframes(ID, entity, Frame, In, Out, Modifiers)
     local keyframe = {}
     keyframe.ID = ID
     keyframe.Entity = entity
     keyframe.Frame = Frame
-    keyframe.EaseIn = In
-    keyframe.EaseOut = Out
-    if Modifiers then
-        keyframe.Modifiers = table.Copy(Modifiers)
-    end
-    keyframe.Modifier = Modifier
+    keyframe.EaseIn = table.Copy(In)
+    keyframe.EaseOut = table.Copy(Out)
+    keyframe.Modifiers = table.Copy(Modifiers)
 
     table.insert(keyframesAssembling, keyframe)
 end

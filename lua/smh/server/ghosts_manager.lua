@@ -5,7 +5,7 @@ local SpawnGhost = {}
 local SpawnGhostData = {}
 local GhostSettings = {}
 
-local function CreateGhost(player, entity, color, frame)
+local function CreateGhost(player, entity, color, frame, ghostable)
     for _, ghost in ipairs(GhostData[player].Ghosts) do
         if ghost.Entity == entity and ghost.Frame == frame then return ghost end -- we already have a ghost on this entity for this frame, just return it.
     end
@@ -45,26 +45,22 @@ local function CreateGhost(player, entity, color, frame)
     g.Frame = frame
     g.Physbones = false
 
+    table.insert(ghostable, g)
+
     return g
 end
 
-local function SetGhostFrame(entity, ghost, modifiers)
-    for name, mod in pairs(SMH.Modifiers) do
-        if modifiers[name] ~= nil then
-            mod:LoadGhost(entity, ghost, modifiers[name])
-            if name == "physbones" then ghost.Physbones = true end
-            break
-        end
+local function SetGhostFrame(entity, ghost, modifiers, modname)
+    if modifiers[modname] ~= nil then
+        SMH.Modifiers[modname]:LoadGhost(entity, ghost, modifiers[modname])
+        if modname == "physbones" then ghost.Physbones = true end
     end
 end
 
-local function SetGhostBetween(entity, ghost, data1, data2, percentage)
-    for name, mod in pairs(SMH.Modifiers) do
-        if data1[name] ~= nil then
-            mod:LoadGhostBetween(entity, ghost, data1[name], data2[name], percentage)
-            if name == "physbones" then ghost.Physbones = true end
-            break
-        end
+local function SetGhostBetween(entity, ghost, data1, data2, modname, percentage)
+    if data1[modname] ~= nil then
+        SMH.Modifiers[modname]:LoadGhostBetween(entity, ghost, data1[modname], data2[modname], percentage)
+        if modname == "physbones" then ghost.Physbones = true end
     end
 end
 
@@ -149,33 +145,28 @@ function MGR.UpdateState(player, frame, settings, settimeline)
 
             if lerpMultiplier == 0 then
                 if settings.GhostPrevFrame and prevKeyframe.Frame < frame then
-                    local g = CreateGhost(player, entity, Color(200, 0, 0, alpha), prevKeyframe.Frame)
-                    table.insert(ghosts, g)
-                    SetGhostFrame(entity, g, prevKeyframe.Modifiers)
+                    local g = CreateGhost(player, entity, Color(200, 0, 0, alpha), prevKeyframe.Frame, ghosts)
+                    SetGhostFrame(entity, g, prevKeyframe.Modifiers, name)
                 elseif settings.GhostNextFrame and nextKeyframe.Frame > frame then
-                    local g = CreateGhost(player, entity, Color(0, 200, 0, alpha), nextKeyframe.Frame)
-                    table.insert(ghosts, g)
-                    SetGhostFrame(entity, g, nextKeyframe.Modifiers)
+                    local g = CreateGhost(player, entity, Color(0, 200, 0, alpha), nextKeyframe.Frame, ghosts)
+                    SetGhostFrame(entity, g, nextKeyframe.Modifiers, name)
                 end
             else
                 if settings.GhostPrevFrame then
-                    local g = CreateGhost(player, entity, Color(200, 0, 0, alpha), prevKeyframe.Frame)
-                    table.insert(ghosts, g)
-                    SetGhostFrame(entity, g, prevKeyframe.Modifiers)
+                    local g = CreateGhost(player, entity, Color(200, 0, 0, alpha), prevKeyframe.Frame, ghosts)
+                    SetGhostFrame(entity, g, prevKeyframe.Modifiers, name)
                 end
                 if settings.GhostNextFrame then
-                    local g = CreateGhost(player, entity, Color(0, 200, 0, alpha), nextKeyframe.Frame)
-                    table.insert(ghosts, g)
-                    SetGhostFrame(entity, g, nextKeyframe.Modifiers)
+                    local g = CreateGhost(player, entity, Color(0, 200, 0, alpha), nextKeyframe.Frame, ghosts)
+                    SetGhostFrame(entity, g, nextKeyframe.Modifiers, name)
                 end
             end
 
             if settings.OnionSkin then
                 for _, keyframe in pairs(keyframes) do
-                    if keyframe.Modifier == name then
-                        local g = CreateGhost(player, entity, Color(255, 255, 255, alpha), keyframe.Frame)
-                        table.insert(ghosts, g)
-                        SetGhostFrame(entity, g, keyframe.Modifiers)
+                    if keyframe.Modifiers[name] then
+                        local g = CreateGhost(player, entity, Color(255, 255, 255, alpha), keyframe.Frame, ghosts)
+                        SetGhostFrame(entity, g, keyframe.Modifiers, name)
                     end
                 end
             end
@@ -188,8 +179,8 @@ function MGR.UpdateState(player, frame, settings, settimeline)
                 if filtermods[name] then continue end -- we used these modifiers already
                 local IsSet = false
                 for _, keyframe in pairs(keyframes) do
-                    if keyframe.Frame == g.Frame and keyframe.Modifier == name then
-                        SetGhostFrame(entity, g, keyframe.Modifiers)
+                    if keyframe.Frame == g.Frame and keyframe.Modifiers[name] then
+                        SetGhostFrame(entity, g, keyframe.Modifiers, name)
                         IsSet = true
                         break
                     end
@@ -202,11 +193,11 @@ function MGR.UpdateState(player, frame, settings, settimeline)
                     end
 
                     if lerpMultiplier <= 0 or settings.TweenDisable then
-                        SetGhostFrame(entity, g, prevKeyframe.Modifiers)
+                        SetGhostFrame(entity, g, prevKeyframe.Modifiers, name)
                     elseif lerpMultiplier >= 1 then
-                        SetGhostFrame(entity, g, nextKeyframe.Modifiers)
+                        SetGhostFrame(entity, g, nextKeyframe.Modifiers, name)
                     else
-                        SetGhostBetween(entity, g, prevKeyframe.Modifiers, nextKeyframe.Modifiers, lerpMultiplier)
+                        SetGhostBetween(entity, g, prevKeyframe.Modifiers, nextKeyframe.Modifiers, name, lerpMultiplier)
                     end
                 end
             end

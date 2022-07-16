@@ -251,9 +251,6 @@ function MGR.SetProperties(player, entity, properties)
     SMH.Properties.Players[player].Entities[entity].Name = newname
     SMH.Properties.Players[player].Entities[entity].Timelines = properties.Timelines
     SMH.Properties.Players[player].Entities[entity].TimelineMods = properties.TimelineMods
-    if properties.Old then
-        SMH.Properties.Players[player].Entities[entity].Old = true
-    end
 end
 
 SMH.PropertiesManager = MGR
