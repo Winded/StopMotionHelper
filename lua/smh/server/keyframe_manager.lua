@@ -6,6 +6,7 @@ local function GetExistingKeyframe(player, entity, frame, modnames)
         modnames = {}
         for name, mod in pairs(SMH.Modifiers) do
             table.insert(modnames, name)
+            table.insert(modnames, "world")
         end
     end
 
@@ -106,6 +107,8 @@ function MGR.Create(player, entity, frame, timeline)
 
         keyframe = SMH.KeyframeData:New(player, entity)
         keyframe.Frame = frame
+        keyframe.EaseIn["world"] = 0
+        keyframe.EaseOut["world"] = 0
         keyframe.Modifiers["world"] = {
             Console = "",
             Push = "",
@@ -123,7 +126,7 @@ function MGR.Update(player, keyframeId, updateData, timeline)
     end
 
     local keyframe = SMH.KeyframeData.Players[player].Keyframes[keyframeId]
-    local modnames = SMH.Properties.Players[player].Entities[keyframe.Entity].TimelineMods[timeline]
+    local modnames = player == keyframe.Entity and {"world"} or SMH.Properties.Players[player].Entities[keyframe.Entity].TimelineMods[timeline]
     local updateableFields = {
         "Frame",
         "EaseIn",
@@ -182,7 +185,7 @@ function MGR.Copy(player, keyframeId, frame, timeline)
     end
 
     local keyframe = SMH.KeyframeData.Players[player].Keyframes[keyframeId]
-    local modnames = SMH.Properties.Players[player].Entities[keyframe.Entity].TimelineMods[timeline]
+    local modnames = player == keyframe.Entity and {"world"} or SMH.Properties.Players[player].Entities[keyframe.Entity].TimelineMods[timeline]
 
     local EaseIn, EaseOut, Mods = {}, {}, {}
     for _, name in ipairs(modnames) do
@@ -221,7 +224,7 @@ function MGR.Delete(player, keyframeId, timeline)
     end
 
     local keyframe = SMH.KeyframeData.Players[player].Keyframes[keyframeId]
-    local modnames = SMH.Properties.Players[player].Entities[keyframe.Entity].TimelineMods[timeline]
+    local modnames = player == keyframe.Entity and {"world"} or SMH.Properties.Players[player].Entities[keyframe.Entity].TimelineMods[timeline]
 
     for _, name in ipairs(modnames) do
         ClearModifier(keyframe, name)
