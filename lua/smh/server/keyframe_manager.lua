@@ -30,8 +30,8 @@ local function Record(keyframe, player, entity, modnames)
         if not data then continue end
         recorded = true
         keyframe.Modifiers[name] = data
-        keyframe.EaseIn[name] = 0
-        keyframe.EaseOut[name] = 0
+        keyframe.EaseIn[name] = keyframe.EaseIn[name] and keyframe.EaseIn[name] or 0
+        keyframe.EaseOut[name] = keyframe.EaseOut[name] and keyframe.EaseOut[name] or 0
     end
     return recorded
 end
