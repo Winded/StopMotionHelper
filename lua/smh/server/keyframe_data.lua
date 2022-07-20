@@ -6,15 +6,15 @@ function SMH.GetClosestKeyframes(keyframes, frame, ignoreCurrentFrame, modname)
     local prevKeyframe = nil
     local nextKeyframe = nil
     for _, keyframe in pairs(keyframes) do
-        if keyframe.Frame == frame and keyframe.Modifier == modname and not ignoreCurrentFrame then
+        if keyframe.Frame == frame and keyframe.Modifiers[modname] and not ignoreCurrentFrame then
             prevKeyframe = keyframe
             nextKeyframe = keyframe
             break
         end
 
-        if keyframe.Frame < frame and (not prevKeyframe or prevKeyframe.Frame < keyframe.Frame) and keyframe.Modifier == modname then
+        if keyframe.Frame < frame and (not prevKeyframe or prevKeyframe.Frame < keyframe.Frame) and keyframe.Modifiers[modname] then
             prevKeyframe = keyframe
-        elseif keyframe.Frame > frame and (not nextKeyframe or nextKeyframe.Frame > keyframe.Frame) and keyframe.Modifier == modname then
+        elseif keyframe.Frame > frame and (not nextKeyframe or nextKeyframe.Frame > keyframe.Frame) and keyframe.Modifiers[modname] then
             nextKeyframe = keyframe
         end
     end
@@ -30,7 +30,7 @@ function SMH.GetClosestKeyframes(keyframes, frame, ignoreCurrentFrame, modname)
     local lerpMultiplier = 0
     if prevKeyframe.Frame ~= nextKeyframe.Frame then
         lerpMultiplier = (frame - prevKeyframe.Frame) / (nextKeyframe.Frame - prevKeyframe.Frame)
-        lerpMultiplier = math.EaseInOut(lerpMultiplier, prevKeyframe.EaseOut, nextKeyframe.EaseIn)
+        lerpMultiplier = math.EaseInOut(lerpMultiplier, prevKeyframe.EaseOut[modname], nextKeyframe.EaseIn[modname])
     end
 
     return prevKeyframe, nextKeyframe, lerpMultiplier
@@ -43,11 +43,10 @@ function META:New(player, entity)
     local keyframe = {
         ID = self.NextKeyframeId,
         Entity = entity,
-        Frame = 1,
-        EaseIn = 0,
-        EaseOut = 0,
-        Modifiers = {},
-        Modifier = "nil"
+        Frame = -1,
+        EaseIn = {},
+        EaseOut = {},
+        Modifiers = {}
     }
     self.NextKeyframeId = self.NextKeyframeId + 1
 

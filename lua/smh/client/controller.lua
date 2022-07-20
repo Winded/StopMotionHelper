@@ -4,7 +4,15 @@ local function ReceiveKeyframes()
     local entity = net.ReadEntity()
     local framecount = net.ReadUInt(INT_BITCOUNT)
     for i = 1, framecount do
-        SMH.TableSplit.AKeyframes(net.ReadUInt(INT_BITCOUNT), entity, net.ReadUInt(INT_BITCOUNT), net.ReadFloat(), net.ReadFloat(), nil, net.ReadString())
+        local ID, Frame, ModCount = net.ReadUInt(INT_BITCOUNT), net.ReadUInt(INT_BITCOUNT), net.ReadUInt(INT_BITCOUNT)
+        local Modifiers, In, Out = {}, {}, {}
+        for j = 1, ModCount do
+            local name = net.ReadString()
+            Modifiers[name] = true
+            In[name] = net.ReadFloat()
+            Out[name] = net.ReadFloat()
+        end
+        SMH.TableSplit.AKeyframes(ID, entity, Frame, In, Out, Modifiers)
     end
     return SMH.TableSplit.GetKeyframes(), entity
 end
@@ -57,6 +65,7 @@ function CTRL.UpdateKeyframe(keyframeId, updateData)
     net.Start(SMH.MessageTypes.UpdateKeyframe)
     net.WriteUInt(keyframeId, INT_BITCOUNT)
     net.WriteTable(updateData)
+    net.WriteUInt(SMH.State.Timeline, INT_BITCOUNT)
     net.SendToServer()
 end
 
@@ -64,12 +73,14 @@ function CTRL.CopyKeyframe(keyframeId, frame)
     net.Start(SMH.MessageTypes.CopyKeyframe)
     net.WriteUInt(keyframeId, INT_BITCOUNT)
     net.WriteUInt(frame, INT_BITCOUNT)
+    net.WriteUInt(SMH.State.Timeline, INT_BITCOUNT)
     net.SendToServer()
 end
 
 function CTRL.DeleteKeyframe(keyframeId)
     net.Start(SMH.MessageTypes.DeleteKeyframe)
     net.WriteUInt(keyframeId, INT_BITCOUNT)
+    net.WriteUInt(SMH.State.Timeline, INT_BITCOUNT)
     net.SendToServer()
 end
 

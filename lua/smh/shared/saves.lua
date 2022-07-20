@@ -92,7 +92,6 @@ function MGR.LoadForEntity(path, modelName)
                     Name = sEntity.Model,
                     Timelines = 1,
                     TimelineMods = table.Copy(timelinemods),
-                    Old = true,
                 }
 
                 return sEntity.Frames, sEntity.Properties
@@ -115,7 +114,6 @@ function MGR.LoadForEntity(path, modelName)
 
                     sEntity.Properties.Timelines = 1
                     sEntity.Properties.TimelineMods = table.Copy(timelinemods)
-                    sEntity.Properties.Old = true
                 else
                     for timeline, value in pairs(sEntity.Properties.TimelineMods) do
                         local color = value.KeyColor
@@ -174,10 +172,9 @@ function MGR.Serialize(keyframes, properties, player)
         end
         table.insert(entityMappedKeyframes[entity].Frames, {
             Position = keyframe.Frame,
-            EaseIn = keyframe.EaseIn,
-            EaseOut = keyframe.EaseOut,
+            EaseIn = table.Copy(keyframe.EaseIn),
+            EaseOut = table.Copy(keyframe.EaseOut),
             EntityData = table.Copy(keyframe.Modifiers),
-            Modifier = keyframe.Modifier
         })
     end
 

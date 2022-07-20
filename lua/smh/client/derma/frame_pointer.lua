@@ -25,7 +25,7 @@ function PANEL:Init()
     self._frame = 0
     self._dragging = false
     self._ids = {}
-    self._mods = {}
+    self._ent = {}
     self._selected = false
     self._maxoffset = 0
     self._minoffset = 0
@@ -110,18 +110,18 @@ function PANEL:GetIDs()
     return self._ids
 end
 
-function PANEL:GetMods()
-    return self._mods
+function PANEL:GetEnts()
+    return self._ent
 end
 
 function PANEL:RemoveID(id)
-    self._mods[self._ids[id]] = nil
+    self._ent[self._ids[id]] = nil
     self._ids[id] = nil
 end
 
 function PANEL:AddID(id, mod)
     self._ids[id] = mod
-    self._mods[mod] = id
+    self._ent[mod] = id
 end
 
 function PANEL:OnMousePressed(mousecode)
