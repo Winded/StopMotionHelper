@@ -3,10 +3,9 @@ local function GetExistingKeyframe(player, entity, frame, modnames)
         return nil
     end
     if not modnames then
-        modnames = {}
+        modnames = { "world" }
         for name, mod in pairs(SMH.Modifiers) do
             table.insert(modnames, name)
-            table.insert(modnames, "world")
         end
     end
 
@@ -120,108 +119,131 @@ function MGR.Create(player, entity, frame, timeline)
     return keyframes
 end
 
-function MGR.Update(player, keyframeId, updateData, timeline)
-    if not SMH.KeyframeData.Players[player] or not SMH.KeyframeData.Players[player].Keyframes[keyframeId] then
-        error("Invalid keyframe ID")
-    end
+function MGR.Update(player, keyframeIds, updateData, timeline)
+    local keyframes, movingkeyframes = {}, {}
 
-    local keyframe = SMH.KeyframeData.Players[player].Keyframes[keyframeId]
-    local modnames = player == keyframe.Entity and {"world"} or SMH.Properties.Players[player].Entities[keyframe.Entity].TimelineMods[timeline]
-    local updateableFields = {
-        "Frame",
-        "EaseIn",
-        "EaseOut",
-    }
-    for _, field in pairs(updateableFields) do
-        if updateData[field] then
-            if field == "Frame" then
-                if updateData[field] == keyframe.Frame then continue end
-                local remainmods, EaseIn, EaseOut, frame = table.Copy(keyframe.Modifiers), table.Copy(keyframe.EaseIn), table.Copy(keyframe.EaseOut), updateData[field]
-                for _, name in ipairs(modnames) do
-                    remainmods[name] = nil
-                    EaseIn[name] = nil
-                    EaseOut[name] = nil
-                end
+    for id, keyframeId in ipairs(keyframeIds) do
+        if not SMH.KeyframeData.Players[player] or not SMH.KeyframeData.Players[player].Keyframes[keyframeId] then
+            error("Invalid keyframe ID")
+        end
 
-                if next(remainmods) then -- if there are any modifiers remaining, then we create another keyframe that will stay there
-                    local remainkeyframe = SMH.KeyframeData:New(player, keyframe.Entity)
-
-                    for name, _ in pairs(remainmods) do
-                        ClearModifier(keyframe, name)
+        local keyframe = SMH.KeyframeData.Players[player].Keyframes[keyframeId]
+        local modnames = player == keyframe.Entity and {"world"} or SMH.Properties.Players[player].Entities[keyframe.Entity].TimelineMods[timeline]
+        local updateableFields = {
+            "Frame",
+            "EaseIn",
+            "EaseOut",
+        }
+        for _, field in pairs(updateableFields) do
+            if updateData[id][field] then
+                if field == "Frame" then
+                    if updateData[id][field] == keyframe.Frame then continue end
+                    local remainmods, EaseIn, EaseOut, frame = table.Copy(keyframe.Modifiers), table.Copy(keyframe.EaseIn), table.Copy(keyframe.EaseOut), updateData[id][field]
+                    for _, name in ipairs(modnames) do
+                        remainmods[name] = nil
+                        EaseIn[name] = nil
+                        EaseOut[name] = nil
                     end
-                    remainkeyframe.Frame = keyframe.Frame
-                    remainkeyframe.Modifiers = remainmods
-                    remainkeyframe.EaseIn = EaseIn
-                    remainkeyframe.EaseOut = EaseOut
-                end
 
-                local replacekey = GetExistingKeyframe(player, keyframe.Entity, frame)
-                if replacekey ~= nil and replacekey ~= keyframe then
-                    for name, data in pairs(replacekey.Modifiers) do
-                        if not keyframe.Modifiers[name] then
-                            keyframe.Modifiers[name] = data
-                            keyframe.EaseIn[name] = replacekey.EaseIn[name]
-                            keyframe.EaseOut[name] = replacekey.EaseOut[name]
+                    if next(remainmods) then -- if there are any modifiers remaining, then we create another keyframe that will stay there
+                        local remainkeyframe = SMH.KeyframeData:New(player, keyframe.Entity)
+
+                        for name, _ in pairs(remainmods) do
+                            ClearModifier(keyframe, name)
                         end
+                        remainkeyframe.Frame = keyframe.Frame
+                        remainkeyframe.Modifiers = remainmods
+                        remainkeyframe.EaseIn = EaseIn
+                        remainkeyframe.EaseOut = EaseOut
                     end
-                    SMH.KeyframeData:Delete(player, replacekey.ID)
-                end
-                keyframe.Frame = frame
-            else
-                for _, name in ipairs(modnames) do
-                    if not keyframe[field][name] then continue end
-                    keyframe[field][name] = updateData[field]
+
+                    movingkeyframes[keyframe] = frame
+                else
+                    for _, name in ipairs(modnames) do
+                        if not keyframe[field][name] then continue end
+                        keyframe[field][name] = updateData[id][field]
+                    end
+                    table.insert(keyframes, keyframe)
                 end
             end
         end
     end
 
-    return keyframe
+    for keyframe, frame in pairs(movingkeyframes) do
+        local replacekey = GetExistingKeyframe(player, keyframe.Entity, frame)
+
+        if replacekey ~= nil and not movingkeyframes[replacekey] then
+            for name, data in pairs(replacekey.Modifiers) do
+
+                if not keyframe.Modifiers[name] then
+                    keyframe.Modifiers[name] = data
+                    keyframe.EaseIn[name] = replacekey.EaseIn[name]
+                    keyframe.EaseOut[name] = replacekey.EaseOut[name]
+                end
+            end
+            SMH.KeyframeData:Delete(player, replacekey.ID)
+        end
+        keyframe.Frame = frame
+        table.insert(keyframes, keyframe)
+    end
+
+    return keyframes
 end
 
-function MGR.Copy(player, keyframeId, frame, timeline)
-    if not SMH.KeyframeData.Players[player] or not SMH.KeyframeData.Players[player].Keyframes[keyframeId] then
-        error("Invalid keyframe ID")
-    end
+function MGR.Copy(player, keyframeIds, frame, timeline)
+    local copiedKeyframes, movingkeyframes = {}, {}
 
-    local keyframe = SMH.KeyframeData.Players[player].Keyframes[keyframeId]
-    local modnames = player == keyframe.Entity and {"world"} or SMH.Properties.Players[player].Entities[keyframe.Entity].TimelineMods[timeline]
-
-    local EaseIn, EaseOut, Mods = {}, {}, {}
-    for _, name in ipairs(modnames) do
-        if not keyframe.Modifiers[name] then continue end
-        EaseIn[name] = keyframe.EaseIn[name]
-        EaseOut[name] = keyframe.EaseOut[name]
-        Mods[name] = keyframe.Modifiers[name]
-    end
-
-    local copiedKeyframe = SMH.KeyframeData:New(player, keyframe.Entity)
-    copiedKeyframe.EaseIn = EaseIn
-    copiedKeyframe.EaseOut = EaseOut
-    copiedKeyframe.Modifiers = Mods
-
-    local replacekey = GetExistingKeyframe(player, copiedKeyframe.Entity, frame)
-    if replacekey ~= nil and replacekey ~= keyframe then
-        for name, data in pairs(replacekey.Modifiers) do
-            if not copiedKeyframe.Modifiers[name] then
-                copiedKeyframe.Modifiers[name] = data
-                copiedKeyframe.EaseIn[name] = replacekey.EaseIn[name]
-                copiedKeyframe.EaseOut[name] = replacekey.EaseOut[name]
-            end
+    for id, keyframeId in ipairs(keyframeIds) do
+        if not SMH.KeyframeData.Players[player] or not SMH.KeyframeData.Players[player].Keyframes[keyframeId] then
+            error("Invalid keyframe ID")
         end
-        SMH.KeyframeData:Delete(player, replacekey.ID)
+
+        local keyframe = SMH.KeyframeData.Players[player].Keyframes[keyframeId]
+        local modnames = player == keyframe.Entity and {"world"} or SMH.Properties.Players[player].Entities[keyframe.Entity].TimelineMods[timeline]
+
+        local EaseIn, EaseOut, Mods = {}, {}, {}
+        for _, name in ipairs(modnames) do
+            if not keyframe.Modifiers[name] then continue end
+            EaseIn[name] = keyframe.EaseIn[name]
+            EaseOut[name] = keyframe.EaseOut[name]
+            Mods[name] = keyframe.Modifiers[name]
+        end
+
+        local copiedKeyframe = SMH.KeyframeData:New(player, keyframe.Entity)
+        copiedKeyframe.EaseIn = EaseIn
+        copiedKeyframe.EaseOut = EaseOut
+        copiedKeyframe.Modifiers = Mods
+
+        movingkeyframes[copiedKeyframe] = frame[id]
     end
 
-    copiedKeyframe.Frame = frame
+    for keyframe, frame in pairs(movingkeyframes) do
+        local replacekey = GetExistingKeyframe(player, keyframe.Entity, frame)
 
-    return copiedKeyframe
+        if replacekey ~= nil and not movingkeyframes[replacekey] then
+            for name, data in pairs(replacekey.Modifiers) do
+                if not keyframe.Modifiers[name] then
+                    keyframe.Modifiers[name] = data
+                    keyframe.EaseIn[name] = replacekey.EaseIn[name]
+                    keyframe.EaseOut[name] = replacekey.EaseOut[name]
+                end
+            end
+            SMH.KeyframeData:Delete(player, replacekey.ID)
+        end
+
+        keyframe.Frame = frame
+        table.insert(copiedKeyframes, keyframe)
+    end
+
+    return copiedKeyframes
 end
 
 function MGR.Delete(player, keyframeId, timeline)
-    local entity = SMH.KeyframeData.Players[player].Keyframes[keyframeId].Entity
     if not SMH.KeyframeData.Players[player] or not SMH.KeyframeData.Players[player].Keyframes[keyframeId] then
         error("Invalid keyframe ID")
     end
+
+    local entity = SMH.KeyframeData.Players[player].Keyframes[keyframeId].Entity
 
     local keyframe = SMH.KeyframeData.Players[player].Keyframes[keyframeId]
     local modnames = player == keyframe.Entity and {"world"} or SMH.Properties.Players[player].Entities[keyframe.Entity].TimelineMods[timeline]

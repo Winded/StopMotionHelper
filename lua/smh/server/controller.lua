@@ -115,47 +115,89 @@ local function CreateKeyframe(msgLength, player)
     net.Send(player)
 end
 
+local bufferData = {}
+
 local function UpdateKeyframe(msgLength, player)
-    local id = net.ReadUInt(INT_BITCOUNT)
-    local updateData = net.ReadTable()
-    local timeline = net.ReadUInt(INT_BITCOUNT)
+    bufferData[player] = {Ids = {}, UpdateData = {}, Timeline = 1}
 
-    local keyframe = SMH.KeyframeManager.Update(player, id, updateData, timeline)
-    local framecount, IDs, ents, Frame, In, Out, KModCount, KModifiers = SMH.TableSplit.DKeyframes({keyframe})
+    local count = net.ReadUInt(INT_BITCOUNT)
 
-    net.Start(SMH.MessageTypes.UpdateKeyframeResponse)
-    SendKeyframes(framecount, IDs, ents, Frame, In, Out, KModCount, KModifiers)
-    net.WriteBool(false)
-    net.Send(player)
+    for i = 1, count do
+        table.insert(bufferData[player].Ids, net.ReadUInt(INT_BITCOUNT))
+        local data = net.ReadString()
+
+        if data == "Frame" then
+            local temptable = {}
+            temptable[data] = net.ReadUInt(INT_BITCOUNT)
+            table.insert(bufferData[player].UpdateData, temptable)
+        else
+            local temptable = {}
+            temptable[data] = net.ReadFloat()
+            table.insert(bufferData[player].UpdateData, temptable)
+        end
+    end
+
+    bufferData[player].Timeline = net.ReadUInt(INT_BITCOUNT)
+end
+
+local function UpdateKeyframeExecute(msgLength, player)
+    local keyframes = SMH.KeyframeManager.Update(player, bufferData[player].Ids, bufferData[player].UpdateData, bufferData[player].Timeline)
+
+    for key, keyframe in ipairs(keyframes) do
+        local framecount, IDs, ents, Frame, In, Out, KModCount, KModifiers = SMH.TableSplit.DKeyframes({keyframe})
+
+        net.Start(SMH.MessageTypes.UpdateKeyframeResponse)
+        SendKeyframes(framecount, IDs, ents, Frame, In, Out, KModCount, KModifiers)
+        net.WriteBool(false)
+        net.Send(player)
+    end
+
+    bufferData[player] = {}
 end
 
 local function CopyKeyframe(msgLength, player)
-    local id = net.ReadUInt(INT_BITCOUNT)
-    local frame = net.ReadUInt(INT_BITCOUNT)
-    local timeline = net.ReadUInt(INT_BITCOUNT)
+    bufferData[player] = {Ids = {}, Frames = {}, Timeline = 1}
 
-    local keyframe = SMH.KeyframeManager.Copy(player, id, frame, timeline)
-    local framecount, IDs, ents, Frame, In, Out, KModCount, KModifiers = SMH.TableSplit.DKeyframes({keyframe})
+    local count = net.ReadUInt(INT_BITCOUNT)
 
-    net.Start(SMH.MessageTypes.UpdateKeyframeResponse)
-    SendKeyframes(framecount, IDs, ents, Frame, In, Out, KModCount, KModifiers)
-    net.WriteBool(false)
-    net.Send(player)
+    for i = 1, count do
+        table.insert(bufferData[player].Ids, net.ReadUInt(INT_BITCOUNT))
+        table.insert(bufferData[player].Frames, net.ReadUInt(INT_BITCOUNT))
+    end
+
+    bufferData[player].Timeline = net.ReadUInt(INT_BITCOUNT)
+end
+
+local function CopyKeyframeExecute(msgLength, player)
+    local keyframes = SMH.KeyframeManager.Copy(player, bufferData[player].Ids, bufferData[player].Frames, bufferData[player].Timeline)
+    
+    for key, keyframe in ipairs(keyframes) do
+        local framecount, IDs, ents, Frame, In, Out, KModCount, KModifiers = SMH.TableSplit.DKeyframes({keyframe})
+
+        net.Start(SMH.MessageTypes.UpdateKeyframeResponse)
+        SendKeyframes(framecount, IDs, ents, Frame, In, Out, KModCount, KModifiers)
+        net.WriteBool(false)
+        net.Send(player)
+    end
+
+    bufferData[player] = {}
 end
 
 local function DeleteKeyframe(msgLength, player)
-    local id = net.ReadUInt(INT_BITCOUNT)
-    local timeline = net.ReadUInt(INT_BITCOUNT)
+    local count, timeline = net.ReadUInt(INT_BITCOUNT), net.ReadUInt(INT_BITCOUNT)
 
-    local entity = SMH.KeyframeManager.Delete(player, id, timeline)
+    for i = 1, count do 
+        local id = net.ReadUInt(INT_BITCOUNT)
+        local entity = SMH.KeyframeManager.Delete(player, id, timeline)
 
-    SMH.PropertiesManager.RemoveEntity(player)
-    local isoldent = SMH.PropertiesManager.CheckEntity(player, entity)
+        SMH.PropertiesManager.RemoveEntity(player)
+        local isoldent = SMH.PropertiesManager.CheckEntity(player, entity)
 
-    net.Start(SMH.MessageTypes.DeleteKeyframeResponse)
-    net.WriteUInt(id, INT_BITCOUNT)
-    net.WriteBool(isoldent)
-    net.Send(player)
+        net.Start(SMH.MessageTypes.DeleteKeyframeResponse)
+        net.WriteUInt(id, INT_BITCOUNT)
+        net.WriteBool(isoldent)
+        net.Send(player)
+    end
 end
 
 local function StartPlayback(msgLength, player)
@@ -189,7 +231,7 @@ local function UpdateGhostState(msgLength, player)
 end
 
 local function GetServerSaves(msgLength, player)
-    local saves, keys, count = SMH.TableSplit.DList(SMH.Saves.ListFiles())
+    local saves, keys, count = SMH.TableSplit.DTable(SMH.Saves.ListFiles())
     net.Start(SMH.MessageTypes.GetServerSavesResponse)
     net.WriteUInt(count, INT_BITCOUNT)
     for i = 1, count do
@@ -203,7 +245,7 @@ local function GetModelList(msgLength, player)
     local path = net.ReadString()
 
     local modelslist, map = SMH.Saves.ListModels(path)
-    local models, keys, count = SMH.TableSplit.DList(modelslist)
+    local models, keys, count = SMH.TableSplit.DTable(modelslist)
     net.Start(SMH.MessageTypes.GetModelListResponse)
     net.WriteUInt(count, INT_BITCOUNT)
     for i = 1, count do
@@ -215,7 +257,7 @@ local function GetModelList(msgLength, player)
 end
 
 local function GetServerEntities(msgLength, player)
-    local entities, keys, count = SMH.TableSplit.DList(SMH.PropertiesManager.GetAllEntitiesNames(player))
+    local entities, keys, count = SMH.TableSplit.DTable(SMH.PropertiesManager.GetAllEntitiesNames(player))
 
     net.Start(SMH.MessageTypes.GetServerEntitiesResponse)
     net.WriteUInt(count, INT_BITCOUNT)
@@ -555,7 +597,9 @@ net.Receive(SMH.MessageTypes.SelectEntity, SelectEntity)
 
 net.Receive(SMH.MessageTypes.CreateKeyframe, CreateKeyframe)
 net.Receive(SMH.MessageTypes.UpdateKeyframe, UpdateKeyframe)
+net.Receive(SMH.MessageTypes.UpdateKeyframeExecute, UpdateKeyframeExecute)
 net.Receive(SMH.MessageTypes.CopyKeyframe, CopyKeyframe)
+net.Receive(SMH.MessageTypes.CopyKeyframeExecute, CopyKeyframeExecute)
 net.Receive(SMH.MessageTypes.DeleteKeyframe, DeleteKeyframe)
 
 net.Receive(SMH.MessageTypes.StartPlayback, StartPlayback)

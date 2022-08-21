@@ -90,7 +90,7 @@ function MGR.GetProperties()
     return timeline
 end
 
-function MGR.DList(list)
+function MGR.DTable(list)
     local items, keys, count = {}, {}, 0
     for key, item in pairs(list) do
         table.insert(items, item)
@@ -100,7 +100,7 @@ function MGR.DList(list)
     return items, keys, count
 end
 
-function MGR.AList(key, item)
+function MGR.ATable(key, item)
     if not tonumber(key) then
         listAssembling[key] = item
     else
@@ -108,7 +108,7 @@ function MGR.AList(key, item)
     end
 end
 
-function MGR.GetList()
+function MGR.GetTable()
     local list = table.Copy(listAssembling)
     listAssembling = {}
     return list

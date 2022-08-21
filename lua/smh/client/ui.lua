@@ -31,58 +31,38 @@ local function DeleteEmptyKeyframe(pointer)
                     break
                 end
             end
+            break
         end
     end
 end
 
 local function CreateCopyPointer(keyframeId)
     OffsetPointers = {}
-    local KeysToDelete = {}
+    local KeysToDelete, KeysToCopy, FramesToSend = {}, {}, {}
     local originFrame = KeyframePointers[keyframeId]:GetFrame()
 
     local counter = 1
 
-    for id, kpointer in pairs(KeyframePointers) do
+    for id, kpointer in pairs(SelectedPointers) do
         if id == keyframeId then continue end
-        if SelectedPointers[id] then
-            local difference = kpointer:GetFrame() - originFrame
+        local difference = kpointer:GetFrame() - originFrame
 
-            kpointer:SetSelected(false)
-            SelectedPointers[id] = nil
+        kpointer:SetSelected(false)
+        SelectedPointers[id] = nil
 
-            local pointer = WorldClicker.MainMenu.FramePanel:CreateFramePointer(
-            KeyColor,
-            WorldClicker.MainMenu.FramePanel:GetTall() / 4 * 2.2,
-            false
-            )
+        local pointer = WorldClicker.MainMenu.FramePanel:CreateFramePointer(
+        KeyColor,
+        WorldClicker.MainMenu.FramePanel:GetTall() / 4 * 2.2,
+        false
+        )
 
-            table.insert(OffsetPointers, pointer)
-            pointer:SetFrame(originFrame + difference)
-            pointer:SetSelected(true)
+        table.insert(OffsetPointers, pointer)
+        pointer:SetFrame(originFrame + difference)
+        pointer:SetSelected(true)
+        pointer.NewID = LocalIDs + counter
+        pointer.keyframeId = id
 
-            pointer.OnPointerReleased = function(_, frame)
-                WorldClicker.MainMenu.FramePanel:DeleteFramePointer(pointer)
-                if frame < 0 then return end
-
-                for id, _ in pairs(kpointer:GetIDs()) do
-                    SMH.Controller.CopyKeyframe(id, frame)
-                end
-
-                for id, pointer in pairs(KeyframePointers) do
-                    if id == LocalIDs + counter then continue end
-                    if pointer:GetFrame() == frame then
-                        for ent, id in pairs(pointer:GetEnts()) do
-                            if not kpointer:GetEnts()[ent] then
-                                SMH.Controller.CopyKeyframe(id, frame)
-                            end
-                        end
-
-                        table.insert(KeysToDelete, pointer)
-                    end
-                end
-            end
-            counter = counter + 1
-        end
+        counter = counter + 1
     end
 
     local pointer = WorldClicker.MainMenu.FramePanel:CreateFramePointer(
@@ -105,31 +85,42 @@ local function CreateCopyPointer(keyframeId)
 
     pointer:OnMousePressed(MOUSE_LEFT)
     pointer:SetOffsets(minimum, maximum)
+    pointer.NewID = LocalIDs + counter
 
-    pointer.OnPointerReleased = function(_, frame)
-        for _, kpointer in ipairs(OffsetPointers) do
-            kpointer:OnPointerReleased(kpointer:GetFrame())
-        end
-        OffsetPointers = {}
+    local function ProcessCopyKey(pointer, NewID, frame, keyframeId)
         WorldClicker.MainMenu.FramePanel:DeleteFramePointer(pointer)
         if frame < 0 then return end
 
-        for id, ent in pairs(KeyframePointers[keyframeId]:GetIDs()) do
-            SMH.Controller.CopyKeyframe(id, frame)
+        for id, _ in pairs(KeyframePointers[keyframeId]:GetIDs()) do
+            table.insert(KeysToCopy, id)
+            table.insert(FramesToSend, frame)
         end
 
         for id, pointer in pairs(KeyframePointers) do
-            if id == LocalIDs + counter then continue end
+            if id == NewID then continue end
             if pointer:GetFrame() == frame then
+
                 for ent, id in pairs(pointer:GetEnts()) do
                     if not KeyframePointers[keyframeId]:GetEnts()[ent] then
-                        SMH.Controller.CopyKeyframe(id, frame)
+                        table.insert(KeysToCopy, id)
+                        table.insert(FramesToSend, frame)
                     end
                 end
 
                 table.insert(KeysToDelete, pointer)
             end
         end
+    end
+
+    pointer.OnPointerReleased = function(_, frame)
+        for _, kpointer in ipairs(OffsetPointers) do
+            ProcessCopyKey(kpointer, kpointer.NewID, kpointer:GetFrame(), kpointer.keyframeId)
+        end
+        OffsetPointers = {}
+        ProcessCopyKey(pointer, pointer.NewID, frame, keyframeId)
+
+        SMH.Controller.CopyKeyframe(KeysToCopy, FramesToSend)
+
         for _, dpointer in ipairs(KeysToDelete) do
             DeleteEmptyKeyframe(dpointer)
         end
@@ -145,35 +136,54 @@ local function NewKeyframePointer(keyframeId)
     )
 
     pointer.OnPointerReleased = function(_, frame)
-        if frame < 0 then
-            for id, _ in pairs(pointer:GetIDs()) do
-                SMH.Controller.DeleteKeyframe(id)
-            end
-            return
-        end
+        local KeysToDelete, KeysToUpdate, UpdateStuff = {}, {}, {}
 
-        for id, _ in pairs(pointer:GetIDs()) do
-            SMH.Controller.UpdateKeyframe(id, { Frame = frame })
-        end
-
-        for id, kpointer in pairs(KeyframePointers) do
-            if id == keyframeId then continue end
-
-            if kpointer:GetFrame() == frame then
-                for ent, id in pairs(kpointer:GetEnts()) do
-                    if not pointer:GetEnts()[ent] then
-                        pointer:AddID(id, ent) -- gonna leave this logic in for the future stuff
-                        KeyframeIDs[id] = KeyframeIDs[keyframeId]
-                        kpointer:RemoveID(id)
-                    end
+        local function ReleaseAction(pointer, keyframeId, frame)
+            if frame < 0 then
+                for id, _ in pairs(pointer:GetIDs()) do
+                    table.insert(KeysToDelete, id)
                 end
-                DeleteEmptyKeyframe(kpointer)
+                return
             end
+
+            for id, _ in pairs(pointer:GetIDs()) do
+                table.insert(KeysToUpdate, id)
+                table.insert(UpdateStuff, { Frame = frame })
+            end
+
+            for id, kpointer in pairs(KeyframePointers) do
+                if id == keyframeId then continue end
+
+                if kpointer:GetFrame() == frame then
+                    for ent, id in pairs(kpointer:GetEnts()) do
+                        if not pointer:GetEnts()[ent] then
+                            pointer:AddID(id, ent) -- gonna leave this logic in for the future stuff
+                            KeyframeIDs[id] = KeyframeIDs[keyframeId]
+                            kpointer:RemoveID(id)
+                        end
+                    end
+                    DeleteEmptyKeyframe(kpointer)
+                end
+            end
+        end
+
+        for id, pointer in pairs(SelectedPointers) do
+            ReleaseAction(pointer, id, pointer:GetFrame())
+        end
+
+        ReleaseAction(pointer, keyframeId, frame)
+
+        if next(KeysToDelete) then
+            SMH.Controller.DeleteKeyframe(KeysToDelete)
+        end
+        if next(KeysToUpdate) then
+            SMH.Controller.UpdateKeyframe(KeysToUpdate, UpdateStuff)
         end
     end
 
     pointer.OnCustomMousePressed = function(_, mousecode)
         local frame = pointer:GetFrame()
+        local KeysToDelete = {}
 
         if SelectedPointers[keyframeId] then
             pointer:SetSelected(false)
@@ -182,19 +192,21 @@ local function NewKeyframePointer(keyframeId)
         end
 
         if mousecode == MOUSE_RIGHT and not input.IsKeyDown(KEY_LCONTROL) then
-            for id, kpointer in pairs(KeyframePointers) do
-                if SelectedPointers[id] then
-                    if kpointer == LastSelectedKeyframe then LastSelectedKeyframe = nil end
-                    for id, _ in pairs(kpointer:GetIDs()) do
-                        SMH.Controller.DeleteKeyframe(id)
-                    end
+            for id, kpointer in pairs(SelectedPointers) do
+                if kpointer == LastSelectedKeyframe then LastSelectedKeyframe = nil end
+                for id, _ in pairs(kpointer:GetIDs()) do
+                    table.insert(KeysToDelete, id)
                 end
             end
             for id, _ in pairs(pointer:GetIDs()) do
-                SMH.Controller.DeleteKeyframe(id)
+                table.insert(KeysToDelete, id)
             end
         elseif mousecode == MOUSE_MIDDLE or (mousecode == MOUSE_RIGHT and input.IsKeyDown(KEY_LCONTROL)) then
             CreateCopyPointer(keyframeId)
+        end
+
+        if next(KeysToDelete) then
+            SMH.Controller.DeleteKeyframe(KeysToDelete)
         end
     end
 
@@ -211,11 +223,13 @@ local function AddCallbacks()
         SMH.Controller.UpdateState(newState)
     end
     WorldClicker.MainMenu.OnRequestKeyframeUpdate = function(_, newKeyframeData)
+        local keyframes = {}
         for id, pointer in pairs(KeyframePointers) do
             if pointer:GetFrame() == SMH.State.Frame then
-                for id, mod in pairs(pointer:GetIDs()) do
-                    SMH.Controller.UpdateKeyframe(id, newKeyframeData)
+                for id, ent in pairs(pointer:GetIDs()) do
+                    table.insert(keyframes, id)
                 end
+                SMH.Controller.UpdateKeyframe(keyframes, newKeyframeData, true)
                 break
             end
         end
@@ -602,7 +616,7 @@ function MGR.MoveChildren(pointer, frame)
         end
     else
         for id, kpointer in pairs(KeyframePointers) do
-            if kpointer:GetParentKeyframe() == pointer then
+            if kpointer:GetParentKeyframe() == pointer then -- obsolete but i'm keeping this in here for future
                 kpointer:SetFrame(frame)
             end
             if kpointer == pointer then continue end
@@ -614,7 +628,7 @@ function MGR.MoveChildren(pointer, frame)
     end
 end
 
-function MGR.ClearFrames(pointer)
+function MGR.ClearFrames(pointer) -- i don't think i need this
     for id, kpointer in pairs(KeyframePointers) do
         if kpointer:GetParentKeyframe() == pointer then
             kpointer:OnPointerReleased(kpointer:GetFrame())
@@ -628,10 +642,8 @@ function MGR.ClearFrames(pointer)
 end
 
 function MGR.ClearAllSelected()
-    for id, pointer in pairs(KeyframePointers) do
-        if SelectedPointers[id] then
-            pointer:SetSelected(false)
-        end
+    for id, pointer in pairs(SelectedPointers) do
+        pointer:SetSelected(false)
     end
     LastSelectedKeyframe = nil
     SelectedPointers = {}
@@ -652,7 +664,7 @@ function MGR.ShiftSelect(pointer)
 
     for id, kpointer in pairs(KeyframePointers) do
         if kpointer:GetFrame() >= minimum and kpointer:GetFrame() <= maximum then
-            SelectedPointers[id] = true
+            SelectedPointers[id] = kpointer
             kpointer:SetSelected(true)
         end
     end
@@ -669,7 +681,7 @@ function MGR.ToggleSelect(pointer)
             LastSelectedKeyframe = kpointer
             for id, kpointer in pairs(KeyframePointers) do
                 if kpointer:GetFrame() == frame then
-                    SelectedPointers[id] = true
+                    SelectedPointers[id] = kpointer
                     kpointer:SetSelected(selected)
                 end
             end

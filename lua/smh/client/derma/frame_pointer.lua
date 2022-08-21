@@ -139,32 +139,20 @@ function PANEL:OnMousePressed(mousecode)
 end
 
 function PANEL:SetParentPointer(ppointer)
-    self.parent = ppointer
+    self._parent = ppointer
 end
 
 function PANEL:ClearParentPointer()
-    self.parent = nil
+    self._parent = nil
 end
 
 function PANEL:GetParentKeyframe()
-    return self.parent
+    return self._parent
 end
 
 function PANEL:SetOffsets(minimum, maximum)
     self._minoffset = minimum
     self._maxoffset = maximum
-end
-
-function PANEL:SetParentPointer(ppointer)
-    self.parent = ppointer
-end
-
-function PANEL:ClearParentPointer()
-    self.parent = nil
-end
-
-function PANEL:GetParentKeyframe()
-    return self.parent
 end
 
 function PANEL:OnMouseReleased(mousecode)
@@ -176,7 +164,7 @@ function PANEL:OnMouseReleased(mousecode)
 
     self:MouseCapture(false)
     self._dragging = false
-    SMH.UI.ClearFrames(self)
+    --SMH.UI.ClearFrames(self)
     self:OnPointerReleased(self._frame)
 
     if mousecode == MOUSE_LEFT and not self.PointyBottom then
