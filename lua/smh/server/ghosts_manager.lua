@@ -173,7 +173,8 @@ function MGR.UpdateState(player, frame, settings, settimeline)
         end
 
         for _, g in ipairs(ghosts) do
-            if not g.Entity == entity then continue end
+
+            if not (g.Entity == entity) then continue end
 
             for name, mod in pairs(SMH.Modifiers) do
                 if filtermods[name] then continue end -- we used these modifiers already
@@ -201,6 +202,7 @@ function MGR.UpdateState(player, frame, settings, settimeline)
                     end
                 end
             end
+
         end
 
         ClearNoPhysGhosts(ghosts) -- need to delete ragdoll ghosts that don't have physbone modifier, or else they'll just keep falling through ground.
