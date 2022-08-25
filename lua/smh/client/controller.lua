@@ -1,4 +1,5 @@
 local INT_BITCOUNT = 32
+local KFRAMES_PER_MSG = 250
 
 local function ReceiveKeyframes()
     local entity = net.ReadEntity()
@@ -61,27 +62,83 @@ function CTRL.Record()
     net.SendToServer()
 end
 
-function CTRL.UpdateKeyframe(keyframeId, updateData)
-    net.Start(SMH.MessageTypes.UpdateKeyframe)
-    net.WriteUInt(keyframeId, INT_BITCOUNT)
-    net.WriteTable(updateData)
-    net.WriteUInt(SMH.State.Timeline, INT_BITCOUNT)
+function CTRL.UpdateKeyframe(keyframeId, updateData, singledata)
+    local keyframeAmount = #keyframeId
+
+    for i = 1, math.ceil(keyframeAmount / KFRAMES_PER_MSG) do
+        local keyframesToSend = keyframeAmount - KFRAMES_PER_MSG * (i - 1) > KFRAMES_PER_MSG and KFRAMES_PER_MSG or keyframeAmount - KFRAMES_PER_MSG * (i - 1)
+
+        net.Start(SMH.MessageTypes.UpdateKeyframe)
+        net.WriteUInt(keyframesToSend, INT_BITCOUNT)
+
+        for ids = 1 + KFRAMES_PER_MSG * (i - 1), keyframesToSend + KFRAMES_PER_MSG * (i - 1) do
+            net.WriteUInt(keyframeId[ids], INT_BITCOUNT)
+
+            if singledata then
+                for data, value in pairs(updateData) do
+                    net.WriteString(data)
+                    if data == "Frame" then
+                        net.WriteUInt(value, INT_BITCOUNT)
+                    else
+                        net.WriteFloat(value)
+                    end
+                end
+            else
+                for data, value in pairs(updateData[ids]) do
+                    net.WriteString(data)
+                    if data == "Frame" then
+                        net.WriteUInt(value, INT_BITCOUNT)
+                    else
+                        net.WriteFloat(value)
+                    end
+                end
+            end
+        end
+        net.WriteUInt(SMH.State.Timeline, INT_BITCOUNT)
+        net.SendToServer()
+    end
+
+    net.Start(SMH.MessageTypes.UpdateKeyframeExecute)
     net.SendToServer()
 end
 
 function CTRL.CopyKeyframe(keyframeId, frame)
-    net.Start(SMH.MessageTypes.CopyKeyframe)
-    net.WriteUInt(keyframeId, INT_BITCOUNT)
-    net.WriteUInt(frame, INT_BITCOUNT)
-    net.WriteUInt(SMH.State.Timeline, INT_BITCOUNT)
+    local keyframeAmount = #keyframeId
+
+    for i = 1, math.ceil(keyframeAmount / KFRAMES_PER_MSG) do
+        local keyframesToSend = keyframeAmount - KFRAMES_PER_MSG * (i - 1) > KFRAMES_PER_MSG and KFRAMES_PER_MSG or keyframeAmount - KFRAMES_PER_MSG * (i - 1)
+
+        net.Start(SMH.MessageTypes.CopyKeyframe)
+        net.WriteUInt(keyframesToSend, INT_BITCOUNT)
+
+        for ids = 1 + KFRAMES_PER_MSG * (i - 1), keyframesToSend + KFRAMES_PER_MSG * (i - 1) do
+            net.WriteUInt(keyframeId[ids], INT_BITCOUNT)
+            net.WriteUInt(frame[ids], INT_BITCOUNT)
+        end
+        net.WriteUInt(SMH.State.Timeline, INT_BITCOUNT)
+        net.SendToServer()
+    end
+
+    net.Start(SMH.MessageTypes.CopyKeyframeExecute)
     net.SendToServer()
 end
 
 function CTRL.DeleteKeyframe(keyframeId)
-    net.Start(SMH.MessageTypes.DeleteKeyframe)
-    net.WriteUInt(keyframeId, INT_BITCOUNT)
-    net.WriteUInt(SMH.State.Timeline, INT_BITCOUNT)
-    net.SendToServer()
+    local keyframeAmount = #keyframeId
+
+    for i = 1, math.ceil(keyframeAmount / KFRAMES_PER_MSG) do
+        local keyframesToSend = keyframeAmount - KFRAMES_PER_MSG * (i - 1) > KFRAMES_PER_MSG and KFRAMES_PER_MSG or keyframeAmount - KFRAMES_PER_MSG * (i - 1)
+
+        net.Start(SMH.MessageTypes.DeleteKeyframe)
+        net.WriteUInt(keyframesToSend, INT_BITCOUNT)
+        net.WriteUInt(SMH.State.Timeline, INT_BITCOUNT)
+
+        for ids = 1 + KFRAMES_PER_MSG * (i - 1), keyframesToSend + KFRAMES_PER_MSG * (i - 1) do
+            net.WriteUInt(keyframeId[ids], INT_BITCOUNT)
+        end
+
+        net.SendToServer()
+    end
 end
 
 function CTRL.StartPlayback()
@@ -436,26 +493,26 @@ end
 
 local function GetServerSavesResponse(msgLength)
     for i=1, net.ReadUInt(INT_BITCOUNT) do
-        SMH.TableSplit.AList(net.ReadString(), net.ReadString())
+        SMH.TableSplit.ATable(net.ReadString(), net.ReadString())
     end
-    local saves = SMH.TableSplit.GetList()
+    local saves = SMH.TableSplit.GetTable()
     SMH.UI.SetServerSaves(saves)
 end
 
 local function GetModelListResponse(msgLength)
     for i=1, net.ReadUInt(INT_BITCOUNT) do
-        SMH.TableSplit.AList(net.ReadString(), net.ReadString())
+        SMH.TableSplit.ATable(net.ReadString(), net.ReadString())
     end
-    local models = SMH.TableSplit.GetList()
+    local models = SMH.TableSplit.GetTable()
     local map = net.ReadString()
     SMH.UI.SetModelList(models, map)
 end
 
 local function GetServerEntitiesResponse(msgLength)
     for i=1, net.ReadUInt(INT_BITCOUNT) do
-        SMH.TableSplit.AList(net.ReadEntity(), {Name = net.ReadString()})
+        SMH.TableSplit.ATable(net.ReadEntity(), {Name = net.ReadString()})
     end
-    local entities = SMH.TableSplit.GetList()
+    local entities = SMH.TableSplit.GetTable()
     SMH.UI.SetEntityList(entities)
 end
 
