@@ -68,8 +68,5 @@ concommand.Add("smh_makescreenshot", function(pl, cmd, args)
     end
 end)
 
-concommand.Add("smh_savepreset", function()
-    SMH.Controller.SaveProperties()
-end)
-
 CreateClientConVar("smh_startatone", 0, true, false, nil, 0, 1)
+CreateClientConVar("smh_currentpreset", "default", true, false)

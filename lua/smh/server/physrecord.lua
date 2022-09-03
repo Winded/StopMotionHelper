@@ -6,7 +6,7 @@ local function RecordPhys(player, entities, frame)
     for entity, timeline in pairs(entities) do
         SMH.PropertiesManager.AddEntity(player, entity)
 
-        local totaltimelines = SMH.PropertiesManager.GetTimelines(player, entity)
+        local totaltimelines = SMH.PropertiesManager.GetTimelines(player)
         if timeline > totaltimelines then timeline = 1 end
 
         SMH.KeyframeManager.Create(player, entity, frame, timeline)
