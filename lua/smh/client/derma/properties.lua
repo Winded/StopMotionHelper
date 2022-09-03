@@ -204,7 +204,7 @@ function PANEL:PerformLayout(width, height)
     self.AddSettingPresetButton:SetSize(20, 20)
 
     self.TimelinesCList:SetPos(5, 70)
-    self.TimelinesCList:SetSize(self.TimelinesPanel:GetWide() - 10, self.TimelinesPanel:GetTall() - 55 - 5)
+    self.TimelinesCList:SetSize(self.TimelinesPanel:GetWide() - 10, self.TimelinesPanel:GetTall() - 70 - 5)
 
     self.AddTimeButton:SetPos(5, 50)
     self.AddTimeButton:SetSize(self.TimelinesCList:GetWide() / 2 - 2, 20)
