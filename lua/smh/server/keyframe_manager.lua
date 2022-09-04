@@ -75,48 +75,59 @@ function MGR.GetAll(player)
     return result
 end
 
-function MGR.GetAllForEntity(player, entity)
-    if not SMH.KeyframeData.Players[player] or not SMH.KeyframeData.Players[player].Entities[entity] then
-        return {}
-    end
-    return table.Copy(SMH.KeyframeData.Players[player].Entities[entity])
-end
-
-function MGR.Create(player, entity, frame, timeline)
+function MGR.GetAllForEntity(player, entities)
     local keyframes = {}
 
-    if player ~= entity then
-        local modnames = SMH.Properties.Players[player].TimelineSetting.TimelineMods[timeline]
-        local keyframe = GetExistingKeyframe(player, entity, frame)
+    for _, entity in ipairs(entities) do
+        if not SMH.KeyframeData.Players[player] or not SMH.KeyframeData.Players[player].Entities[entity] then
+            continue
+        end
 
-        if keyframe ~= nil then
-            local check = Record(keyframe, player, entity, modnames)
-            if check then
-                table.insert(keyframes, keyframe)
+        for k, keyframe in pairs(SMH.KeyframeData.Players[player].Entities[entity]) do
+            table.insert(keyframes, keyframe)
+        end
+    end
+
+    return keyframes
+end
+
+function MGR.Create(player, entities, frame, timeline)
+    local keyframes = {}
+
+    for _, entity in ipairs(entities) do
+        if player ~= entity then
+            local modnames = SMH.Properties.Players[player].TimelineSetting.TimelineMods[timeline]
+            local keyframe = GetExistingKeyframe(player, entity, frame)
+
+            if keyframe ~= nil then
+                local check = Record(keyframe, player, entity, modnames)
+                if check then
+                    table.insert(keyframes, keyframe)
+                end
+            else
+                keyframe = SMH.KeyframeData:New(player, entity)
+                keyframe.Frame = frame
+                local check = Record(keyframe, player, entity, modnames)
+                if check then
+                    table.insert(keyframes, keyframe)
+                end
             end
         else
+            local keyframe = GetExistingKeyframe(player, entity, frame, {"world"})
+
+            if keyframe ~= nil then return {keyframe} end
+
             keyframe = SMH.KeyframeData:New(player, entity)
             keyframe.Frame = frame
-            local check = Record(keyframe, player, entity, modnames)
-            if check then
-                table.insert(keyframes, keyframe)
-            end
+            keyframe.EaseIn["world"] = 0
+            keyframe.EaseOut["world"] = 0
+            keyframe.Modifiers["world"] = {
+                Console = "",
+                Push = "",
+                Release = "",
+            }
+            table.insert(keyframes, keyframe)
         end
-    else
-        local keyframe = GetExistingKeyframe(player, entity, frame, {"world"})
-
-        if keyframe ~= nil then return {keyframe} end
-
-        keyframe = SMH.KeyframeData:New(player, entity)
-        keyframe.Frame = frame
-        keyframe.EaseIn["world"] = 0
-        keyframe.EaseOut["world"] = 0
-        keyframe.Modifiers["world"] = {
-            Console = "",
-            Push = "",
-            Release = "",
-        }
-        table.insert(keyframes, keyframe)
     end
 
     return keyframes

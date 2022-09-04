@@ -5,7 +5,7 @@ local mat_Add    = Material( "pp/add" )
 local mat_Sub    = Material( "pp/sub" )
 local rt_Stencil    = render.GetBloomTex0()
 local rt_Store        = render.GetScreenEffectTexture( 0 )
-local function RenderHalo(entity)
+local function RenderHalo(entities)
 
     local OldRT = render.GetRenderTarget()
 
@@ -24,45 +24,53 @@ local function RenderHalo(entity)
         cam.IgnoreZ( false )
         render.OverrideDepthEnable( true, false )                                    -- Don't write depth
 
-        render.SetStencilEnable( true );
-        render.SetStencilFailOperation( STENCILOPERATION_KEEP );
-        render.SetStencilZFailOperation( STENCILOPERATION_KEEP );
-        render.SetStencilPassOperation( STENCILOPERATION_REPLACE );
-        render.SetStencilCompareFunction( STENCILCOMPARISONFUNCTION_ALWAYS );
-        render.SetStencilWriteMask( 1 );
-        render.SetStencilReferenceValue( 1 );
+        render.SetStencilEnable( true )
+        render.SetStencilFailOperation( STENCILOPERATION_KEEP )
+        render.SetStencilZFailOperation( STENCILOPERATION_KEEP )
+        render.SetStencilPassOperation( STENCILOPERATION_REPLACE )
+        render.SetStencilCompareFunction( STENCILCOMPARISONFUNCTION_ALWAYS )
+        render.SetStencilWriteMask( 1 )
+        render.SetStencilReferenceValue( 1 )
 
-        render.SetBlend( 0 ); -- don't render any colour
+        render.SetBlend( 0 ) -- don't render any colour
 
         render.PushFlashlightMode( true )
-        entity:DrawModel()
+        for entity, _ in pairs(entities) do
+            if IsValid(entity) then
+                entity:DrawModel()
+            end
+        end
         render.PopFlashlightMode()
 
     cam.End3D()
 
     -- FILL COLOUR
     -- Write to the colour buffer
-    cam.Start3D( EyePos(), EyeAngles() );
+    cam.Start3D( EyePos(), EyeAngles() )
 
-        render.MaterialOverride( matColor )    ;
+        render.MaterialOverride( matColor )
         cam.IgnoreZ( false );
 
-        render.SetStencilEnable( true );
-        render.SetStencilWriteMask( 0 );
-        render.SetStencilReferenceValue( 0 );
-        render.SetStencilTestMask( 1 );
-        render.SetStencilFailOperation( STENCILOPERATION_KEEP );
-        render.SetStencilPassOperation( STENCILOPERATION_KEEP );
-        render.SetStencilZFailOperation( STENCILOPERATION_KEEP );
-        render.SetStencilCompareFunction( STENCILCOMPARISONFUNCTION_NOTEQUAL );
+        render.SetStencilEnable( true )
+        render.SetStencilWriteMask( 0 )
+        render.SetStencilReferenceValue( 0 )
+        render.SetStencilTestMask( 1 )
+        render.SetStencilFailOperation( STENCILOPERATION_KEEP )
+        render.SetStencilPassOperation( STENCILOPERATION_KEEP )
+        render.SetStencilZFailOperation( STENCILOPERATION_KEEP )
+        render.SetStencilCompareFunction( STENCILCOMPARISONFUNCTION_NOTEQUAL )
 
-        render.SetColorModulation(0, 1, 0);
-        render.SetBlend(1);
+        render.SetColorModulation(0, 1, 0)
+        render.SetBlend(1)
 
-        entity:DrawModel();
+        for entity, _ in pairs(entities) do
+            if IsValid(entity) then
+                entity:DrawModel()
+            end
+        end
 
-        render.MaterialOverride(nil);
-        render.SetStencilEnable(false);
+        render.MaterialOverride(nil)
+        render.SetStencilEnable(false)
 
     cam.End3D()
 
@@ -73,49 +81,49 @@ local function RenderHalo(entity)
     render.BlurRenderTarget( rt_Stencil, 2, 2, 1 )
 
     -- Put our scene back
-    render.SetRenderTarget( OldRT );
-    render.SetColorModulation( 1, 1, 1 );
-    render.SetStencilEnable( false );
-    render.OverrideDepthEnable( true, false );
-    render.SetBlend( 1 );
-    mat_Copy:SetTexture( "$basetexture", rt_Store );
-    render.SetMaterial( mat_Copy );
-    render.DrawScreenQuad();
+    render.SetRenderTarget( OldRT )
+    render.SetColorModulation( 1, 1, 1 )
+    render.SetStencilEnable( false )
+    render.OverrideDepthEnable( true, false )
+    render.SetBlend( 1 )
+    mat_Copy:SetTexture( "$basetexture", rt_Store )
+    render.SetMaterial( mat_Copy )
+    render.DrawScreenQuad()
 
 
     -- DRAW IT TO THE SCEEN
 
-    render.SetStencilEnable( true );
-    render.SetStencilWriteMask( 0 );
-    render.SetStencilReferenceValue( 0 );
-    render.SetStencilTestMask( 1 );
-    render.SetStencilFailOperation( STENCILOPERATION_KEEP );
-    render.SetStencilPassOperation( STENCILOPERATION_KEEP );
-    render.SetStencilZFailOperation( STENCILOPERATION_KEEP );
-    render.SetStencilCompareFunction( STENCILCOMPARISONFUNCTION_EQUAL );
+    render.SetStencilEnable( true )
+    render.SetStencilWriteMask( 0 )
+    render.SetStencilReferenceValue( 0 )
+    render.SetStencilTestMask( 1 )
+    render.SetStencilFailOperation( STENCILOPERATION_KEEP )
+    render.SetStencilPassOperation( STENCILOPERATION_KEEP )
+    render.SetStencilZFailOperation( STENCILOPERATION_KEEP )
+    render.SetStencilCompareFunction( STENCILCOMPARISONFUNCTION_EQUAL )
 
-    mat_Add:SetTexture( "$basetexture", rt_Stencil );
-    render.SetMaterial( mat_Add );
+    mat_Add:SetTexture( "$basetexture", rt_Stencil )
+    render.SetMaterial( mat_Add )
 
     for i=0, 2 do
-        render.DrawScreenQuad();
+        render.DrawScreenQuad()
     end
 
     -- PUT EVERYTHING BACK HOW WE FOUND IT
 
-    render.SetStencilWriteMask( 0 );
-    render.SetStencilReferenceValue( 0 );
-    render.SetStencilTestMask( 0 );
-    render.SetStencilEnable( false );
-    render.OverrideDepthEnable( false );
-    render.SetBlend( 1 );
+    render.SetStencilWriteMask( 0 )
+    render.SetStencilReferenceValue( 0 )
+    render.SetStencilTestMask( 0 )
+    render.SetStencilEnable( false )
+    render.OverrideDepthEnable( false )
+    render.SetBlend( 1 )
 
-    cam.IgnoreZ( false );
+    cam.IgnoreZ( false )
 
 end
 
 hook.Add("PostDrawEffects", "smh_highlighter", function()
-    if not IsValid(SMH.State.Entity) or not SMH.Controller.ShouldHighlight() then
+    if not next(SMH.State.Entity) or not SMH.Controller.ShouldHighlight() then
         return
     end
 

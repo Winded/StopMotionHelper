@@ -53,20 +53,23 @@ function PANEL:Init()
         SMH.PhysRecord.RecordToggle()
         self.SelectEntity:SetText("Select Entity")
 
-        if not IsValid(SMH.State.Entity) then return end
-        SMH.PhysRecord.SelectedEntities[SMH.State.Entity] = SMH.State.Timeline
+        if not next(SMH.State.Entity) then return end
+        for entity, _ in pairs(SMH.State.Entity) do
+            SMH.PhysRecord.SelectedEntities[entity] = SMH.State.Timeline
+        end
     end
 
     self.SelectEntity = vgui.Create("DButton", self)
     self.SelectEntity:SetText("Select Entity")
     self.SelectEntity.DoClick = function()
-        if not IsValid(SMH.State.Entity) then return end
+        if not next(SMH.State.Entity) then return end
+        local entity = next(SMH.State.Entity)
 
-        if not SMH.PhysRecord.SelectedEntities[SMH.State.Entity] then
-            SMH.PhysRecord.SelectedEntities[SMH.State.Entity] = SMH.State.Timeline
+        if not SMH.PhysRecord.SelectedEntities[entity] then
+            SMH.PhysRecord.SelectedEntities[entity] = SMH.State.Timeline
             self.SelectEntity:SetText("Unselect Entity")
         else
-            SMH.PhysRecord.SelectedEntities[SMH.State.Entity] = nil
+            SMH.PhysRecord.SelectedEntities[entity] = nil
             self.SelectEntity:SetText("Select Entity")
         end
     end

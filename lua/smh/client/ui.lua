@@ -14,7 +14,7 @@ local LocalIDs = 0
 local LastSelectedKeyframe = nil
 local KeyColor = Color(0, 200, 0)
 
-local ClickerEntity = nil
+local ClickerEntity = {}
 
 local function DeleteEmptyKeyframe(pointer)
     for id, kpointer in pairs(KeyframePointers) do
@@ -215,8 +215,18 @@ end
 
 local function AddCallbacks()
 
-    WorldClicker.OnEntitySelected = function(_, entity)
-        SMH.Controller.SelectEntity(entity)
+    WorldClicker.OnEntitySelected = function(_, entity, multiselect)
+        local enttable = table.Copy(SMH.State.Entity)
+        if multiselect == 1 then
+            enttable[entity] = true
+        elseif multiselect == 2 then
+            enttable[entity] = nil
+            entity = nil
+        else
+            enttable = {}
+            enttable[entity] = true
+        end
+        SMH.Controller.SelectEntity(entity, enttable)
     end
 
     WorldClicker.MainMenu.OnRequestStateUpdate = function(_, newState)
@@ -338,7 +348,9 @@ local function AddCallbacks()
         SMH.Controller.ApplyEntityName(ent, name)
     end
     PropertiesMenu.SelectEntity = function(_, ent)
-        SMH.Controller.SelectEntity(ent)
+        local enttable = {}
+        enttable[ent] = true
+        SMH.Controller.SelectEntity(ent, enttable)
     end
     PropertiesMenu.OnAddTimelineRequested = function()
         SMH.Controller.AddTimeline()
@@ -353,7 +365,9 @@ local function AddCallbacks()
         SMH.Controller.UpdateKeyframeColor(color, timeline)
     end
     PropertiesMenu.SelectWorld = function()
-        SMH.Controller.SelectEntity(LocalPlayer())
+        local enttable = {}
+        enttable[LocalPlayer()] = true
+        SMH.Controller.SelectEntity(LocalPlayer(), enttable)
     end
     PropertiesMenu.SetData = function(_, str, key)
         SMH.Controller.UpdateWorld(str, key)
@@ -369,8 +383,11 @@ end
 
 hook.Add("EntityRemoved", "SMHWorldClickerEntityRemoved", function(entity)
 
-    if entity == ClickerEntity then
-        WorldClicker:OnEntitySelected(nil)
+    for centity, _ in pairs(ClickerEntity) do
+        if entity == centity then
+            SMH.State.Entity[entity] = nil
+            WorldClicker:OnEntitySelected(entity, 2)
+        end
     end
 
 end)
@@ -708,11 +725,12 @@ function MGR.ToggleSelect(pointer)
     end
 end
 
-function MGR.SetSelectedEntity(entity)
+function MGR.SetSelectedEntity(entities)
+    local entity = next(entities)
     LoadMenu:UpdateSelectedEnt(entity)
     PropertiesMenu:UpdateSelectedEnt(entity)
     WorldClicker.PhysRecorder:UpdateSelectedEnt(entity)
-    ClickerEntity = entity
+    ClickerEntity = entities
 end
 
 function MGR.SetServerSaves(saves)
@@ -756,7 +774,7 @@ end
 function MGR.SetTimeline(timeline)
     WorldClicker.MainMenu:UpdateTimelines(timeline)
     PropertiesMenu:UpdateTimelineInfo(timeline)
-    if IsValid(SMH.State.Entity) then
+    if next(SMH.State.Entity) then
         SMH.Controller.UpdateTimeline()
     end
 end

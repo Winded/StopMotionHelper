@@ -5,14 +5,14 @@ local listAssembling = {}
 local MGR = {} -- btw D stands for "deconstruct", A for "Assemble"
 
 function MGR.DKeyframes(keyframes)
-    local IDs, ent, Frame, In, Out, ModCount, Modifiers = {}, {}, {}, {}, {}, {}, {}
+    local IDs, ents, Frame, In, Out, ModCount, Modifiers = {}, {}, {}, {}, {}, {}, {}
     local i = 0
     for _, keyframe in pairs(keyframes) do
         i = i + 1
 
         IDs[i] = keyframe.ID
         Frame[i] = keyframe.Frame
-        ent = keyframe.Entity -- We won't be using keyframes from multiple entities with these functions anyway
+        ents[i] = keyframe.Entity
         Modifiers[i], In[i], Out[i] = {}, {}, {}
         ModCount[i] = 0
         for name, data in pairs(keyframe.Modifiers) do
@@ -23,7 +23,7 @@ function MGR.DKeyframes(keyframes)
         end
     end
 
-    return i, IDs, ent, Frame, In, Out, ModCount, Modifiers
+    return i, IDs, ents, Frame, In, Out, ModCount, Modifiers
 end
 
 function MGR.AKeyframes(ID, entity, Frame, In, Out, Modifiers)
