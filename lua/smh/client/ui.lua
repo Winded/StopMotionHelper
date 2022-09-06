@@ -569,7 +569,7 @@ function MGR.UpdateKeyframe(keyframe)
         --     WorldClicker.MainMenu.FramePanel:DeleteFramePointer(pointer)
         -- end
     end
-    local name = next(keyframe.Modifiers)
+    local _, name = next(PropertiesMenu:GetCurrentModifiers())
 
     KeyframeEasingData[KeyframeIDs[keyframe.ID]] = {
         EaseIn = keyframe.EaseIn[name],

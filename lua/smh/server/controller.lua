@@ -292,11 +292,11 @@ local function Load(msgLength, player)
     local framecount, IDs, ents, Frame, In, Out, KModCount, KModifiers = SMH.TableSplit.DKeyframes(keyframes)
 
     net.Start(SMH.MessageTypes.LoadResponse)
-    framecount = SendKeyframes(framecount, IDs, entity, Frame, In, Out, KModCount, KModifiers)
+    framecount = SendKeyframes(framecount, IDs, ents, Frame, In, Out, KModCount, KModifiers)
     net.WriteEntity(entity)
     net.Send(player)
 
-    SendLeftoverKeyframes(player, framecount, IDs, entity, Frame, In, Out, KModCount, KModifiers)
+    SendLeftoverKeyframes(player, framecount, IDs, ents, Frame, In, Out, KModCount, KModifiers)
 end
 
 local function GetModelInfo(msgLength, player)
@@ -366,10 +366,10 @@ local function UpdateTimeline(msgLength, player)
     local framecount, IDs, ents, Frame, In, Out, KModCount, KModifiers = SMH.TableSplit.DKeyframes(keyframes)
 
     net.Start(SMH.MessageTypes.UpdateTimelineResponse)
-    framecount = SendKeyframes(framecount, IDs, entities, Frame, In, Out, KModCount, KModifiers)
+    framecount = SendKeyframes(framecount, IDs, ents, Frame, In, Out, KModCount, KModifiers)
     net.Send(player)
 
-    SendLeftoverKeyframes(player, framecount, IDs, entities, Frame, In, Out, KModCount, KModifiers)
+    SendLeftoverKeyframes(player, framecount, IDs, ents, Frame, In, Out, KModCount, KModifiers)
 end
 
 local function RequestModifiers(msgLength, player)
@@ -504,10 +504,10 @@ local function SpawnEntity(msgLength, player)
     local framecount, IDs, ents, Frame, In, Out, KModCount, KModifiers = SMH.TableSplit.DKeyframes(keyframes)
 
     net.Start(SMH.MessageTypes.LoadResponse)
-    framecount = SendKeyframes(framecount, IDs, entity, Frame, In, Out, KModCount, KModifiers)
+    framecount = SendKeyframes(framecount, IDs, ents, Frame, In, Out, KModCount, KModifiers)
     net.Send(player)
 
-    SendLeftoverKeyframes(player, framecount, IDs, entity, Frame, In, Out, KModCount, KModifiers)
+    SendLeftoverKeyframes(player, framecount, IDs, ents, Frame, In, Out, KModCount, KModifiers)
 end
 
 local function SpawnReset(msgLength, player)
