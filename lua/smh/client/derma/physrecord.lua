@@ -5,7 +5,18 @@ function PANEL:Init()
     local function CreateSlider(label, min, max, default, func)
         local slider = vgui.Create("DNumSlider", self)
 
-        slider.ValueChanged = function(self, val) -- overriding default function as it used to clamp result between mix and max, and we kinda want to go over the max if need be
+        -- overriding default functions as it used to clamp result between mix and max, and we kinda want to go over the max if need be
+        slider.SetValue = function(self, val)
+
+            if ( self:GetValue() == val ) then return end
+
+            self.Scratch:SetValue( val )
+
+            self:ValueChanged( self:GetValue() )
+
+        end
+
+        slider.ValueChanged = function(self, val)
 
             if ( self.TextArea != vgui.GetKeyboardFocus() ) then
                 self.TextArea:SetValue( self.Scratch:GetTextValue() )
