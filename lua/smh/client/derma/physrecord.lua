@@ -4,6 +4,19 @@ function PANEL:Init()
 
     local function CreateSlider(label, min, max, default, func)
         local slider = vgui.Create("DNumSlider", self)
+
+        slider.ValueChanged = function(self, val) -- overriding default function as it used to clamp result between mix and max, and we kinda want to go over the max if need be
+
+            if ( self.TextArea != vgui.GetKeyboardFocus() ) then
+                self.TextArea:SetValue( self.Scratch:GetTextValue() )
+            end
+
+            self.Slider:SetSlideX( self.Scratch:GetFraction( val ) )
+
+            self:OnValueChanged( val )
+
+        end
+
         slider:SetMinMax(min, max)
         slider:SetDecimals(0)
         slider:SetDefaultValue(default)
