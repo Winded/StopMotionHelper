@@ -122,20 +122,19 @@ function MGR.UpdateState(player, frame, settings, settimeline)
     end
 
     local alpha = settings.GhostTransparency * 255
+    local timeline = SMH.PropertiesManager.GetTimelinesInfo(player)
+    local selectedtime  = settimeline
+    if selectedtime > timeline.Timelines then -- this shouldn't really happen?
+        selectedtime = 1
+    end
+
+    local filtermods = {}
+
+    for _, name in ipairs(timeline.TimelineMods[selectedtime]) do
+        filtermods[name] = true
+    end
 
     for entity, keyframes in pairs(entities) do
-        local timeline = SMH.PropertiesManager.GetAllEntityProperties(player, entity)
-        if next(timeline) == nil then continue end
-        local selectedtime  = settimeline
-        if selectedtime > timeline.Timelines then
-            selectedtime = 1
-        end
-
-        local filtermods = {}
-
-        for _, name in ipairs(timeline.TimelineMods[selectedtime]) do
-            filtermods[name] = true
-        end
 
         for name, _ in pairs(filtermods) do -- gonna apply used modifiers
             local prevKeyframe, nextKeyframe, lerpMultiplier = SMH.GetClosestKeyframes(keyframes, frame, true, name)
@@ -202,7 +201,6 @@ function MGR.UpdateState(player, frame, settings, settimeline)
                     end
                 end
             end
-
         end
 
         ClearNoPhysGhosts(ghosts) -- need to delete ragdoll ghosts that don't have physbone modifier, or else they'll just keep falling through ground.

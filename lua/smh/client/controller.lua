@@ -18,10 +18,20 @@ local function ReceiveKeyframes()
     return SMH.TableSplit.GetKeyframes(), entity
 end
 
-local function ReceiveProperties()
-    local Timelines = SMH.TableSplit.StartAProperties(net.ReadString(), net.ReadUInt(INT_BITCOUNT))
+local function SendProperties(Timelines, KeyColor, ModCount, Modifiers)
+    net.WriteUInt(Timelines, INT_BITCOUNT)
     for i=1, Timelines do
-        net.ReadUInt(4)
+        net.WriteColor(KeyColor[i])
+        net.WriteUInt(ModCount[i], INT_BITCOUNT)
+        for j=1, ModCount[i] do
+            net.WriteString(Modifiers[i][j])
+        end
+    end
+end
+
+local function ReceiveProperties()
+    local Timelines = SMH.TableSplit.StartAProperties(net.ReadUInt(INT_BITCOUNT))
+    for i=1, Timelines do
         SMH.TableSplit.AProperties(i, nil, net.ReadColor())
         for j=1, net.ReadUInt(INT_BITCOUNT) do
             SMH.TableSplit.AProperties(i, net.ReadString())
@@ -312,19 +322,16 @@ end
 
 function CTRL.AddTimeline()
     net.Start(SMH.MessageTypes.AddTimeline)
-    net.WriteEntity(SMH.State.Entity)
     net.SendToServer()
 end
 
 function CTRL.RemoveTimeline()
     net.Start(SMH.MessageTypes.RemoveTimeline)
-    net.WriteEntity(SMH.State.Entity)
     net.SendToServer()
 end
 
 function CTRL.UpdateModifier(i, mod, check)
     net.Start(SMH.MessageTypes.UpdateModifier)
-    net.WriteEntity(SMH.State.Entity)
     net.WriteUInt(i, INT_BITCOUNT)
     net.WriteString(mod)
     net.WriteBool(check)
@@ -333,15 +340,8 @@ end
 
 function CTRL.UpdateKeyframeColor(color, timeline)
     net.Start(SMH.MessageTypes.UpdateKeyframeColor)
-    net.WriteEntity(SMH.State.Entity)
     net.WriteUInt(timeline, INT_BITCOUNT)
     net.WriteColor(color)
-    net.SendToServer()
-end
-
-function CTRL.SaveProperties()
-    net.Start(SMH.MessageTypes.SaveProperties)
-    net.WriteEntity(SMH.State.Entity)
     net.SendToServer()
 end
 
@@ -399,6 +399,22 @@ function CTRL.OffsetAng(Ang)
     net.SendToServer()
 end
 
+function CTRL.SetTimeline(settings, presetname)
+    net.Start(SMH.MessageTypes.SetTimeline)
+    net.WriteBool(presetname == "default")
+    if not (presetname == "default") then
+        local Timelines, KeyColor, ModCount, Modifiers = SMH.TableSplit.DProperties(settings)
+        SendProperties(Timelines, KeyColor, ModCount, Modifiers)
+    end
+    net.SendToServer()
+end
+
+function CTRL.RequestTimelineInfo(name)
+    net.Start(SMH.MessageTypes.RequestTimelineInfo)
+    net.WriteString(name)
+    net.SendToServer()
+end
+
 function CTRL.RequestWorldData(frame)
     net.Start(SMH.MessageTypes.RequestWorldData)
     net.WriteUInt(frame, INT_BITCOUNT)
@@ -448,16 +464,10 @@ end
 
 local function SelectEntityResponse(msgLength)
     local keyframes, entity = ReceiveKeyframes()
-    local timeline = {}
-
-    if net.ReadBool() then
-        timeline = ReceiveProperties()
-    end
 
     SMH.State.Entity = entity
     SMH.UI.SetSelectedEntity(entity)
     SMH.UI.SetUsingWorld(entity == LocalPlayer())
-    SMH.UI.SetTimeline(timeline)
     SMH.UI.SetKeyframes(keyframes)
 end
 
@@ -469,20 +479,11 @@ local function UpdateKeyframeResponse(msgLength)
             SMH.UI.UpdateKeyframe(keyframe)
         end
     end
-
-    if net.ReadBool() then
-        local timeline = ReceiveProperties()
-        SMH.UI.SetTimeline(timeline)
-    end
 end
 
 local function DeleteKeyframeResponse(msgLength)
     local keyframeId = net.ReadUInt(INT_BITCOUNT)
     SMH.UI.DeleteKeyframe(keyframeId)
-
-    if net.ReadBool() then
-        SMH.UI.SetTimeline({})
-    end
 end
 
 local function GetAllKeyframes(msgLength)
@@ -518,10 +519,8 @@ end
 
 local function LoadResponse(msgLength)
     local keyframes, entity = ReceiveKeyframes()
-    local timeline = ReceiveProperties()
 
     if entity == SMH.State.Entity then
-        SMH.UI.SetTimeline(timeline)
         SMH.UI.SetKeyframes(keyframes)
     end
 end
@@ -570,25 +569,29 @@ end
 
 local function UpdateTimelineInfoResponse(msgLength)
     local timeline = ReceiveProperties()
-    local keyframes = ReceiveKeyframes()
 
     SMH.UI.SetTimeline(timeline)
-    SMH.UI.SetKeyframes(keyframes)
 end
 
 local function UpdateModifierResponse(msgLength)
     local changed = net.ReadString()
     local timeline = ReceiveProperties()
-    local keyframes = ReceiveKeyframes()
 
     SMH.UI.UpdateModifier(timeline, changed)
-    SMH.UI.SetKeyframes(keyframes)
 end
 
 local function UpdateKeyframeColorResponse(msgLength)
     local timelineinfo = ReceiveProperties()
 
     SMH.UI.UpdateKeyColor(timelineinfo)
+end
+
+local function RequestTimelineInfoResponse(msgLength)
+    local name = net.ReadString()
+    local timeline = ReceiveProperties()
+
+    SMH.Saves.SaveProperties(timeline, name)
+    SMH.UI.RefreshTimelineSettings()
 end
 
 local function RequestWorldDataResponse(msgLength)
@@ -626,6 +629,8 @@ local function Setup()
     net.Receive(SMH.MessageTypes.UpdateTimelineInfoResponse, UpdateTimelineInfoResponse)
     net.Receive(SMH.MessageTypes.UpdateModifierResponse, UpdateModifierResponse)
     net.Receive(SMH.MessageTypes.UpdateKeyframeColorResponse, UpdateKeyframeColorResponse)
+
+    net.Receive(SMH.MessageTypes.RequestTimelineInfoResponse, RequestTimelineInfoResponse)
 
     net.Receive(SMH.MessageTypes.RequestWorldDataResponse, RequestWorldDataResponse)
 

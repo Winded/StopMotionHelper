@@ -46,7 +46,7 @@ end
 
 function MGR.DProperties(timeline)
     if not next(timeline) then return end
-    local Name, Timelines = timeline.Name, timeline.Timelines
+    local Timelines = timeline.Timelines
     local KeyColor, Modifiers, ModCount = {}, {}, {}
 
     for key, _ in ipairs(timeline.TimelineMods) do
@@ -62,11 +62,10 @@ function MGR.DProperties(timeline)
             Modifiers[key][k] = value
         end
     end
-    return Name, Timelines, KeyColor, ModCount, Modifiers
+    return Timelines, KeyColor, ModCount, Modifiers
 end
 
-function MGR.StartAProperties(Name, Timelines)
-    timelineAssembling.Name = Name
+function MGR.StartAProperties(Timelines)
     timelineAssembling.Timelines = Timelines
     timelineAssembling.TimelineMods = {}
     return Timelines

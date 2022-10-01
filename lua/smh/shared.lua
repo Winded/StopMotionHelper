@@ -65,7 +65,9 @@ SMH.MessageTypes = {
     "OffsetPos",
     "OffsetAng",
 
-    "SaveProperties",
+    "SetTimeline",
+    "RequestTimelineInfo",
+    "RequestTimelineInfoResponse",
 
     "RequestWorldData",
     "RequestWorldDataResponse",

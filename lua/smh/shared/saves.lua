@@ -11,7 +11,7 @@ local SettingsDir = "smhsettings/"
 local MGR = {}
 
 function MGR.ListFiles()
-    local files, dirs = file.Find(SaveDir .. "*.txt", "DATA");
+    local files, dirs = file.Find(SaveDir .. "*.txt", "DATA")
 
     local saves = {}
     for _, file in pairs(files) do
@@ -19,6 +19,17 @@ function MGR.ListFiles()
     end
 
     return saves
+end
+
+function MGR.ListSettings()
+    local files, dirs = file.Find(SettingsDir .. "*.txt", "DATA")
+
+    local settings = {}
+    for _, setting in pairs(files) do
+        table.insert(settings, setting:sub(1, -5))
+    end
+
+    return settings
 end
 
 function MGR.Load(path)
@@ -75,52 +86,14 @@ function MGR.LoadForEntity(path, modelName)
         if not sEntity.Properties then
             if sEntity.Model == modelName then
 
-                local timelinemods = {}
-                timelinemods[1] = { KeyColor = Color(0, 200, 0) }
-
-                if SERVER then
-                    for name, mod in pairs(SMH.Modifiers) do
-                        table.insert(timelinemods[1], name)
-                    end
-                else
-                    for name, mod in pairs(SMH.UI.GetModifiers()) do
-                        table.insert(timelinemods[1], name)
-                    end
-                end
-
                 sEntity.Properties = {
                     Name = sEntity.Model,
-                    Timelines = 1,
-                    TimelineMods = table.Copy(timelinemods),
                 }
 
                 return sEntity.Frames, sEntity.Properties
             end
         else
             if sEntity.Properties.Name == modelName then
-                if not sEntity.Properties.TimelineMods then -- i've had some previous version of properties have only entity naming, but no timeline modifiers. so now i gotta make a check for this occassion as well
-                    local timelinemods = {}
-                    timelinemods[1] = { KeyColor = Color(0, 200, 0) }
-
-                    if SERVER then
-                        for name, mod in pairs(SMH.Modifiers) do
-                            table.insert(timelinemods[1], name)
-                        end
-                    else
-                        for name, mod in pairs(SMH.UI.GetModifiers()) do
-                            table.insert(timelinemods[1], name)
-                        end
-                    end
-
-                    sEntity.Properties.Timelines = 1
-                    sEntity.Properties.TimelineMods = table.Copy(timelinemods)
-                else
-                    for timeline, value in pairs(sEntity.Properties.TimelineMods) do
-                        local color = value.KeyColor
-                        color = Color(color.r, color.g, color.b)
-                        value.KeyColor = color
-                    end
-                end
                 return sEntity.Frames, sEntity.Properties, sEntity.Properties.IsWorld
             end
         end
@@ -146,8 +119,6 @@ function MGR.Serialize(keyframes, properties, player)
                     Model = mdl,
                     Properties = {
                         Name = properties[entity].Name,
-                        Timelines = properties[entity].Timelines,
-                        TimelineMods = table.Copy(properties[entity].TimelineMods),
                         Class = properties[entity].Class,
                         Model = properties[entity].Model,
                     },
@@ -162,8 +133,6 @@ function MGR.Serialize(keyframes, properties, player)
                     Model = mdl,
                     Properties = {
                         Name = properties[entity].Name,
-                        Timelines = properties[entity].Timelines,
-                        TimelineMods = table.Copy(properties[entity].TimelineMods),
                         IsWorld = true,
                     },
                     Frames = {},
@@ -216,7 +185,7 @@ function MGR.Delete(path)
     end
 end
 
-function MGR.SaveProperties(timeline, player)
+function MGR.SaveProperties(timeline, name)
     if next(timeline) == nil then return end
 
     if not file.Exists(SettingsDir, "DATA") or not file.IsDir(SettingsDir, "DATA") then
@@ -228,13 +197,13 @@ function MGR.SaveProperties(timeline, player)
         TimelineMods = table.Copy(timeline.TimelineMods),
     }
 
-    path = SettingsDir .. "timelineinfo_" .. player:GetName() .. ".txt"
+    path = SettingsDir .. name .. ".txt"
     local json = util.TableToJSON(template)
     file.Write(path, json)
 end
 
-function MGR.GetPreferences(player)
-    path = SettingsDir .. "timelineinfo_" .. player:GetName() .. ".txt"
+function MGR.GetPreferences(name)
+    path = SettingsDir .. name .. ".txt"
     if not file.Exists(path, "DATA") then return nil end
 
     local json = file.Read(path)

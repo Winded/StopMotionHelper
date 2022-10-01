@@ -5,6 +5,7 @@ local ModifierList = {}
 local Fallback = "none"
 local selectedEntity = nil
 local UsingWorld = false
+local IsSaving = false
 
 local function GetModelName(entity)
     local mdl = string.Split(entity:GetModel(), "/");
@@ -85,6 +86,20 @@ function PANEL:Init()
 
     self.TimelinesPanel = vgui.Create("DPanel", self)
     self.TimelinesPanel:SetBackgroundColor(Color(155, 155, 155, 255))
+
+    self.SettingPicker = vgui.Create("DComboBox", self.TimelinesPanel)
+    self.SettingPicker.OnSelect = function(_, index, value)
+        RunConsoleCommand("smh_currentpreset", value)
+        local settings = SMH.Saves.GetPreferences(value)
+        if not settings and not value == "default" then return end
+        self:SetSettings(settings, value)
+    end
+
+    self.AddSettingPresetButton = vgui.Create("DButton", self.TimelinesPanel)
+    self.AddSettingPresetButton:SetText("+")
+    self.AddSettingPresetButton.DoClick = function()
+        self:MakeSettingSavePanel()
+    end
 
     self.SelectedEntityLabel = vgui.Create("DLabel", self.TimelinesPanel)
     self.SelectedEntityLabel:SetText("Selected model: " .. "none")
@@ -182,13 +197,19 @@ function PANEL:PerformLayout(width, height)
     self.SelectedEntityLabel:SetPos(4, 5)
     self.SelectedEntityLabel:SetSize(self.TimelinesPanel:GetWide() - 8, 15)
 
-    self.TimelinesCList:SetPos(5, 55)
-    self.TimelinesCList:SetSize(self.TimelinesPanel:GetWide() - 10, self.TimelinesPanel:GetTall() - 55 - 5)
+    self.SettingPicker:SetPos(4, 25)
+    self.SettingPicker:SetSize(self.TimelinesPanel:GetWide() - 10 - 25, 20)
 
-    self.AddTimeButton:SetPos(5, 35)
+    self.AddSettingPresetButton:SetPos(self.TimelinesPanel:GetWide() - 8 - 20, 25)
+    self.AddSettingPresetButton:SetSize(20, 20)
+
+    self.TimelinesCList:SetPos(5, 70)
+    self.TimelinesCList:SetSize(self.TimelinesPanel:GetWide() - 10, self.TimelinesPanel:GetTall() - 70 - 5)
+
+    self.AddTimeButton:SetPos(5, 50)
     self.AddTimeButton:SetSize(self.TimelinesCList:GetWide() / 2 - 2, 20)
 
-    self.RemoveTimeButton:SetPos(5 + self.TimelinesCList:GetWide() / 2 + 2, 35)
+    self.RemoveTimeButton:SetPos(5 + self.TimelinesCList:GetWide() / 2 + 2, 50)
     self.RemoveTimeButton:SetSize(self.TimelinesCList:GetWide() / 2 - 2, 20)
 
     self.ColorPanel:SetPos(248 + self:GetWide() - 456 + 4, 30)
@@ -221,6 +242,38 @@ function PANEL:PerformLayout(width, height)
     self.ButtonReleaseEnter:SetSize(self.WorldParent:GetWide() - 10, 20)
         self.ButtonReleaseEnter.Label:SetRelativePos(self.ButtonReleaseEnter, 2, -5 - self.ButtonReleaseEnter.Label:GetTall())
 
+end
+
+function PANEL:MakeSettingSavePanel()
+    if IsSaving then return end
+
+    IsSaving = true
+
+    local savepanel = vgui.Create("DFrame")
+    savepanel:SetTitle("Save Timeline Preset")
+    savepanel:SetPos((ScrW() / 2) - 100, (ScrH() / 2) - 50)
+    savepanel:SetSize(200, 100)
+    savepanel:MakePopup()
+
+    savepanel.TextEnter = vgui.Create("DTextEntry", savepanel)
+    savepanel.TextEnter:SetPos(50, 45)
+    savepanel.TextEnter:SetSize(100, 20)
+
+    savepanel.SaveButton = vgui.Create("DButton", savepanel)
+    savepanel.SaveButton:SetPos(75, 75)
+    savepanel.SaveButton:SetSize(50, 20)
+    savepanel.SaveButton:SetText("Save")
+
+    savepanel.SaveButton.DoClick = function()
+        local text = savepanel.TextEnter:GetValue()
+        if text == "" or text == "default" then return end
+        self:SaveSettingsPreset(text)
+        savepanel:Close()
+    end
+
+    savepanel.OnClose = function()
+        IsSaving = false
+    end
 end
 
 function PANEL:UpdateSelectedEnt(ent)
@@ -305,6 +358,21 @@ function PANEL:GetCurrentModifiers()
     return PropertyTable.TimelineMods[SMH.State.Timeline]
 end
 
+function PANEL:UpdateTimelineSettings()
+    self.SettingPicker:Clear()
+    self.SettingPicker:AddChoice("default")
+
+    for _, setting in ipairs(SMH.Saves.ListSettings()) do
+        self.SettingPicker:AddChoice(setting)
+    end
+
+    if ConVarExists("smh_currentpreset") then
+        self.SettingPicker:SetValue(GetConVar("smh_currentpreset"):GetString())
+    else
+        self.SettingPicker:SetValue("default")
+    end
+end
+
 function PANEL:SetEntities(entities)
     local entlist = {}
     EntsTable = table.Copy(entities)
@@ -377,6 +445,20 @@ function PANEL:HideWorldSettings()
     self.WorldParent:SetVisible(false)
 end
 
+function PANEL:InitTimelineSettings()
+    local value
+
+    if ConVarExists("smh_currentpreset") then
+        value = GetConVar("smh_currentpreset"):GetString()
+    else
+        value = "default"
+    end
+
+    local settings = SMH.Saves.GetPreferences(value)
+    if not settings then value = "default" end
+    self:SetSettings(settings, value)
+end
+
 function PANEL:ApplyName(ent, name) end
 function PANEL:SelectEntity(entity) end
 function PANEL:SelectWorld() end
@@ -385,5 +467,7 @@ function PANEL:OnRemoveTimelineRequested() end
 function PANEL:OnUpdateModifierRequested(i, mod, check) end
 function PANEL:OnUpdateKeyframeColorRequested(color, timeline) end
 function PANEL:SetData(str, key) end
+function PANEL:SetSettings(settings, presetname) end
+function PANEL:SaveSettingsPreset(name) end
 
 vgui.Register("SMHProperties", PANEL, "DFrame")

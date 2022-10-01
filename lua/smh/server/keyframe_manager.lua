@@ -49,6 +49,9 @@ hook.Add("EntityRemoved", "SMHKeyframesEntityRemoved", function(entity)
             for _, keyframe in pairs(SMH.KeyframeData.Players[player].Entities[entity]) do
                 table.insert(keyframesToDelete, keyframe.ID)
             end
+
+            SMH.KeyframeData.Players[player].Entities[entity] = nil
+
             for _, keyframeId in pairs(keyframesToDelete) do
                 SMH.KeyframeData:Delete(player, keyframeId)
             end
@@ -83,7 +86,7 @@ function MGR.Create(player, entity, frame, timeline)
     local keyframes = {}
 
     if player ~= entity then
-        local modnames = SMH.Properties.Players[player].Entities[entity].TimelineMods[timeline]
+        local modnames = SMH.Properties.Players[player].TimelineSetting.TimelineMods[timeline]
         local keyframe = GetExistingKeyframe(player, entity, frame)
 
         if keyframe ~= nil then
@@ -128,7 +131,7 @@ function MGR.Update(player, keyframeIds, updateData, timeline)
         end
 
         local keyframe = SMH.KeyframeData.Players[player].Keyframes[keyframeId]
-        local modnames = player == keyframe.Entity and {"world"} or SMH.Properties.Players[player].Entities[keyframe.Entity].TimelineMods[timeline]
+        local modnames = player == keyframe.Entity and {"world"} or SMH.Properties.Players[player].TimelineSetting.TimelineMods[timeline]
         local updateableFields = {
             "Frame",
             "EaseIn",
@@ -199,7 +202,7 @@ function MGR.Copy(player, keyframeIds, frame, timeline)
         end
 
         local keyframe = SMH.KeyframeData.Players[player].Keyframes[keyframeId]
-        local modnames = player == keyframe.Entity and {"world"} or SMH.Properties.Players[player].Entities[keyframe.Entity].TimelineMods[timeline]
+        local modnames = player == keyframe.Entity and {"world"} or SMH.Properties.Players[player].TimelineSetting.TimelineMods[timeline]
 
         local EaseIn, EaseOut, Mods = {}, {}, {}
         for _, name in ipairs(modnames) do
@@ -246,7 +249,7 @@ function MGR.Delete(player, keyframeId, timeline)
     local entity = SMH.KeyframeData.Players[player].Keyframes[keyframeId].Entity
 
     local keyframe = SMH.KeyframeData.Players[player].Keyframes[keyframeId]
-    local modnames = player == keyframe.Entity and {"world"} or SMH.Properties.Players[player].Entities[keyframe.Entity].TimelineMods[timeline]
+    local modnames = player == keyframe.Entity and {"world"} or SMH.Properties.Players[player].TimelineSetting.TimelineMods[timeline]
 
     for _, name in ipairs(modnames) do
         ClearModifier(keyframe, name)

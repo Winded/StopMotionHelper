@@ -238,6 +238,7 @@ local function AddCallbacks()
         local frame = SMH.State.Frame
 
         PropertiesMenu:SetVisible(true)
+        PropertiesMenu:UpdateTimelineSettings()
         SMH.Controller.GetServerEntities()
 
         if FrameToKeyframe[frame] ~= nil and PropertiesMenu:GetUsingWorld() then
@@ -351,13 +352,17 @@ local function AddCallbacks()
     PropertiesMenu.OnUpdateKeyframeColorRequested = function(_, color, timeline)
         SMH.Controller.UpdateKeyframeColor(color, timeline)
     end
-
     PropertiesMenu.SelectWorld = function()
         SMH.Controller.SelectEntity(LocalPlayer())
     end
-
     PropertiesMenu.SetData = function(_, str, key)
         SMH.Controller.UpdateWorld(str, key)
+    end
+    PropertiesMenu.SetSettings = function(_, settings, presetname)
+        SMH.Controller.SetTimeline(settings, presetname)
+    end
+    PropertiesMenu.SaveSettingsPreset = function(_, name)
+        SMH.Controller.RequestTimelineInfo(name)
     end
 
 end
@@ -403,6 +408,7 @@ hook.Add("InitPostEntity", "SMHMenuSetup", function()
     AddCallbacks()
 
     SMH.Controller.RequestModifiers() -- needed to initialize properties menu
+    PropertiesMenu:InitTimelineSettings()
 
     WorldClicker.MainMenu:SetInitialState(SMH.State)
 
@@ -743,9 +749,16 @@ function MGR.InitModifiers(list)
     PropertiesMenu:InitModifiers(list)
 end
 
+function MGR.RefreshTimelineSettings()
+    PropertiesMenu:UpdateTimelineSettings()
+end
+
 function MGR.SetTimeline(timeline)
     WorldClicker.MainMenu:UpdateTimelines(timeline)
     PropertiesMenu:UpdateTimelineInfo(timeline)
+    if IsValid(SMH.State.Entity) then
+        SMH.Controller.UpdateTimeline()
+    end
 end
 
 function MGR.UpdateState(newState)
