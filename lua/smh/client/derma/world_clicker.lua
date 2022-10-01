@@ -32,9 +32,12 @@ function PANEL:OnMousePressed(mousecode)
     local trace = util.TraceLine(util.GetPlayerTrace(LocalPlayer()))
     if not IsValid(trace.Entity) then return end
 
-    self:OnEntitySelected(trace.Entity)
+    local setting = 0
+    if input.IsKeyDown(KEY_LSHIFT) then setting = 1 end
+
+    self:OnEntitySelected(trace.Entity, setting)
 end
 
-function PANEL:OnEntitySelected(entity) end
+function PANEL:OnEntitySelected(entity, setting) end
 
 vgui.Register("SMHWorldClicker", PANEL, "EditablePanel")

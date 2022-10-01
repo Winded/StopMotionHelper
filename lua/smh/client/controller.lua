@@ -2,10 +2,9 @@ local INT_BITCOUNT = 32
 local KFRAMES_PER_MSG = 250
 
 local function ReceiveKeyframes()
-    local entity = net.ReadEntity()
     local framecount = net.ReadUInt(INT_BITCOUNT)
     for i = 1, framecount do
-        local ID, Frame, ModCount = net.ReadUInt(INT_BITCOUNT), net.ReadUInt(INT_BITCOUNT), net.ReadUInt(INT_BITCOUNT)
+        local ID, entity, Frame, ModCount = net.ReadUInt(INT_BITCOUNT), net.ReadEntity(), net.ReadUInt(INT_BITCOUNT), net.ReadUInt(INT_BITCOUNT)
         local Modifiers, In, Out = {}, {}, {}
         for j = 1, ModCount do
             local name = net.ReadString()
@@ -15,7 +14,7 @@ local function ReceiveKeyframes()
         end
         SMH.TableSplit.AKeyframes(ID, entity, Frame, In, Out, Modifiers)
     end
-    return SMH.TableSplit.GetKeyframes(), entity
+    return SMH.TableSplit.GetKeyframes()
 end
 
 local function SendProperties(Timelines, KeyColor, ModCount, Modifiers)
@@ -52,21 +51,38 @@ function CTRL.SetFrame(frame)
     net.SendToServer()
 end
 
-function CTRL.SelectEntity(entity)
+function CTRL.SelectEntity(entity, enttable)
     if SMH.PhysRecord.IsActive() then return end
+    local count = 0
+
+    for ent, _ in pairs(enttable) do
+        count = count + 1
+    end
 
     net.Start(SMH.MessageTypes.SelectEntity)
     net.WriteEntity(entity)
+    net.WriteUInt(count, INT_BITCOUNT)
+    for tentity, _ in pairs(enttable) do
+        net.WriteEntity(tentity)
+    end
     net.SendToServer()
 end
 
 function CTRL.Record()
-    if not IsValid(SMH.State.Entity) or SMH.State.Frame < 0 or SMH.State.Timeline < 1 or SMH.PhysRecord.IsActive() then
+    if not next(SMH.State.Entity) or SMH.State.Frame < 0 or SMH.State.Timeline < 1 or SMH.PhysRecord.IsActive() then
         return
+    end
+    local count = 0
+
+    for ent, _ in pairs(SMH.State.Entity) do
+        count = count + 1
     end
 
     net.Start(SMH.MessageTypes.CreateKeyframe)
-    net.WriteEntity(SMH.State.Entity)
+    net.WriteUInt(count, INT_BITCOUNT)
+    for entity, _ in pairs(SMH.State.Entity) do
+        net.WriteEntity(entity)
+    end
     net.WriteUInt(SMH.State.Frame, INT_BITCOUNT)
     net.WriteUInt(SMH.State.Timeline, INT_BITCOUNT)
     net.SendToServer()
@@ -189,13 +205,14 @@ function CTRL.GetServerEntities()
 end
 
 function CTRL.Load(path, modelName, loadFromClient)
-    if not IsValid(SMH.State.Entity) then
+    if not next(SMH.State.Entity) then
         return
     end
+    local entity = next(SMH.State.Entity)
 
     net.Start(SMH.MessageTypes.Load)
 
-    net.WriteEntity(SMH.State.Entity)
+    net.WriteEntity(entity)
     net.WriteBool(loadFromClient)
 
     if loadFromClient then
@@ -310,8 +327,17 @@ function CTRL.ApplyEntityName(ent, name)
 end
 
 function CTRL.UpdateTimeline()
+    local count = 0
+
+    for ent, _ in pairs(SMH.State.Entity) do
+        count = count + 1
+    end
+
     net.Start(SMH.MessageTypes.UpdateTimeline)
-    net.WriteEntity(SMH.State.Entity)
+    net.WriteUInt(count, INT_BITCOUNT)
+    for entity, _ in pairs(SMH.State.Entity) do
+        net.WriteEntity(entity)
+    end
     net.SendToServer()
 end
 
@@ -463,10 +489,16 @@ local function SetFrameResponse(msgLength)
 end
 
 local function SelectEntityResponse(msgLength)
-    local keyframes, entity = ReceiveKeyframes()
+    local keyframes = ReceiveKeyframes()
+    local entities = {}
+    for i = 1, net.ReadUInt(INT_BITCOUNT) do
+        entities[net.ReadEntity()] = true
+    end
 
-    SMH.State.Entity = entity
-    SMH.UI.SetSelectedEntity(entity)
+    local entity = next(entities)
+
+    SMH.State.Entity = entities
+    SMH.UI.SetSelectedEntity(entities)
     SMH.UI.SetUsingWorld(entity == LocalPlayer())
     SMH.UI.SetKeyframes(keyframes)
 end
@@ -475,7 +507,7 @@ local function UpdateKeyframeResponse(msgLength)
     local keyframes = ReceiveKeyframes()
 
     for num, keyframe in ipairs(keyframes) do
-        if keyframe.Entity == SMH.State.Entity then
+        if SMH.State.Entity[keyframe.Entity] then
             SMH.UI.UpdateKeyframe(keyframe)
         end
     end
@@ -518,9 +550,10 @@ local function GetServerEntitiesResponse(msgLength)
 end
 
 local function LoadResponse(msgLength)
-    local keyframes, entity = ReceiveKeyframes()
+    local keyframes = ReceiveKeyframes()
+    local entity = net.ReadEntity()
 
-    if entity == SMH.State.Entity then
+    if SMH.State.Entity[entity] then
         SMH.UI.SetKeyframes(keyframes)
     end
 end

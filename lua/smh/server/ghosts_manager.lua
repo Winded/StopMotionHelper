@@ -76,15 +76,15 @@ local MGR = {}
 
 MGR.IsRendering = false
 
-function MGR.SelectEntity(player, entity)
+function MGR.SelectEntity(player, entities)
     if not GhostData[player] then
         GhostData[player] = {
-            Entity = nil,
+            Entity = {},
             Ghosts = {},
         }
     end
 
-    GhostData[player].Entity = entity
+    GhostData[player].Entity = table.Copy(entities)
 end
 
 function MGR.UpdateState(player, frame, settings, settimeline)
@@ -113,10 +113,13 @@ function MGR.UpdateState(player, frame, settings, settimeline)
     end
 
     local entities = SMH.KeyframeData.Players[player].Entities
-    if not settings.GhostAllEntities and IsValid(GhostData[player].Entity) and entities[GhostData[player].Entity] then
-        entities = {
-            [GhostData[player].Entity] = entities[GhostData[player].Entity]
-        }
+    local _, gentity = next(GhostData[player].Entity)
+    if not settings.GhostAllEntities and IsValid(gentity) and entities[gentity] then
+        local oldentities = table.Copy(entities)
+        entities = {}
+        for _, entity in pairs(GhostData[player].Entity) do
+            entities[entity] = oldentities[entity]
+        end
     elseif not settings.GhostAllEntities then
         return
     end

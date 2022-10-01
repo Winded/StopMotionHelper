@@ -5,11 +5,11 @@ local function SendKeyframes(framecount, IDs, ents, Frame, In, Out, ModCount, Mo
     if not loop then loop = 0 end
 
     local sendframes = framecount > KFRAMES_PER_MSG and KFRAMES_PER_MSG or framecount
-    net.WriteEntity(ents)
 
     net.WriteUInt(sendframes, INT_BITCOUNT)
     for i = 1 + KFRAMES_PER_MSG * loop, sendframes + KFRAMES_PER_MSG * loop do
         net.WriteUInt(IDs[i],INT_BITCOUNT)
+        net.WriteEntity(ents[i])
         net.WriteUInt(Frame[i], INT_BITCOUNT)
         net.WriteUInt(ModCount[i], INT_BITCOUNT)
         for j = 1, ModCount[i] do
@@ -43,13 +43,13 @@ local function ReceiveProperties()
     return SMH.TableSplit.GetProperties()
 end
 
-local function SendLeftoverKeyframes(player, framecount, IDs, entity, Frame, In, Out, ModCount, Modifiers)
+local function SendLeftoverKeyframes(player, framecount, IDs, entities, Frame, In, Out, ModCount, Modifiers)
     if framecount < 0 then return end
 
     for i = 1, math.ceil(framecount / KFRAMES_PER_MSG) do
         if framecount < 0 then break end
         net.Start(SMH.MessageTypes.GetAllKeyframes)
-            framecount = SendKeyframes(framecount, IDs, entity, Frame, In, Out, ModCount, Modifiers, i)
+            framecount = SendKeyframes(framecount, IDs, entities, Frame, In, Out, ModCount, Modifiers, i)
         net.Send(player)
     end
 end
@@ -69,37 +69,50 @@ end
 
 local function SelectEntity(msgLength, player)
     local entity = net.ReadEntity()
+    local entities = {}
 
     if entity.SMHGhost then
         entity = entity.Entity
     end
 
-    if player ~= entity then
-        SMH.GhostsManager.SelectEntity(player, entity)
-    else
-        SMH.GhostsManager.SelectEntity(player, nil)
+    for i = 1, net.ReadUInt(INT_BITCOUNT) do
+        entities[i] = net.ReadEntity()
     end
 
-    local keyframes = SMH.KeyframeManager.GetAllForEntity(player, entity)
+    if player ~= entity then
+        SMH.GhostsManager.SelectEntity(player, entities)
+    else
+        SMH.GhostsManager.SelectEntity(player, {})
+    end
+
+    local keyframes = SMH.KeyframeManager.GetAllForEntity(player, entities)
     local framecount, IDs, ents, Frame, In, Out, KModCount, KModifiers = SMH.TableSplit.DKeyframes(keyframes)
 
     net.Start(SMH.MessageTypes.SelectEntityResponse)
-    framecount = SendKeyframes(framecount, IDs, entity, Frame, In, Out, KModCount, KModifiers)
+    framecount = SendKeyframes(framecount, IDs, ents, Frame, In, Out, KModCount, KModifiers)
+    net.WriteUInt(#entities, INT_BITCOUNT)
+    for _, entity in ipairs(entities) do
+        net.WriteEntity(entity)
+    end
     net.Send(player)
 
-    SendLeftoverKeyframes(player, framecount, IDs, entity, Frame, In, Out, KModCount, KModifiers)
+    SendLeftoverKeyframes(player, framecount, IDs, ents, Frame, In, Out, KModCount, KModifiers)
 end
 
 local function CreateKeyframe(msgLength, player)
-    local entity = net.ReadEntity()
+    local entities = {}
+    for i = 1, net.ReadUInt(INT_BITCOUNT) do
+        entities[i] = net.ReadEntity()
+    end
+
     local frame = net.ReadUInt(INT_BITCOUNT)
     local timeline = net.ReadUInt(INT_BITCOUNT)
 
-    SMH.PropertiesManager.AddEntity(player, entity)
+    SMH.PropertiesManager.AddEntity(player, entities)
     local totaltimelines = SMH.PropertiesManager.GetTimelines(player)
     if timeline > totaltimelines then timeline = 1 end
 
-    local keyframes = SMH.KeyframeManager.Create(player, entity, frame, timeline)
+    local keyframes = SMH.KeyframeManager.Create(player, entities, frame, timeline)
     if not next(keyframes) then return end
     local framecount, IDs, ents, Frame, In, Out, KModCount, KModifiers = SMH.TableSplit.DKeyframes(keyframes)
 
@@ -272,17 +285,18 @@ local function Load(msgLength, player)
 
     if isWorld then entity = player end
 
-    SMH.PropertiesManager.AddEntity(player, entity)
+    SMH.PropertiesManager.AddEntity(player, {entity})
     SMH.KeyframeManager.ImportSave(player, entity, serializedKeyframes, entityProperties)
 
-    local keyframes = SMH.KeyframeManager.GetAllForEntity(player, entity)
+    local keyframes = SMH.KeyframeManager.GetAllForEntity(player, {entity})
     local framecount, IDs, ents, Frame, In, Out, KModCount, KModifiers = SMH.TableSplit.DKeyframes(keyframes)
 
     net.Start(SMH.MessageTypes.LoadResponse)
-    framecount = SendKeyframes(framecount, IDs, entity, Frame, In, Out, KModCount, KModifiers)
+    framecount = SendKeyframes(framecount, IDs, ents, Frame, In, Out, KModCount, KModifiers)
+    net.WriteEntity(entity)
     net.Send(player)
 
-    SendLeftoverKeyframes(player, framecount, IDs, entity, Frame, In, Out, KModCount, KModifiers)
+    SendLeftoverKeyframes(player, framecount, IDs, ents, Frame, In, Out, KModCount, KModifiers)
 end
 
 local function GetModelInfo(msgLength, player)
@@ -343,16 +357,19 @@ local function ApplyEntityName(msgLength, player)
 end
 
 local function UpdateTimeline(msgLength, player)
-    local entity = net.ReadEntity()
+    local entities = {}
+    for i = 1, net.ReadUInt(INT_BITCOUNT) do
+        entities[i] = net.ReadEntity()
+    end
 
-    local keyframes = SMH.KeyframeManager.GetAllForEntity(player, entity)
+    local keyframes = SMH.KeyframeManager.GetAllForEntity(player, entities)
     local framecount, IDs, ents, Frame, In, Out, KModCount, KModifiers = SMH.TableSplit.DKeyframes(keyframes)
 
     net.Start(SMH.MessageTypes.UpdateTimelineResponse)
-    framecount = SendKeyframes(framecount, IDs, entity, Frame, In, Out, KModCount, KModifiers)
+    framecount = SendKeyframes(framecount, IDs, ents, Frame, In, Out, KModCount, KModifiers)
     net.Send(player)
 
-    SendLeftoverKeyframes(player, framecount, IDs, entity, Frame, In, Out, KModCount, KModifiers)
+    SendLeftoverKeyframes(player, framecount, IDs, ents, Frame, In, Out, KModCount, KModifiers)
 end
 
 local function RequestModifiers(msgLength, player)
@@ -476,21 +493,21 @@ local function SpawnEntity(msgLength, player)
 
     serializedKeyframes, entityProperties = SMH.Saves.LoadForEntity(path, modelName)
 
-    SMH.PropertiesManager.AddEntity(player, entity)
+    SMH.PropertiesManager.AddEntity(player, {entity})
     SMH.KeyframeManager.ImportSave(player, entity, serializedKeyframes, entityProperties)
 
     if offset then
         SMH.Spawner.OffsetKeyframes(player, entity)
     end
 
-    local keyframes = SMH.KeyframeManager.GetAllForEntity(player, entity)
+    local keyframes = SMH.KeyframeManager.GetAllForEntity(player, {entity})
     local framecount, IDs, ents, Frame, In, Out, KModCount, KModifiers = SMH.TableSplit.DKeyframes(keyframes)
 
     net.Start(SMH.MessageTypes.LoadResponse)
-    framecount = SendKeyframes(framecount, IDs, entity, Frame, In, Out, KModCount, KModifiers)
+    framecount = SendKeyframes(framecount, IDs, ents, Frame, In, Out, KModCount, KModifiers)
     net.Send(player)
 
-    SendLeftoverKeyframes(player, framecount, IDs, entity, Frame, In, Out, KModCount, KModifiers)
+    SendLeftoverKeyframes(player, framecount, IDs, ents, Frame, In, Out, KModCount, KModifiers)
 end
 
 local function SpawnReset(msgLength, player)
@@ -544,19 +561,20 @@ local function StartPhysicsRecord(msgLength, player)
     local frame = net.ReadUInt(INT_BITCOUNT)
     local playbackrate = net.ReadUInt(INT_BITCOUNT)
     local totalframes = net.ReadUInt(INT_BITCOUNT)
-    local entities = {}
+    local entities, timelines = {}, {}
 
     for i = 1, net.ReadUInt(INT_BITCOUNT) do
         local entity = net.ReadEntity()
         local timeline = net.ReadUInt(INT_BITCOUNT)
 
         if not IsValid(entity) then continue end
-        entities[entity] = timeline
+        entities[i] = entity
+        timelines[entity] = timeline
     end
 
     local settings = net.ReadTable()
 
-    SMH.PhysRecord.RecordStart(player, framecount, interval, frame, playbackrate, totalframes, entities, settings)
+    SMH.PhysRecord.RecordStart(player, framecount, interval, frame, playbackrate, totalframes, entities, timelines, settings)
 end
 
 local function StopPhysicsRecord(msgLength, player)

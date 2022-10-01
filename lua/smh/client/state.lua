@@ -1,5 +1,5 @@
 SMH.State = {
-    Entity = nil,
+    Entity = {},
     Frame = 0,
     Timeline = 1,
 

@@ -28,7 +28,7 @@ MGR.SelectedEntities = {}
 function MGR.RecordToggle()
 
     if not Active then
-        SMH.Controller.SelectEntity(nil)
+        SMH.Controller.SelectEntity(nil, {})
         Active = true
         local wait = MGR.StartDelay
         Waiting = wait

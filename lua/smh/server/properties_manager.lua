@@ -123,34 +123,36 @@ function MGR.RemoveEntity(player)
     end
 end
 
-function MGR.AddEntity(player, entity)
+function MGR.AddEntity(player, entities)
     if not SMH.Properties.Players[player] then
         SMH.Properties.Players[player] = { Entities = {}, TimelineSetting = {} }
     end
 
-    if not SMH.Properties.Players[player].Entities[entity] then
-        if player ~= entity then
-            local class = entity:GetClass()
-            local model
+    for _, entity in ipairs(entities) do
+        if not SMH.Properties.Players[player].Entities[entity] then
+            if player ~= entity then
+                local class = entity:GetClass()
+                local model
 
-            if class == "prop_effect" and IsValid(entity.AttachedEntity) then
-                model = entity.AttachedEntity:GetModel()
+                if class == "prop_effect" and IsValid(entity.AttachedEntity) then
+                    model = entity.AttachedEntity:GetModel()
+                else
+                    model = entity:GetModel()
+                end
+
+                SMH.Properties.Players[player].Entities[entity] = {
+                    Name = SetUniqueName(player, entity, GetModelName(entity)),
+                    Class = class,
+                    Model = model,
+                }
             else
-                model = entity:GetModel()
+                SMH.Properties.Players[player].Entities[entity] = {
+                    Name = SetUniqueName(player, entity, "world"),
+                }
             end
-
-            SMH.Properties.Players[player].Entities[entity] = {
-                Name = SetUniqueName(player, entity, GetModelName(entity)),
-                Class = class,
-                Model = model,
-            }
-        else
-            SMH.Properties.Players[player].Entities[entity] = {
-                Name = SetUniqueName(player, entity, "world"),
-            }
         end
+        usednames[player][SMH.Properties.Players[player].Entities[entity].Name] = true
     end
-    usednames[player][SMH.Properties.Players[player].Entities[entity].Name] = true
 end
 
 function MGR.SetName(player, entity, newname)
