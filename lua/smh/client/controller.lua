@@ -303,6 +303,10 @@ function CTRL.UpdateSettings(newSettings)
     SMH.Settings.Update(newSettings)
 end
 
+function CTRL.UpdateUISetting(setting, value)
+    SMH.UI.UpdateUISetting(setting, value)
+end
+
 function CTRL.OpenHelp()
     gui.OpenURL("https://github.com/Winded/StopMotionHelper/blob/master/TUTORIAL.md")
 end

@@ -4,6 +4,14 @@ local ConVarType = {
     Float = 3,
 }
 
+local GhostVars = {
+    smh_ghostprevframe = "GhostPrevFrame",
+    smh_ghostnextframe = "GhostNextFrame",
+    smh_ghostallentities = "GhostAllEntities",
+    smh_ghosttransparency = "GhostTransparency",
+    smh_onionskin = "OnionSkin"
+}
+
 local TYPED_CV = {}
 TYPED_CV.__index = TYPED_CV
 
@@ -42,6 +50,15 @@ local function CreateTypedConVar(type, name, defaultValue, helptext)
     }
     setmetatable(cv, TYPED_CV)
 
+    if GhostVars[name] then
+        cvars.AddChangeCallback(name, function(convar, oldvalue, newvalue)
+            if oldvalue == newvalue then return end
+
+            SMH.Controller.UpdateUISetting(GhostVars[name], newvalue)
+            SMH.Controller.UpdateGhostState()
+        end)
+    end
+
     return cv
 end
 
@@ -58,6 +75,7 @@ local ConVars = {
     SmoothPlayback = CreateTypedConVar(ConVarType.Bool, "smh_smoothplayback", false),
     EnableWorld = CreateTypedConVar(ConVarType.Bool, "smh_enableworldkeyframes", false),
 }
+
 
 local MGR = {}
 
