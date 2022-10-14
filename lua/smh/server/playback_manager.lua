@@ -104,6 +104,7 @@ function MGR.StartPlayback(player, startFrame, endFrame, playbackRate, settings)
         EndFrame = endFrame,
         PlaybackRate = playbackRate,
         CurrentFrame = startFrame,
+        PrevFrame = startFrame - 1,
         Timer = 0,
         Settings = settings,
     }
@@ -117,16 +118,24 @@ end
 hook.Add("Think", "SMHPlaybackManagerThink", function()
     for player, playback in pairs(ActivePlaybacks) do
         if not playback.Settings.SmoothPlayback or playback.Settings.TweenDisable then
+
             playback.Timer = playback.Timer + FrameTime()
             local timePerFrame = 1 / playback.PlaybackRate
+
             if playback.Timer >= timePerFrame then
+
                 playback.CurrentFrame = math.floor(playback.Timer / timePerFrame) + playback.StartFrame
                 if playback.CurrentFrame > playback.EndFrame then
                     playback.CurrentFrame = 0
                     playback.StartFrame = 0
                     playback.Timer = 0
                 end
-                MGR.SetFrame(player, playback.CurrentFrame, playback.Settings)
+
+                if playback.CurrentFrame ~= playback.PrevFrame then
+                    playback.PrevFrame = playback.CurrentFrame
+                    MGR.SetFrame(player, playback.CurrentFrame, playback.Settings)
+                end
+
             end
         else
             PlaybackSmooth(player, playback, playback.Settings)

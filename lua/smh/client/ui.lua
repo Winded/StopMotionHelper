@@ -771,6 +771,12 @@ function MGR.RefreshTimelineSettings()
     PropertiesMenu:UpdateTimelineSettings()
 end
 
+function MGR.UpdateUISetting(setting, value)
+    local settings = {}
+    settings[setting] = value
+    WorldClicker.Settings:ApplySettings(settings)
+end
+
 function MGR.SetTimeline(timeline)
     WorldClicker.MainMenu:UpdateTimelines(timeline)
     PropertiesMenu:UpdateTimelineInfo(timeline)

@@ -220,7 +220,11 @@ function MGR.Copy(player, keyframeIds, frame, timeline)
             if not keyframe.Modifiers[name] then continue end
             EaseIn[name] = keyframe.EaseIn[name]
             EaseOut[name] = keyframe.EaseOut[name]
-            Mods[name] = keyframe.Modifiers[name]
+            if istable(keyframe.Modifiers[name]) then
+                Mods[name] = table.Copy(keyframe.Modifiers[name]) -- in case if we copy things like world keyframes
+            else
+                Mods[name] = keyframe.Modifiers[name]
+            end
         end
 
         local copiedKeyframe = SMH.KeyframeData:New(player, keyframe.Entity)
