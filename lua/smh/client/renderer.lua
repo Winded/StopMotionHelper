@@ -1,5 +1,4 @@
 local UseScreenshot = false
-local TimerName = "SMHRender"
 local IsRendering = false
 
 local MGR = {}
@@ -9,17 +8,17 @@ function MGR.IsRendering()
 end
 
 function MGR.Stop()
-    if timer.Exists(TimerName) then
-        timer.Remove(TimerName)
-    end
-
-    LocalPlayer():EmitSound("buttons/button1.wav");
+    LocalPlayer():EmitSound("buttons/button1.wav")
 
     IsRendering = false
     SMH.Controller.SetRendering(IsRendering)
 end
 
 local function RenderTick()
+    if not IsRendering then
+        return
+    end
+
     local newPos = SMH.State.Frame + 1
 
     local command = "jpeg"
@@ -34,8 +33,12 @@ local function RenderTick()
         return
     end
 
-    timer.Simple(0.4, function()
+    timer.Simple(0.01, function()
         SMH.Controller.SetFrame(newPos)
+
+        timer.Simple(0.01, function()
+            RenderTick()
+        end)
     end)
 
 end
@@ -50,7 +53,7 @@ function MGR.Start(useScreenshot, StartFrame)
 
     LocalPlayer():EmitSound("buttons/blip1.wav")
 
-    timer.Create(TimerName, 1, 0, RenderTick)
+    timer.Simple(1, RenderTick)
 end
 
 SMH.Renderer = MGR
