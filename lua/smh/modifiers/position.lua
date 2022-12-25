@@ -38,7 +38,7 @@ end
 function MOD:Offset(data, origindata, worldvector, worldangle, hitpos)
 
     local datanew = {};
-    local Pos, Ang = WorldToLocal(data.Pos, data.Ang, origindata.Pos, origindata.Ang);
+    local Pos, Ang = WorldToLocal(data.Pos, data.Ang, origindata.Pos, Angle(0, 0, 0));
     datanew.Pos, datanew.Ang = LocalToWorld(Pos, Ang, worldvector, worldangle);
     datanew.Pos = datanew.Pos + hitpos
     return datanew;

@@ -1,4 +1,9 @@
 local Active = {}
+local MGR = {}
+
+MGR.OffsetPos, MGR.OffsetAng, MGR.OffsetMode = {}, {}, {}
+
+MGR.OriginData = {}
 
 local function GetPosData(serializedKeyframes, model)
     for i, sEntity in pairs(serializedKeyframes.Entities) do
@@ -17,7 +22,7 @@ local function GetPosData(serializedKeyframes, model)
             for _, kframe in pairs(serializedKeyframes.Entities[i].Frames) do
                 for name, mod in pairs(kframe.EntityData) do
                     if not data[name] or data[name].Frame > kframe.Position then
-                        data[name] = {Modifiers = kframe.EntityData[name], Frame = kframe.Position}
+                        data[name] = {Modifiers = mod, Frame = kframe.Position}
                     end
                 end
             end
@@ -27,11 +32,14 @@ local function GetPosData(serializedKeyframes, model)
     end
 end
 
-local MGR = {}
+local function SetOffset(player, modname, keyframe)
+    local mod = SMH.Modifiers[modname]
 
-MGR.OffsetPos, MGR.OffsetAng, MGR.OffsetMode = {}, {}, {}
+    local offsetpos = MGR.OffsetPos[player] or Vector(0, 0, 0)
+    local offsetang = MGR.OffsetAng[player] or Angle(0, 0, 0)
 
-MGR.OriginData = {}
+    keyframe.Modifiers[modname] = mod:Offset(keyframe.Modifiers[modname], MGR.OriginData[player][modname].Modifiers, offsetpos, offsetang, player:GetEyeTraceNoCursor().HitPos)
+end
 
 function MGR.SetPreviewEntity(path, model, settings, player)
     if not Active[player] then return end
@@ -115,15 +123,17 @@ end
 
 function MGR.OffsetKeyframes(player, entity)
     for id, keyframe in pairs(SMH.KeyframeData.Players[player].Entities[entity]) do
-        if not keyframe.Modifiers["physbones"] and not keyframe.Modifiers["position"] then continue end
-        local offsetpos = MGR.OffsetPos[player] or Vector(0, 0, 0)
-        local offsetang = MGR.OffsetAng[player] or Angle(0, 0, 0)
+        local hasphysics = keyframe.Modifiers["physbones"] and true or false
+        local hasposition = keyframe.Modifiers["position"] and true or false
 
-        for modname, mod in pairs(SMH.Modifiers) do
-            if modname == "physbones" or modname == "position" then
-                local name = modname == "physbones" and "physbones" or "position"
-                keyframe.Modifiers[name] = mod:Offset(keyframe.Modifiers[name], MGR.OriginData[player][name].Modifiers, offsetpos, offsetang, player:GetEyeTraceNoCursor().HitPos)
-            end
+        if not hasphysics and not hasposition then continue end
+
+        if hasphysics then
+            SetOffset(player, "physbones", keyframe)
+        end
+
+        if hasposition then
+            SetOffset(player, "position", keyframe)
         end
     end
 end

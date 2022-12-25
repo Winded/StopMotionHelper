@@ -150,7 +150,7 @@ function MOD:Offset(data, origindata, worldvector, worldangle, hitpos)
     for id, kdata in pairs(data) do
 
         local d = {};
-        local Pos, Ang = WorldToLocal(kdata.Pos, kdata.Ang, origindata[0].Pos, origindata[0].Ang);
+        local Pos, Ang = WorldToLocal(kdata.Pos, kdata.Ang, origindata[0].Pos, Angle(0, 0, 0));
         d.Pos, d.Ang = LocalToWorld(Pos, Ang, worldvector, worldangle);
         d.Pos = d.Pos + hitpos
 
