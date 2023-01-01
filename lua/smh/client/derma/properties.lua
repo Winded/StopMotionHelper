@@ -254,6 +254,7 @@ function PANEL:MakeSettingSavePanel()
     savepanel:SetPos((ScrW() / 2) - 100, (ScrH() / 2) - 50)
     savepanel:SetSize(200, 100)
     savepanel:MakePopup()
+    savepanel:SetBackgroundBlur(true)
 
     savepanel.TextEnter = vgui.Create("DTextEntry", savepanel)
     savepanel.TextEnter:SetPos(50, 45)
@@ -272,6 +273,7 @@ function PANEL:MakeSettingSavePanel()
     end
 
     savepanel.OnClose = function()
+        savepanel:SetBackgroundBlur(false)
         IsSaving = false
     end
 end
