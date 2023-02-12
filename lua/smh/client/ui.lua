@@ -305,10 +305,28 @@ local function AddCallbacks()
     end
 
     SaveMenu.OnSaveRequested = function(_, path, saveToClient)
-        SMH.Controller.Save(path, saveToClient)
+        SMH.Controller.RequestSave(path, saveToClient, false)
     end
-    SaveMenu.OnDeleteRequested = function(_, path, deleteFromClient)
-        SMH.Controller.DeleteSave(path, deleteFromClient)
+    SaveMenu.OnOverwriteSave = function(_, path)
+        SMH.Controller.Save(path)
+    end
+    SaveMenu.OnAppendRequested = function(_, path)
+        SMH.Controller.RequestAppend(path)
+    end
+    SaveMenu.OnAppend = function(_, path, savenames, gamenames)
+        SMH.Controller.Append(path, savenames, gamenames)
+    end
+    SaveMenu.OnFolderRequested = function(_, path, saveToClient)
+        SMH.Controller.RequestSave(path, saveToClient, true)
+    end
+    SaveMenu.OnGoToFolderRequested = function(_, path, toClient)
+        SMH.Controller.RequestGoToFolder(path, toClient)
+    end
+    SaveMenu.OnPackRequested = function()
+        SMH.Controller.RequestPack()
+    end
+    SaveMenu.OnDeleteRequested = function(_, path, isFolder, deleteFromClient)
+        SMH.Controller.DeleteSave(path, isFolder, deleteFromClient)
     end
 
     LoadMenu.OnModelListRequested = function(_, path, loadFromClient)
@@ -318,6 +336,11 @@ local function AddCallbacks()
     end
     LoadMenu.OnLoadRequested = function(_, path, modelName, loadFromClient)
         SMH.Controller.Load(path, modelName, loadFromClient)
+    end
+    LoadMenu.OnGoToFolderRequested = function (_, path, toClient) 
+        SMH.Controller.RequestGoToFolder(path, toClient)
+        SMH.Controller.SetSpawnGhost(false)
+        WorldClicker.SpawnMenu:SetSaveFile(nil)
     end
     LoadMenu.OnModelInfoRequested = function(_, path, modelName, loadFromClient)
         SMH.Controller.GetModelInfo(path, modelName, loadFromClient)
@@ -336,6 +359,7 @@ local function AddCallbacks()
     end
     WorldClicker.SpawnMenu.OnModelRequested = function(_, path, model, loadFromClient)
         SMH.Controller.SetPreviewEntity(path, model, loadFromClient)
+        SMH.Controller.SetSpawnGhost(true)
     end
     WorldClicker.SpawnMenu.OnSpawnRequested = function(_, path, model, loadFromClient)
         SMH.Controller.SpawnEntity(path, model, loadFromClient)
@@ -733,9 +757,9 @@ function MGR.SetSelectedEntity(entities)
     ClickerEntity = entities
 end
 
-function MGR.SetServerSaves(saves)
-    LoadMenu:SetSaves(saves)
-    SaveMenu:SetSaves(saves)
+function MGR.SetServerSaves(folders, saves, path)
+    LoadMenu:SetSaves(folders, saves, path)
+    SaveMenu:SetSaves(folders, saves, path)
 end
 
 function MGR.SetModelList(models, map)
@@ -747,20 +771,28 @@ function MGR.SetEntityList(entities)
     PropertiesMenu:SetEntities(entities)
 end
 
-function MGR.SetModelName(name)
-    LoadMenu:SetModelName(name)
+function MGR.SetModelName(name, class)
+    LoadMenu:SetModelName(name, class)
 end
 
 function MGR.UpdateName(name)
     PropertiesMenu:SetName(name)
 end
 
+function MGR.SaveExistsWarning(names)
+    SaveMenu:SaveExists(names)
+end
+
+function MGR.AppendWindow(savenames, gamenames)
+    SaveMenu:AppendWindow(savenames, gamenames)
+end
+
 function MGR.AddSaveFile(path)
     SaveMenu:AddSave(path)
 end
 
-function MGR.RemoveSaveFile(path)
-    SaveMenu:RemoveSave(path)
+function MGR.RemoveSaveFile(path, isFolder)
+    SaveMenu:RemoveSave(path, isFolder)
 end
 
 function MGR.InitModifiers(list)

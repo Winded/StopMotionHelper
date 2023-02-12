@@ -37,10 +37,25 @@ end
 
 function MOD:Offset(data, origindata, worldvector, worldangle, hitpos)
 
+    if not hitpos then
+        hitpos = origindata.Pos
+    end
+
     local datanew = {};
     local Pos, Ang = WorldToLocal(data.Pos, data.Ang, origindata.Pos, Angle(0, 0, 0));
     datanew.Pos, datanew.Ang = LocalToWorld(Pos, Ang, worldvector, worldangle);
-    datanew.Pos = datanew.Pos + hitpos
+    datanew.Pos = datanew.Pos + hitpos;
+    return datanew;
+
+end
+
+function MOD:OffsetDupe(entity, data, origindata)
+
+    local entPos, entAng = entity:GetPos(), entity:GetAngles();
+    local datanew = {};
+    datanew.Pos, datanew.Ang = WorldToLocal(data.Pos, data.Ang, origindata.Pos, origindata.Ang);
+    datanew.Pos, datanew.Ang = LocalToWorld(datanew.Pos, datanew.Ang, entPos, entAng);
+
     return datanew;
 
 end

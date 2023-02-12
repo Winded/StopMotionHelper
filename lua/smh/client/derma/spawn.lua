@@ -75,7 +75,7 @@ function PANEL:Init()
     end)
 
     self.OffsetCheck = vgui.Create("DCheckBoxLabel", self)
-    self.OffsetCheck:SetText("Enable Offset")
+    self.OffsetCheck:SetText("Move to where you're looking")
     self.OffsetCheck.OnChange = function(_, value)
         self:SetOffsetMode(value)
     end
@@ -135,11 +135,16 @@ end
 
 function PANEL:SpawnSelected()
     local _, selectedEntity = self.EntityList:GetSelectedLine()
+    if not SaveFile or not selectedEntity then return end
     self:OnSpawnRequested(SaveFile, selectedEntity:GetValue(1), false)
 end
 
 function PANEL:SetSaveFile(path)
     SaveFile = path
+    if not SaveFile then
+        self.Origins:Clear()
+        self.EntityList:Clear()
+    end
 end
 
 function PANEL:OnOriginRequested(path, modelname, loadFromClient) end

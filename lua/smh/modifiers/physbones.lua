@@ -145,6 +145,10 @@ end
 
 function MOD:Offset(data, origindata, worldvector, worldangle, hitpos)
 
+    if not hitpos then
+        hitpos = origindata[0].Pos;
+    end
+
     local newdata = {};
 
     for id, kdata in pairs(data) do
@@ -152,7 +156,34 @@ function MOD:Offset(data, origindata, worldvector, worldangle, hitpos)
         local d = {};
         local Pos, Ang = WorldToLocal(kdata.Pos, kdata.Ang, origindata[0].Pos, Angle(0, 0, 0));
         d.Pos, d.Ang = LocalToWorld(Pos, Ang, worldvector, worldangle);
-        d.Pos = d.Pos + hitpos
+        d.Pos = d.Pos + hitpos;
+
+        if kdata.LocalPos and kdata.LocalAng then -- those shouldn't change
+            d.LocalPos, d.LocalAng = kdata.LocalPos, kdata.LocalAng;
+        end
+
+        d.Moveable = kdata.Moveable;
+
+        newdata[id] = d;
+    end
+
+    return newdata;
+
+end
+
+function MOD:OffsetDupe(entity, data, origindata)
+
+    local pb = entity:GetPhysicsObjectNum(0);
+    if not IsValid(pb) then return nil end
+
+    local entPos, entAng = pb:GetPos(), pb:GetAngles();
+    local newdata = {};
+
+    for id, kdata in pairs(data) do
+
+        local d = {};
+        d.Pos, d.Ang = WorldToLocal(kdata.Pos, kdata.Ang, origindata[0].Pos, origindata[0].Ang);
+        d.Pos, d.Ang = LocalToWorld(d.Pos, d.Ang, entPos, entAng);
 
         if kdata.LocalPos and kdata.LocalAng then -- those shouldn't change
             d.LocalPos, d.LocalAng = kdata.LocalPos, kdata.LocalAng;

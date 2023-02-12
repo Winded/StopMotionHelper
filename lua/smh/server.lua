@@ -10,7 +10,7 @@ include("server/modifiers.lua")
 include("server/physrecord.lua")
 include("server/playback_manager.lua")
 include("server/properties_manager.lua")
-include("server/spawner.lua")
+include("server/spawn_manager.lua")
 include("server/worldkeyframes_manager.lua")
 
 AddCSLuaFile("shared.lua")
