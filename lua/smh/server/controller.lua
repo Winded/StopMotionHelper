@@ -333,7 +333,7 @@ local function RequestSave(msgLength, player)
     if not isFolder then
         local properties = SMH.PropertiesManager.GetAllProperties(player)
 
-        local fileExists = SMH.Saves.CheckIfExists(path)
+        local fileExists = SMH.Saves.CheckIfExists(path, player)
 
         if fileExists then
             local names = SMH.Saves.GetUnusedNames(path, properties, player)

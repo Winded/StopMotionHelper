@@ -181,12 +181,12 @@ function MGR.Serialize(keyframes, properties, player)
     return serializedKeyframes
 end
 
-function MGR.CheckIfExists(path)
+function MGR.CheckIfExists(path, player)
     if not file.Exists(SaveDir, "DATA") or not file.IsDir(SaveDir, "DATA") then
         file.CreateDir(SaveDir)
     end
 
-    path = SaveDir .. path .. ".txt"
+    path = SaveDir .. (PlayerPath[player] or "") ..  path .. ".txt"
     if file.Exists(path, "DATA") and not file.IsDir(path, "DATA") then return true end
 
     return false
@@ -274,9 +274,9 @@ function MGR.AddFolder(path, player)
     return path
 end
 
-function MGR.CopyIfExists(pathFrom, pathTo)
-    pathFrom = SaveDir .. pathFrom .. ".txt"
-    pathTo = SaveDir .. pathTo .. ".txt"
+function MGR.CopyIfExists(pathFrom, pathTo, player)
+    pathFrom = SaveDir .. (PlayerPath[player] or "") .. pathFrom .. ".txt"
+    pathTo = SaveDir .. (PlayerPath[player] or "") .. pathTo .. ".txt"
 
     if file.Exists(pathFrom, "DATA") then
         file.Write(pathTo, file.Read(pathFrom));

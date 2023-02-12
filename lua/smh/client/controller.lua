@@ -283,7 +283,7 @@ function CTRL.QuickSave()
     local qs1 = "quicksave_" .. nick
     local qs2 = "quicksave_" .. nick .. "_backup"
 
-    SMH.Saves.CopyIfExists(qs1, qs2)
+    SMH.Saves.CopyIfExists(qs1, qs2, LocalPlayer())
     CTRL.Save(qs1, false)
 end
 
