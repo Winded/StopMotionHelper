@@ -6,8 +6,16 @@ local function GetModelName(entity)
 end
 
 local function SetUniqueName(name, usedModelNames)
+    local namebase = name
+    local num = 1
+
+    if usedModelNames[name] then
+        local startPos = string.find(namebase, "%d*$")
+        namebase = string.sub(namebase, 1, startPos - 1)
+    end
     while usedModelNames[name] do
-        name = name .. "I"
+        name = namebase .. num
+        num = num + 1
     end
     usedModelNames[name] = true
     return name
