@@ -165,7 +165,7 @@ function MGR.Save(path, serializedKeyframes)
     end
 
     path = SaveDir .. path .. ".txt"
-    local json = util.TableToJSON(serializedKeyframes)
+    local json = util.TableToJSON(serializedKeyframes, true)
     file.Write(path, json)
 end
 
