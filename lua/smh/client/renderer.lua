@@ -33,10 +33,10 @@ local function RenderTick()
         return
     end
 
-    timer.Simple(0.01, function()
+    timer.Simple(0.001, function()
         SMH.Controller.SetFrame(newPos)
 
-        timer.Simple(0.01, function()
+        timer.Simple(0.001, function()
             RenderTick()
         end)
     end)

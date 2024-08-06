@@ -190,7 +190,7 @@ end
 
 function CTRL.GetModelList(path, loadFromClient)
     if loadFromClient then
-        local models = SMH.Saves.ListModels(path)
+        local models = SMH.Saves.ListModels(path, LocalPlayer())
         SMH.UI.SetModelList(models)
     else
         net.Start(SMH.MessageTypes.GetModelList)
@@ -216,7 +216,7 @@ function CTRL.Load(path, modelName, loadFromClient)
     net.WriteBool(loadFromClient)
 
     if loadFromClient then
-        local serializedKeyframes = SMH.Saves.LoadForEntity(path, modelName)
+        local serializedKeyframes = SMH.Saves.LoadForEntity(path, modelName, LocalPlayer())
         net.WriteTable(serializedKeyframes)
     else
         net.WriteString(path)
@@ -233,10 +233,48 @@ function CTRL.GetModelInfo(path, modelName, loadFromClient)
     net.SendToServer()
 end
 
-function CTRL.Save(path, saveToClient)
-    net.Start(SMH.MessageTypes.Save)
+function CTRL.RequestSave(path, saveToClient, isFolder)
+    net.Start(SMH.MessageTypes.RequestSave)
     net.WriteBool(saveToClient)
+    net.WriteBool(isFolder)
     net.WriteString(path)
+    net.SendToServer()
+end
+
+function CTRL.Save(path)
+    net.Start(SMH.MessageTypes.Save)
+    net.WriteString(path)
+    net.SendToServer()
+end
+
+function CTRL.RequestGoToFolder(path, toClient)
+    net.Start(SMH.MessageTypes.RequestGoToFolder)
+    net.WriteBool(toClient)
+    net.WriteString(path)
+    net.SendToServer()
+end
+
+function CTRL.RequestAppend(path)
+    net.Start(SMH.MessageTypes.RequestAppend)
+    net.WriteString(path)
+    net.SendToServer()
+end
+
+function CTRL.Append(path, savenames, gamenames)
+    net.Start(SMH.MessageTypes.Append)
+    local count = #savenames
+
+    net.WriteString(path)
+    net.WriteUInt(count, INT_BITCOUNT)
+    for _, name in ipairs(savenames) do
+        net.WriteString(name)
+    end
+
+    count = #gamenames
+    net.WriteUInt(count, INT_BITCOUNT)
+    for _, name in ipairs(gamenames) do
+        net.WriteString(name)
+    end
     net.SendToServer()
 end
 
@@ -245,15 +283,21 @@ function CTRL.QuickSave()
     local qs1 = "quicksave_" .. nick
     local qs2 = "quicksave_" .. nick .. "_backup"
 
-    SMH.Saves.CopyIfExists(qs1, qs2)
+    SMH.Saves.CopyIfExists(qs1, qs2, LocalPlayer())
     CTRL.Save(qs1, false)
 end
 
-function CTRL.DeleteSave(path, deleteFromClient)
+function CTRL.RequestPack()
+    net.Start(SMH.MessageTypes.RequestPack)
+    net.SendToServer()
+end
+
+function CTRL.DeleteSave(path, isFolder, deleteFromClient)
     if deleteFromClient then
-        SMH.Saves.Delete(path)
+        SMH.Saves.Delete(path, LocalPlayer())
     else
         net.Start(SMH.MessageTypes.DeleteSave)
+        net.WriteBool(isFolder)
         net.WriteString(path)
         net.SendToServer()
     end
@@ -530,15 +574,22 @@ end
 
 local function GetServerSavesResponse(msgLength)
     for i=1, net.ReadUInt(INT_BITCOUNT) do
-        SMH.TableSplit.ATable(net.ReadString(), net.ReadString())
+        SMH.TableSplit.ATable(i, net.ReadString())
+    end
+    local folders = SMH.TableSplit.GetTable()
+
+    for i=1, net.ReadUInt(INT_BITCOUNT) do
+        SMH.TableSplit.ATable(i, net.ReadString())
     end
     local saves = SMH.TableSplit.GetTable()
-    SMH.UI.SetServerSaves(saves)
+    local path = net.ReadString()
+
+    SMH.UI.SetServerSaves(folders, saves, path)
 end
 
 local function GetModelListResponse(msgLength)
     for i=1, net.ReadUInt(INT_BITCOUNT) do
-        SMH.TableSplit.ATable(net.ReadString(), net.ReadString())
+        SMH.TableSplit.ATable(i, net.ReadString())
     end
     local models = SMH.TableSplit.GetTable()
     local map = net.ReadString()
@@ -563,8 +614,18 @@ local function LoadResponse(msgLength)
 end
 
 local function GetModelInfoResponse(msgLength)
-    local name = net.ReadString()
-    SMH.UI.SetModelName(name)
+    local name, class = net.ReadString(), net.ReadString()
+    SMH.UI.SetModelName(name, class)
+end
+
+local function SaveExists(msgLength)
+    local names = {}
+
+    for i = 1, net.ReadUInt(INT_BITCOUNT) do
+        table.insert(names, net.ReadString())
+    end
+
+    SMH.UI.SaveExistsWarning(names)
 end
 
 local function SaveResponse(msgLength)
@@ -576,14 +637,39 @@ local function SaveResponse(msgLength)
     end
 
     local serializedKeyframes = net.ReadTable()
-    SMH.Saves.Save(path, serializedKeyframes)
+    SMH.Saves.Save(path, serializedKeyframes, LocalPlayer())
     SMH.UI.AddSaveFile(path)
 end
 
+local function AddFolderResponse(msgLength)
+    local saveToClient = net.ReadBool()
+    local folder = net.ReadString()
+    if not saveToClient then
+        CTRL.GetServerSaves()
+        return
+    end
+
+    SMH.UI.AddFolder(folder, LocalPlayer())
+end
+
+local function RequestAppendResponse(msgLength)
+    local savenames, gamenames = {}, {}
+
+    for i = 1, net.ReadUInt(INT_BITCOUNT) do
+        table.insert(savenames, net.ReadString())
+    end
+    for i = 1, net.ReadUInt(INT_BITCOUNT) do
+        table.insert(gamenames, net.ReadString())
+    end
+
+    SMH.UI.AppendWindow(savenames, gamenames)
+end
+
 local function DeleteSaveResponse(msgLength)
+    local isFolder = net.ReadBool()
     local path = net.ReadString()
 
-    SMH.UI.RemoveSaveFile(path)
+    SMH.UI.RemoveSaveFile(path, isFolder)
 end
 
 local function ApplyEntityNameResponse(msgLength)
@@ -657,7 +743,10 @@ local function Setup()
     net.Receive(SMH.MessageTypes.GetServerEntitiesResponse, GetServerEntitiesResponse)
     net.Receive(SMH.MessageTypes.LoadResponse, LoadResponse)
     net.Receive(SMH.MessageTypes.GetModelInfoResponse, GetModelInfoResponse)
+    net.Receive(SMH.MessageTypes.SaveExists, SaveExists)
     net.Receive(SMH.MessageTypes.SaveResponse, SaveResponse)
+    net.Receive(SMH.MessageTypes.AddFolderResponse, AddFolderResponse)
+    net.Receive(SMH.MessageTypes.RequestAppendResponse, RequestAppendResponse)
     net.Receive(SMH.MessageTypes.DeleteSaveResponse, DeleteSaveResponse)
 
     net.Receive(SMH.MessageTypes.ApplyEntityNameResponse, ApplyEntityNameResponse)

@@ -7,17 +7,20 @@ function PANEL:SetRelativePos(otherPanel, x, y)
 end
 
 -- For DListView
-function PANEL:UpdateLines(lines)
+function PANEL:UpdateLines(lines, isfolder)
 
     local set = {}
     local existing = {}
 
     for k, line in pairs(lines) do -- turn lines stuff into a "sorting" table
+        if isfolder then
+            line = "\\" .. line
+        end
         set[line] = true
     end
 
     for k, line in pairs(self:GetLines()) do -- first we remove lines that are missing from the sorting table
-        if not set[line:GetValue(1)] then
+        if not set[line:GetValue(1)] and isfolder == line.IsFolder then
             local _, selected = self:GetSelectedLine()
             if selected == line then self:ClearSelection() end -- clear selection if the removed line was selected
             self:RemoveLine(line:GetID())
@@ -28,7 +31,11 @@ function PANEL:UpdateLines(lines)
 
     for line, _ in pairs(set) do
         if existing[line] then continue end
-        self:AddLine(line)
+
+        local line = self:AddLine(line)
+        if isfolder then
+            line.IsFolder = true
+        end
     end
     self:SortByColumn(1)
 end

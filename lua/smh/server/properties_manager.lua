@@ -23,8 +23,16 @@ local function SetUniqueName(player, entity, name)
         end
     end
 
+    local namebase = name
+    local num = 1
+
+    if usednames[player][name] then
+        local startPos = string.find(namebase, "%d*$")
+        namebase = string.sub(namebase, 1, startPos - 1)
+    end
     while usednames[player][name] do
-        name = name .. "I"
+        name = namebase .. num
+        num = num + 1
     end
     usednames[player][name] = true
     return name
