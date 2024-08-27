@@ -855,4 +855,15 @@ function MGR.SetWorldData(console, push, release)
     PropertiesMenu:ShowWorldSettings(console, push, release)
 end
 
+function MGR.GetKeyframesOnFrame(frame)
+	if not FrameToKeyframe[frame] then return nil end
+	local ids = {}
+
+	for id, mod in pairs(KeyframePointers[FrameToKeyframe[frame]]:GetIDs()) do
+		table.insert(ids, id)
+	end
+
+	return ids
+end
+
 SMH.UI = MGR

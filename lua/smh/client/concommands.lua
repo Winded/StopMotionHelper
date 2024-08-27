@@ -10,6 +10,14 @@ concommand.Add("smh_record", function()
     SMH.Controller.Record()
 end)
 
+concommand.Add("smh_delete", function()
+	local frame = SMH.State.Frame
+	local ids = SMH.UI.GetKeyframesOnFrame(frame)
+	if not ids then return end
+
+    SMH.Controller.DeleteKeyframe(ids)
+end)
+
 concommand.Add("smh_next", function()
     local pos = SMH.State.Frame + 1
     if pos >= SMH.State.PlaybackLength then
