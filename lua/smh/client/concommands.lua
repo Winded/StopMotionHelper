@@ -1,3 +1,7 @@
+local smh_startatone = CreateClientConVar("smh_startatone", 0, true, false, nil, 0, 1)
+CreateClientConVar("smh_currentpreset", "default", true, false)
+
+
 concommand.Add("+smh_menu", function()
     SMH.Controller.OpenMenu()
 end)
@@ -41,7 +45,7 @@ end)
 concommand.Add("smh_makejpeg", function(pl, cmd, args)
     local startframe
     if args[1] then
-        startframe = args[1] - GetConVar("smh_startatone"):GetInt()
+        startframe = args[1] - smh_startatone:GetInt()
     else
         startframe = 0
     end
@@ -56,7 +60,7 @@ end)
 concommand.Add("smh_makescreenshot", function(pl, cmd, args)
     local startframe
     if args[1] then
-        startframe = args[1] - GetConVar("smh_startatone"):GetInt()
+        startframe = args[1] - smh_startatone:GetInt()
     else
         startframe = 0
     end
@@ -67,6 +71,3 @@ concommand.Add("smh_makescreenshot", function(pl, cmd, args)
         print("Specified starting frame is outside of the current Frame Count!")
     end
 end)
-
-CreateClientConVar("smh_startatone", 0, true, false, nil, 0, 1)
-CreateClientConVar("smh_currentpreset", "default", true, false)
