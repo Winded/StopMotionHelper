@@ -1,6 +1,6 @@
-local smh_startatone = CreateClientConVar("smh_startatone", 0, true, false, nil, 0, 1)
+local smh_startatone = CreateClientConVar("smh_startatone", 0, true, false, "Controls whether the timeline starts at 0 or 1.", 0, 1)
+local smh_render_cmd = CreateClientConVar("smh_render_cmd", "poster 1", true, false, "For smh_render, this string will be ran in the console for each frame.")
 CreateClientConVar("smh_currentpreset", "default", true, false)
-
 
 concommand.Add("+smh_menu", function()
     SMH.Controller.OpenMenu()
@@ -50,32 +50,29 @@ concommand.Add("smh_quicksave", function()
     SMH.Controller.QuickSave()
 end)
 
-concommand.Add("smh_makejpeg", function(pl, cmd, args)
-    local startframe
-    if args[1] then
-        startframe = args[1] - smh_startatone:GetInt()
+local function StartRender(startFrame, renderCmd)
+    if startFrame then
+        startFrame = startFrame - smh_startatone:GetInt() -- Implicit string->number. Normalizes startFrame to 0-indexed if smh_startatone is set.
+        if startFrame < 0 then startFrame = 0 end
     else
-        startframe = 0
+        startFrame = 0
     end
-    if startframe < 0 then startframe = 0 end
-    if startframe < SMH.State.PlaybackLength then
-        SMH.Controller.ToggleRendering(false, startframe)
+
+    if startFrame < SMH.State.PlaybackLength then
+        SMH.Controller.ToggleRendering(renderCmd, startFrame)
     else
         print("Specified starting frame is outside of the current Frame Count!")
     end
+end
+
+concommand.Add("smh_makejpeg", function(pl, cmd, args)
+    StartRender(args[1], "jpeg")
 end)
 
 concommand.Add("smh_makescreenshot", function(pl, cmd, args)
-    local startframe
-    if args[1] then
-        startframe = args[1] - smh_startatone:GetInt()
-    else
-        startframe = 0
-    end
-    if startframe < 0 then startframe = 0 end
-    if startframe < SMH.State.PlaybackLength then
-        SMH.Controller.ToggleRendering(true, startframe)
-    else
-        print("Specified starting frame is outside of the current Frame Count!")
-    end
+    StartRender(args[1], "screenshot")
+end)
+
+concommand.Add("smh_render", function(pl, cmd, args)
+    StartRender(args[1], smh_render_cmd:GetString())
 end)
